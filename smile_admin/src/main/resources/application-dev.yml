@@ -1,0 +1,33 @@
+server:
+  port: 8087
+  servlet:
+    context-path: /smile-admin
+    session:
+      timeout: 30m
+
+spring:
+  application:
+    name: smile-admin
+# MySQL 配置
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://47.102.126.36:3306/smile?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: lt2015196
+    tomcat:
+      max-active: 20
+      max-idle: 8
+      min-idle: 8
+      initial-size: 10
+  jpa:
+    database: mysql
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/

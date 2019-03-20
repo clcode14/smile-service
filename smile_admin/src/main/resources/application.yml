@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+  mvc:
+# 资源映射路径为/image/**，你想在url访问的请求路径
+    static-path-pattern: /image/**
+# 资源映射地址为file:D://User/，图片存放的真实路径
+  resources:
+    static-locations: file:D://smile/
