@@ -53,22 +53,25 @@ public class LoginController {
         Map<String, Object> map = new HashMap<>(16);
         map.put("mobile", mobile);
         map.put("code", code);
-
-        String host = "https://cdcxdxjk.market.alicloudapi.com";
-        String path = "/chuangxin/dxjk";
+        if (mobile == null || mobile.trim() == "") {
+            return "请输入手机号";
+        }
+        String host = "http://yzxyzm.market.alicloudapi.com";
+        String path = "/yzx/verifySms";
         String method = "POST";
         String appcode = "4e84bebc30684ce681c98547087784db";
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
         headers.put("Authorization", "APPCODE " + appcode);
-        Map<String, String> querys = new HashMap<String, String>();
-        querys.put("content", "【笑美】你的验证码是：" + code + "，3分钟内有效！");
-        querys.put("mobile", "15850374663");
-        Map<String, String> bodys = new HashMap<String, String>();
+        Map<String, String> querys = new HashMap<>();
+        querys.put("phone", mobile);
+        querys.put("templateId", "TP18040314");
+        querys.put("variable", "code:" + code);
+        Map<String, String> bodys = new HashMap<>();
 
 
         try {
-            /**
+            /*
              * 重要提示如下:
              * HttpUtils请从
              * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/src/main/java/com/aliyun/api/gateway/demo/util/HttpUtils.java
@@ -79,8 +82,6 @@ public class LoginController {
              */
             HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
             System.out.println(response.toString());
-            //获取response的body
-            //System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (Exception e) {
             e.printStackTrace();
         }

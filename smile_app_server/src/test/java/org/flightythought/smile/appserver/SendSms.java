@@ -16,16 +16,17 @@ import java.util.Map;
  */
 public class SendSms {
     public static void main(String[] args) {
-        String host = "https://cdcxdxjk.market.alicloudapi.com";
-        String path = "/chuangxin/dxjk";
+        String host = "http://yzxyzm.market.alicloudapi.com";
+        String path = "/yzx/verifySms";
         String method = "POST";
         String appcode = "4e84bebc30684ce681c98547087784db";
         Map<String, String> headers = new HashMap<String, String>();
         //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
         headers.put("Authorization", "APPCODE " + appcode);
         Map<String, String> querys = new HashMap<String, String>();
-        querys.put("content", "【创信】你的验证码是：5873，3分钟内有效！");
-        querys.put("mobile", "15850374663");
+        querys.put("phone", "15850374663");
+        querys.put("templateId", "TP18040314");
+        querys.put("variable", "code:1234");
         Map<String, String> bodys = new HashMap<String, String>();
 
 
