@@ -9,7 +9,7 @@ spring:
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/smile?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://47.102.126.36:3306/smile_dev?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: lt5227
     tomcat:
@@ -32,7 +32,7 @@ spring:
 #    Redis服务器连接端口
     port: 6379
 #    Redis服务器连接密码
-    password: lt5227
+    password:
 
 
 eureka:
