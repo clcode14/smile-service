@@ -51,22 +51,39 @@ public class DiseaseDetailConfigController {
     @ApiOperation(value = "新增疾病小类", notes = "新增疾病小类", position = 3)
     public ResponseBean saveDiseaseDetail(@RequestBody DiseaseClassDetailDTO diseaseClassDetailDTO, @ApiIgnore HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-        DiseaseClassDetailEntity result = diseaseDetailConfigService.saveDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
-        return ResponseBean.ok("新增成功", result);
+        DiseaseClassDetailEntity result;
+        try {
+            result = diseaseDetailConfigService.saveDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
+            return ResponseBean.ok("新增成功", result);
+        } catch (Exception e) {
+            LOG.error("疾病小类新增失败", e);
+            return ResponseBean.error("新增失败", e.getMessage());
+        }
     }
 
     @PutMapping("/updateDiseaseDetail")
     @ApiOperation(value = "修改疾病小类", notes = "修改疾病小类", position = 4)
     public ResponseBean updateDiseaseDetail(@RequestBody DiseaseClassDetailDTO diseaseClassDetailDTO, @ApiIgnore HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-        DiseaseClassDetailEntity result = diseaseDetailConfigService.updateDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
-        return ResponseBean.ok("修改成功", result);
+        DiseaseClassDetailEntity result;
+        try {
+            result = diseaseDetailConfigService.updateDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
+            return ResponseBean.ok("修改成功", result);
+        } catch (Exception e) {
+            LOG.error("修改疾病小类失败");
+            return ResponseBean.error("修改失败", e.getMessage());
+        }
     }
 
     @DeleteMapping("/deleteDiseaseDetail/{id}")
     @ApiOperation(value = "删除疾病小类", notes = "删除疾病小类", position = 5)
     public ResponseBean deleteDiseaseDetail(@PathVariable("id") Integer id) {
-        diseaseDetailConfigService.deleteDiseaseDetail(id);
-        return ResponseBean.ok("删除成功!");
+        try {
+            diseaseDetailConfigService.deleteDiseaseDetail(id);
+            return ResponseBean.ok("删除成功!");
+        } catch (Exception e) {
+            LOG.error("删除疾病小类失败");
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
     }
 }

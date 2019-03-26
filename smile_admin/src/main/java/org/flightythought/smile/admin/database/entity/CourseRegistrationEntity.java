@@ -9,6 +9,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Copyright 2017 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName CourseRegistrationEntity.java
+ * @CreateTime 2019/3/26 22:31
+ * @Description: 课程报名实体类
+ */
 @Entity
 @Table(name = "tb_course_registration", schema = "smile", catalog = "")
 public class CourseRegistrationEntity extends BaseEntity {
@@ -48,7 +56,7 @@ public class CourseRegistrationEntity extends BaseEntity {
     private String coverPicturePath;
 
     @Basic
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
