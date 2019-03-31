@@ -1,12 +1,14 @@
 package org.flightythought.smile.admin.database.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.List;
 
 /**
- * Copyright 2017 Flighty-Thought All rights reserved.
+ * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
  * @ClassName DiseaseClassEntity.java
@@ -14,7 +16,9 @@ import java.util.List;
  * @Description: 疾病大类实体类
  */
 @Entity
-@Table(name = "tb_disease_class", schema = "smile", catalog = "")
+@Table(name = "tb_disease_class")
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class DiseaseClassEntity extends BaseEntity {
     /**
      * 疾病大类ID
@@ -45,36 +49,4 @@ public class DiseaseClassEntity extends BaseEntity {
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinColumn(name = "disease_id")
     private List<DiseaseClassDetailEntity> diseaseClassDetails;
-
-    public int getDiseaseId() {
-        return diseaseId;
-    }
-
-    public void setDiseaseId(int diseaseId) {
-        this.diseaseId = diseaseId;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
-    }
-
-    public String getDiseaseName() {
-        return diseaseName;
-    }
-
-    public void setDiseaseName(String diseaseName) {
-        this.diseaseName = diseaseName;
-    }
-
-    public List<DiseaseClassDetailEntity> getDiseaseClassDetails() {
-        return diseaseClassDetails;
-    }
-
-    public void setDiseaseClassDetails(List<DiseaseClassDetailEntity> diseaseClassDetails) {
-        this.diseaseClassDetails = diseaseClassDetails;
-    }
 }

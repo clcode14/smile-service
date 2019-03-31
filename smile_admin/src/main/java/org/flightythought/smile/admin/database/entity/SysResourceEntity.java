@@ -1,5 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -11,7 +13,9 @@ import javax.persistence.*;
  * @date 2019/1/15 14:03
  */
 @Entity
-@Table(name = "tb_sys_resource", schema = "smile", catalog = "")
+@Table(name = "tb_sys_resource")
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class SysResourceEntity extends BaseEntity {
     /**
      * 主键ID
@@ -84,85 +88,4 @@ public class SysResourceEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
     private SysResourceEntity resource;
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-    public Integer getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
-    }
-
-    public int getSeq() {
-        return seq;
-    }
-
-    public void setSeq(int seq) {
-        this.seq = seq;
-    }
-
-    public int getState() {
-        return state;
-    }
-
-    public void setState(int state) {
-        this.state = state;
-    }
-
-    public int getResourceType() {
-        return resourceType;
-    }
-
-    public void setResourceType(int resourceType) {
-        this.resourceType = resourceType;
-    }
-
-    public SysResourceEntity getResource() {
-        return resource;
-    }
-
-    public void setResource(SysResourceEntity resource) {
-        this.resource = resource;
-    }
-
 }

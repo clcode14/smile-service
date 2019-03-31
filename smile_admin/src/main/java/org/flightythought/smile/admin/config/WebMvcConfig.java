@@ -30,10 +30,7 @@ import java.time.Year;
  */
 @Configuration
 @EnableWebMvc
-@EnableSwagger2
 public class WebMvcConfig implements WebMvcConfigurer {
-    @Value("${server.port}")
-    private String serverPort;
     @Value("${spring.mvc.static-path-pattern}")
     private String imageUrl;
     @Value("${spring.resources.static-locations}")
@@ -60,47 +57,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 //跨域允许时间
                 .maxAge(3600);
     }
-
-    private CorsConfiguration buildConfig() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("*");
-        corsConfiguration.addAllowedHeader("*");
-        corsConfiguration.addAllowedMethod("*");
-        corsConfiguration.setAllowCredentials(true);
-        return corsConfiguration;
-    }
-
-    @Bean
-    public FilterRegistrationBean myCorsFilter() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", buildConfig());
-        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
-    }
-
-    /**
-     * 配置Swagger API文档
-     */
-    @Bean
-    public Docket createRestApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(apiInfo())
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("org.flightythought.smile.controller"))
-                .paths(PathSelectors.any())
-                .build();
-    }
-
-
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("Smile APP RESTful APIs文档")
-                .description("笑美APP 后台管理系统： http://localhost:" + serverPort
-                        + "/<br/>Copyright &copy; 2018~" + Year.now().getValue())
-//                .termsOfServiceUrl("http://localhost:" + serverPort + "/")
-                .version("1.0")
-                .build();
-    }
-
 }

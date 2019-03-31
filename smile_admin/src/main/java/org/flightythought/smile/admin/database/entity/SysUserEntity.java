@@ -13,7 +13,7 @@ import java.util.*;
  * @author lilei
  */
 @Entity
-@Table(name = "tb_sys_user", schema = "smile", catalog = "")
+@Table(name = "tb_sys_user")
 public class SysUserEntity extends BaseEntity implements UserDetails {
     /**
      * 主键ID

@@ -1,5 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,7 +15,9 @@ import java.util.Set;
  * @date 2019/1/15 14:33
  */
 @Entity
-@Table(name = "tb_sys_department", schema = "smile", catalog = "")
+@Table(name = "tb_sys_department")
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class SysDepartmentEntity extends BaseEntity {
 
     /**
@@ -50,72 +54,14 @@ public class SysDepartmentEntity extends BaseEntity {
      * 父级ID
      */
     @Basic
-    @Column(name = "parent_id", insertable = false, updatable = false)
+    @Column(name = "parent_id")
     private Integer parentId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent_id", insertable = false, updatable = false)
     private SysDepartmentEntity superiorDepartment;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "superiorDepartment")
     private Set<SysDepartmentEntity> subDepartments = new HashSet<>();
 
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getDepartmentName() {
-        return departmentName;
-    }
-
-    public void setDepartmentName(String departmentName) {
-        this.departmentName = departmentName;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
-
-    public Integer getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(Integer parentId) {
-        this.parentId = parentId;
-    }
-
-    public SysDepartmentEntity getSuperiorDepartment() {
-        return superiorDepartment;
-    }
-
-    public void setSuperiorDepartment(SysDepartmentEntity superiorDepartment) {
-        this.superiorDepartment = superiorDepartment;
-    }
-
-    public Set<SysDepartmentEntity> getSubDepartments() {
-        return subDepartments;
-    }
-
-    public void setSubDepartments(Set<SysDepartmentEntity> subDepartments) {
-        this.subDepartments = subDepartments;
-    }
 }

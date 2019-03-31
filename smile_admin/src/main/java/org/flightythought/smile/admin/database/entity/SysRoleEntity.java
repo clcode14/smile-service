@@ -1,5 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -13,7 +15,9 @@ import java.util.Set;
  * @date 2019/1/15 11:10
  */
 @Entity
-@Table(name = "tb_sys_role", schema = "smile", catalog = "")
+@Table(name = "tb_sys_role")
+@Data
+@EqualsAndHashCode(callSuper = false)
 public class SysRoleEntity extends BaseEntity {
     /**
      * 主键ID
@@ -53,45 +57,4 @@ public class SysRoleEntity extends BaseEntity {
             inverseJoinColumns = {@JoinColumn(name = "resource_id", nullable = false, updatable = false)})
     @OrderBy("id ASC")
     private Set<SysResourceEntity> resources = new HashSet<>(0);
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public void setIsAdmin(boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
-
-    public Set<SysResourceEntity> getResources() {
-        return resources;
-    }
-
-    public void setResources(Set<SysResourceEntity> resources) {
-        this.resources = resources;
-    }
 }

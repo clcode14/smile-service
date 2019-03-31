@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.common.GlobalConstant;
@@ -18,10 +20,12 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpSession;
 
 /**
- * Copyright 2018 欧瑞思丹 All rights reserved.
+ * Copyright 2019 Flighty-Thought All rights reserved.
  *
- * @author LiLei
- * @date 2019/1/21 13:20
+ * @Author: LiLei
+ * @ClassName DiseaseConfigController.java
+ * @CreateTime 2019/3/27 16:52
+ * @Description: 疾病大类控制层
  */
 @RestController
 @RequestMapping("/disease")
@@ -38,9 +42,19 @@ public class DiseaseConfigController {
 
     @GetMapping("/majorClass")
     @ApiOperation(value = "获取疾病大类", notes = "获取疾病大类", position = 1)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNumber", value = "页数从1开始"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示个数")
+    })
     public ResponseBean getDiseaseClass(int pageNumber, int pageSize) {
-        Page<DiseaseClassEntity> diseaseClassEntities = diseaseConfigService.getDiseaseClass(pageNumber, pageSize);
-        return ResponseBean.ok("返回成功", diseaseClassEntities);
+        try {
+
+            Page<DiseaseClassEntity> diseaseClassEntities = diseaseConfigService.getDiseaseClass(pageNumber, pageSize);
+            return ResponseBean.ok("返回成功", diseaseClassEntities);
+        } catch (Exception e) {
+            LOG.error("获取疾病大类失败", e);
+            return ResponseBean.error("获取疾病大类失败", e.getMessage());
+        }
     }
 
     @PostMapping("/addMajorClass")
@@ -79,7 +93,12 @@ public class DiseaseConfigController {
     @PostMapping("/deleteDiseaseClass/{id}")
     @ApiOperation(value = "删除疾病大类", notes = "删除疾病大类", position = 4)
     public ResponseBean deleteDiseaseClass(@PathVariable("id") Integer id) {
-        diseaseConfigService.deleteDiseaseClass(id);
-        return ResponseBean.ok("删除成功!");
+        try {
+            diseaseConfigService.deleteDiseaseClass(id);
+            return ResponseBean.ok("删除成功!");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
     }
 }

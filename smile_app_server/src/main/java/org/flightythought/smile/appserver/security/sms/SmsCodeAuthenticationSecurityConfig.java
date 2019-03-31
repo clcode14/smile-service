@@ -1,8 +1,10 @@
 package org.flightythought.smile.appserver.security.sms;
 
+import org.flightythought.smile.appserver.common.redis.RedisUtil;
+import org.flightythought.smile.appserver.config.properties.AppProperties;
 import org.flightythought.smile.appserver.database.repository.UserRepository;
-import org.flightythought.smile.appserver.security.CustomerAuthenticationFailureHandler;
-import org.flightythought.smile.appserver.security.CustomerAuthenticationSuccessHandler;
+import org.flightythought.smile.appserver.security.handler.CustomerAuthenticationFailureHandler;
+import org.flightythought.smile.appserver.security.handler.CustomerAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Component;
  * @Author: LiLei
  * @ClassName SmsCodeAuthenticationSecurityConfig
  * @CreateTime 2019/3/17 18:24
- * @Description: TODO
+ * @Description: 短信代码验证安全配置
  */
 @Component
 public class SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
@@ -30,9 +32,13 @@ public class SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapt
     private CustomerAuthenticationFailureHandler customAuthenticationFailureHandler;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AppProperties appProperties;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
-    public void configure(HttpSecurity builder) throws Exception {
+    public void configure(HttpSecurity builder) {
         SmsCodeAuthenticationFilter smsCodeAuthenticationFilter = new SmsCodeAuthenticationFilter();
         smsCodeAuthenticationFilter.setAuthenticationManager(builder.getSharedObject(AuthenticationManager.class));
         smsCodeAuthenticationFilter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
@@ -41,7 +47,8 @@ public class SmsCodeAuthenticationSecurityConfig extends SecurityConfigurerAdapt
         SmsCodeAuthenticationProvider smsCodeAuthenticationProvider = new SmsCodeAuthenticationProvider();
         smsCodeAuthenticationProvider.setUserDetailsService(userDetailsService);
         smsCodeAuthenticationProvider.setUserRepository(userRepository);
-
+        smsCodeAuthenticationProvider.setAppProperties(appProperties);
+        smsCodeAuthenticationProvider.setRedisUtil(redisUtil);
         builder.authenticationProvider(smsCodeAuthenticationProvider)
                 .addFilterAfter(smsCodeAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }

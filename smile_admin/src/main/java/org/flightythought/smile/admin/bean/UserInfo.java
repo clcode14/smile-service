@@ -3,10 +3,12 @@ package org.flightythought.smile.admin.bean;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 
 /**
- * Copyright 2018 欧瑞思丹 All rights reserved.
- * 登录用户信息
- * @author LiLei
- * @date 2019/1/21 11:59
+ * Copyright 2019 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName UserInfo.java
+ * @CreateTime 2019/3/27 18:52
+ * @Description: 登录用户信息
  */
 public class UserInfo {
     /**

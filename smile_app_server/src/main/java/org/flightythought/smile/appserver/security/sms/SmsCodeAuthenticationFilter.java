@@ -52,13 +52,13 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
         if (postOnly && !request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
-        String mobile = request.getParameter(SPRING_SECURITY_FORM_MOBILE_KEY);
-        if (mobile == null) {
-            mobile = "";
+        String phone = request.getParameter(SPRING_SECURITY_FORM_MOBILE_KEY);
+        if (phone == null) {
+            phone = "";
         }
-        mobile = mobile.trim();
+        phone = phone.trim();
 
-        SmsCodeAuthenticationToken authRequest = new SmsCodeAuthenticationToken(mobile);
+        SmsCodeAuthenticationToken authRequest = new SmsCodeAuthenticationToken(phone);
         // Allow subclasses to set the "details" property
         authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
 

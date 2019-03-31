@@ -19,7 +19,12 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 import org.springframework.web.cors.CorsUtils;
 
 /**
- * @author lilei
+ * Copyright 2019 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName WebSecurityConfig.java
+ * @CreateTime 2019/3/27 17:19
+ * @Description: WebSecurity配置类
  */
 @Configurable
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -45,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/index.html", "/image/**", "/static/**", "/login_p", "/logout_p", "/session/invalid");
+        web.ignoring().antMatchers("/image/**", "/static/**", "/login_p", "/logout_p", "/session/invalid");
         web.ignoring().antMatchers("/swagger-ui.html").antMatchers("/webjars/**").antMatchers("/v2/**").antMatchers("/swagger-resources/**");
     }
 

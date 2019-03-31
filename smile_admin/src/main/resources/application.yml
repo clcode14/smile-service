@@ -7,3 +7,5 @@ spring:
 # 资源映射地址，图片存放的真实路径
   resources:
     static-locations: file:G://cache/smile/
+
+image-url: /image

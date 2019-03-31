@@ -2,9 +2,12 @@ package org.flightythought.smile.admin.bean;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.Data;
+import org.flightythought.smile.admin.framework.serializer.JsonLocalDateTimeSerializer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Copyright 2017 Flighty-Thought All rights reserved.
@@ -14,6 +17,7 @@ import java.time.LocalDateTime;
  * @CreateTime 2019/2/25 22:50
  * @Description: 课程信息对象
  */
+@Data
 public class CourseInfo {
     /**
      * 标题
@@ -23,7 +27,7 @@ public class CourseInfo {
     /**
      * 开始
      */
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonSerialize(using = JsonLocalDateTimeSerializer.class)
     private LocalDateTime startTime;
 
     /**
@@ -36,35 +40,23 @@ public class CourseInfo {
      */
     private Integer member;
 
-    public String getTitle() {
-        return title;
-    }
+    /**
+     * 活动地址
+     */
+    private String address;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    /**
+     * 封面图片
+     */
+    private ImageInfo coverImage;
 
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
+    /**
+     * 展示图片
+     */
+    private List<ImageInfo> images;
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getMember() {
-        return member;
-    }
-
-    public void setMember(Integer member) {
-        this.member = member;
-    }
+    /**
+     * 课程描述
+     */
+    private String description;
 }

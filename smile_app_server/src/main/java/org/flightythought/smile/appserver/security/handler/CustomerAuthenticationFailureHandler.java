@@ -1,6 +1,7 @@
-package org.flightythought.smile.appserver.security;
+package org.flightythought.smile.appserver.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class CustomerAuthenticationFailureHandler implements AuthenticationFailu
 
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(exception.getMessage()));
+        ResponseBean responseBean = ResponseBean.error("登录失败", exception.getMessage());
+        response.getWriter().write(objectMapper.writeValueAsString(responseBean));
     }
 }

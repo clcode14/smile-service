@@ -43,6 +43,7 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
         diseaseClassDetailEntity.setDiseaseId(diseaseClassDetailDTO.getDiseaseId());
         diseaseClassDetailEntity.setCreateUserName(sysUserEntity.getLoginName());
         diseaseClassDetailEntity.setCreateTime(LocalDateTime.now());
+        diseaseClassDetailEntity.setType("0");
         DiseaseClassDetailEntity result = diseaseClassDetailRepository.save(diseaseClassDetailEntity);
         return result;
     }

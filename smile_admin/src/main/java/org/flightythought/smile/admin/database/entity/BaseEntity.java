@@ -2,6 +2,7 @@ package org.flightythought.smile.admin.database.entity;
 
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Data;
 import org.flightythought.smile.admin.framework.serializer.JsonLocalDateTimeSerializer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,12 +12,15 @@ import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 
 /**
- * Copyright 2018 欧瑞思丹 All rights reserved.
+ * Copyright 2019 Flighty-Thought All rights reserved.
  *
- * @author LiLei
- * @date 2019/1/15 12:59
+ * @Author: LiLei
+ * @ClassName BaseEntity.java
+ * @CreateTime 2019/3/27 17:11
+ * @Description: 基础实体类
  */
 @MappedSuperclass
+@Data
 public abstract class BaseEntity {
 
     /**
@@ -52,44 +56,4 @@ public abstract class BaseEntity {
     @JsonSerialize(using = JsonLocalDateTimeSerializer.class)
     @UpdateTimestamp
     protected LocalDateTime updateTime;
-
-    public String getMemo() {
-        return memo;
-    }
-
-    public void setMemo(String memo) {
-        this.memo = memo;
-    }
-
-    public String getCreateUserName() {
-        return createUserName;
-    }
-
-    public void setCreateUserName(String createUserName) {
-        this.createUserName = createUserName;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getUpdateUserName() {
-        return updateUserName;
-    }
-
-    public void setUpdateUserName(String updateUserName) {
-        this.updateUserName = updateUserName;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
 }

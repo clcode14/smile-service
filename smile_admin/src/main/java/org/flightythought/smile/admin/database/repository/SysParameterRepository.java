@@ -12,4 +12,7 @@ public interface SysParameterRepository extends JpaRepository<SysParameterEntity
 
     @Query("select m from SysParameterEntity m where m.parameterKey = 'file_path'")
     SysParameterEntity getFilePathParam();
+
+    @Query("select m from SysParameterEntity m where m.parameterKey = 'domain_port'")
+    SysParameterEntity getDomainPortParam();
 }

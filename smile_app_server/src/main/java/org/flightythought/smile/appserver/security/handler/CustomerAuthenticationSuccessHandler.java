@@ -1,8 +1,12 @@
-package org.flightythought.smile.appserver.security;
+package org.flightythought.smile.appserver.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.converters.Auto;
+import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.redis.RedisUtil;
 import org.flightythought.smile.appserver.common.utils.JwtTokenUtil;
+import org.flightythought.smile.appserver.config.properties.AppProperties;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +23,9 @@ import java.util.HashMap;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
- *
+ * <p>
  * 登录成功
+ *
  * @Author: LiLei
  * @ClassName CustomerAuthenticationSuccessHandler
  * @CreateTime 2019/3/17 19:30
@@ -32,17 +37,14 @@ public class CustomerAuthenticationSuccessHandler implements AuthenticationSucce
     private ObjectMapper objectMapper;
     @Autowired
     private RedisUtil redisUtil;
-
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOG = LoggerFactory.getLogger(CustomerAuthenticationSuccessHandler.class);
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        logger.info("登录成功");
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwtToken = JwtTokenUtil.createToken(userDetails.getUsername(), true);
-        // 缓存token
-        redisUtil.set(jwtToken, userDetails.getUsername(), 5 * 60 * 1000);
+        UserEntity userEntity = (UserEntity) authentication.getPrincipal();
+        LOG.info("用户：{}，登录成功", userEntity.getUsername());
+        ResponseBean responseBean = ResponseBean.ok("登录成功", userEntity);
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(jwtToken));
+        response.getWriter().write(objectMapper.writeValueAsString(responseBean));
     }
 }

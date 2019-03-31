@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service;
 
+import org.flightythought.smile.admin.bean.CourseInfo;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.data.domain.Page;
@@ -27,5 +28,5 @@ public interface CourseRegistrationService {
      * @param pageSize 页面显示数
      * @return 分页课程实体
      */
-    Page<CourseRegistrationEntity> getCourseRegistration(int pageNumber, int pageSize);
+    Page<CourseInfo> getCourseRegistration(int pageNumber, int pageSize);
 }

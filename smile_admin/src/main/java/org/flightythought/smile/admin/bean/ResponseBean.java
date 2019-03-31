@@ -3,10 +3,12 @@ package org.flightythought.smile.admin.bean;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Copyright 2018 欧瑞思丹 All rights reserved.
+ * Copyright 2019 Flighty-Thought All rights reserved.
  *
- * @author LiLei
- * @date 2019/1/15 15:42
+ * @Author: LiLei
+ * @ClassName ResponseBean.java
+ * @CreateTime 2019/3/27 18:51
+ * @Description: 响应结果实体类
  */
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResponseBean {

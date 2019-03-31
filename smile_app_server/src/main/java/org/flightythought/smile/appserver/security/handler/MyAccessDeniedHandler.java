@@ -1,4 +1,4 @@
-package org.flightythought.smile.appserver.security;
+package org.flightythought.smile.appserver.security.handler;
 
 import com.alibaba.fastjson.JSON;
 import org.flightythought.smile.appserver.common.ResultEnum;

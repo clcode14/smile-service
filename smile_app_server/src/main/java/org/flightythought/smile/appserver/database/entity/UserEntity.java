@@ -1,7 +1,12 @@
 package org.flightythought.smile.appserver.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,39 +15,54 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-@ApiModel(value = "UserEntity", description = "user实体")
 @Data
 @Entity
 @Table(name = "tb_user")
+@ApiModel(value = "UserEntity", description = "user实体")
 public class UserEntity extends BaseEntity implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
+    @GenericGenerator(name = "id", strategy = "identity")
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "mobile")
     private String mobile;
 
+    @Column(name = "user_name")
     private String username;
 
+    @Column(name = "password")
+    @JsonIgnore
     private String password;
 
+    @Column(name = "nick_name")
     private String nickName;
 
+    @Column(name = "id_card")
     private String idCard;
 
+    @Column(name = "login_time")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime loginTime;
 
+    @Column(name = "login_count")
     private Integer loginCount;
 
+    @Column(name = "photo")
     private String photo;
 
+    @Column(name = "ip")
+    @JsonIgnore
     private String ip;
 
+    @Column(name = "token")
+    @JsonIgnore
     private String token;
-
-    private String remark;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -61,21 +81,21 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }

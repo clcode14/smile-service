@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 
+import javax.persistence.Access;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -22,6 +23,12 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity implements Serializable {
 
     /**
+     * 备注
+     */
+    @Column(name = "memo")
+    protected String memo;
+
+    /**
      * 创建者
      */
     @Column(name = "create_user_name")
@@ -32,7 +39,7 @@ public abstract class BaseEntity implements Serializable {
      */
     @Column(name = "create_time")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     protected LocalDateTime createTime;
 
     /**

@@ -11,7 +11,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://47.102.126.36:3306/smile_dev?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     username: root
-    password: lt5227
+    password: lt2015196
     tomcat:
       max-active: 20
       max-idle: 8
@@ -32,10 +32,17 @@ spring:
 #    Redis服务器连接端口
     port: 6379
 #    Redis服务器连接密码
-    password:
+    password: lt5227
 
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+#自定义参数
+app-config:
+  tokenKey: 190312Smile_dev
+  codeKey: 190312Smile_dev
+  # Token失效时间90天
+  tokenExpirationTime: 90

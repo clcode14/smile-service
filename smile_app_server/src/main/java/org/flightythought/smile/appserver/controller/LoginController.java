@@ -1,15 +1,24 @@
 package org.flightythought.smile.appserver.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpResponse;
+import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.redis.RedisUtil;
 import org.flightythought.smile.appserver.common.utils.HttpUtils;
+import org.flightythought.smile.appserver.service.LoginService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -22,17 +31,22 @@ import java.util.Map;
  * @Author: LiLei
  * @ClassName LoginController
  * @CreateTime 2019/3/17 19:37
- * @Description: TODO
+ * @Description: 登录模块控制层
  */
 @Controller
+@Api(tags = "登录模块控制层", description = "登录模块")
 public class LoginController {
     private Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    @Autowired
+    private LoginService loginService;
     @Autowired
     private RedisUtil redisUtil;
 
-    @RequestMapping("/")
+    @GetMapping("/")
     @ResponseBody
-    public String showHome(HttpServletRequest request) {
+    @ApiOperation(value = "验证用户登陆", notes = "验证用户登陆返回手机号")
+    public String showHome(@ApiIgnore HttpServletRequest request) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         logger.info("当前登陆用户：" + name);
         String authHeader = request.getHeader("Authorization");
@@ -45,51 +59,18 @@ public class LoginController {
         return name;
     }
 
-    @RequestMapping("/sms/code")
+    @GetMapping("/sms/vCode/{phone}")
     @ResponseBody
-    public String sms(String mobile, HttpSession session) {
-        int code = (int) Math.ceil(Math.random() * 9000 + 1000);
-
-        Map<String, Object> map = new HashMap<>(16);
-        map.put("mobile", mobile);
-        map.put("code", code);
-        if (mobile == null || mobile.trim() == "") {
-            return "请输入手机号";
+    @ApiOperation(value = "获取短信验证码", notes = "发送短信验证码")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "phone", value = "手机号")
+    })
+    public ResponseBean getSMSVerificationCode(@PathVariable(value = "phone") String phone, @ApiIgnore HttpSession session) {
+        ResponseBean result = loginService.getSMSVerificationCode(phone, session);
+        if (result == null) {
+            return ResponseBean.error("短信验证码发送失败");
         }
-        String host = "http://yzxyzm.market.alicloudapi.com";
-        String path = "/yzx/verifySms";
-        String method = "POST";
-        String appcode = "4e84bebc30684ce681c98547087784db";
-        Map<String, String> headers = new HashMap<>();
-        //最后在header中的格式(中间是英文空格)为Authorization:APPCODE 83359fd73fe94948385f570e3c139105
-        headers.put("Authorization", "APPCODE " + appcode);
-        Map<String, String> querys = new HashMap<>();
-        querys.put("phone", mobile);
-        querys.put("templateId", "TP18040314");
-        querys.put("variable", "code:" + code);
-        Map<String, String> bodys = new HashMap<>();
-
-
-        try {
-            /*
-             * 重要提示如下:
-             * HttpUtils请从
-             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/src/main/java/com/aliyun/api/gateway/demo/util/HttpUtils.java
-             * 下载
-             *
-             * 相应的依赖请参照
-             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/pom.xml
-             */
-            HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
-            System.out.println(response.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        session.setAttribute("smsCode", map);
-
-        logger.info("{}：为 {} 设置短信验证码：{}", session.getId(), mobile, code);
-        return "发送短信成功" + code;
+        return result;
     }
 
 }
