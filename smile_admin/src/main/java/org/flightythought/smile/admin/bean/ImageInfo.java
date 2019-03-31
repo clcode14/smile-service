@@ -20,7 +20,7 @@ public class ImageInfo {
     /**
      * 图片名称
      */
-    private String imageName;
+    private String name;
 
     /**
      * 图片主键ID

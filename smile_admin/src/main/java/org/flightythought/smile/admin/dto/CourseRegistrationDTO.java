@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -17,6 +18,9 @@ import java.math.BigDecimal;
 @ApiModel(value = "课程报名 DTO", description = "课程报名 DTO")
 @Data
 public class CourseRegistrationDTO {
+
+    @ApiModelProperty(value = "课程ID, 新增课程不用传，修改课程需传入课程ID")
+    private Integer courseId;
 
     @ApiModelProperty(value = "标题", required = true)
     private String title;
@@ -35,4 +39,8 @@ public class CourseRegistrationDTO {
 
     @ApiModelProperty(value = "描述")
     private String description;
+
+    private ImageDTO coverImage;
+
+    private List<ImageDTO> courseImages;
 }

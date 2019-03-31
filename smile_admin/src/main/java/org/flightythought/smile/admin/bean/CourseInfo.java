@@ -19,6 +19,12 @@ import java.util.List;
  */
 @Data
 public class CourseInfo {
+
+    /**
+     * 课程ID
+     */
+    private Integer courseId;
+
     /**
      * 标题
      */
@@ -38,7 +44,7 @@ public class CourseInfo {
     /**
      * 当前报名人数
      */
-    private Integer member;
+    private Integer members;
 
     /**
      * 活动地址
@@ -48,12 +54,12 @@ public class CourseInfo {
     /**
      * 封面图片
      */
-    private ImageInfo coverImage;
+    private List<ImageInfo> coverImage;
 
     /**
      * 展示图片
      */
-    private List<ImageInfo> images;
+    private List<ImageInfo> courseImages;
 
     /**
      * 课程描述

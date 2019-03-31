@@ -73,15 +73,12 @@ public class CourseRegistrationEntity extends BaseEntity {
      * 封面图片名称
      */
     @Basic
-    @Column(name = "cover_picture_name")
-    private String coverPictureName;
+    @Column(name = "cover_image_id")
+    private Integer coverImageId;
 
-    /**
-     * 封面图片路径
-     */
-    @Basic
-    @Column(name = "cover_picture_path")
-    private String coverPicturePath;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cover_image_id", insertable = false, updatable = false)
+    private Images coverImage;
 
     /**
      * 详情描述
@@ -93,7 +90,8 @@ public class CourseRegistrationEntity extends BaseEntity {
     /**
      * 课程图片
      */
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private List<CourseImageEntity> courseImages;
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_course_image", joinColumns = {@JoinColumn(name = "course_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
+    private List<Images> courseImages;
 }

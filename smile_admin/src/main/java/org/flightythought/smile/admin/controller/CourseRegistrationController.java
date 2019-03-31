@@ -1,6 +1,9 @@
 package org.flightythought.smile.admin.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.CourseInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
@@ -10,17 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -40,27 +36,16 @@ public class CourseRegistrationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CourseRegistrationController.class);
 
     @PostMapping("/add")
-    @ApiOperation(value = "新增课程", notes = "新增课程", position = 1)
-    public ResponseBean addCourseRegistration(CourseRegistrationDTO courseRegistrationDTO,
-                                              @ApiParam(value = "封面图片(只支持一张)") MultipartFile coverPicture,
-                                              @ApiParam(value = "展示图(支持多张上传)") List<MultipartFile> images,
-                                              @ApiIgnore HttpSession session) {
+    @ApiOperation(value = "新增或修改课程", notes = "新增或修改课程，新增不需要courseId，修改需传递courseId", position = 1)
+    public ResponseBean addCourseRegistration(@RequestBody CourseRegistrationDTO courseRegistrationDTO, @ApiIgnore HttpSession session) {
         try {
-            CourseRegistrationEntity courseRegistrationEntity = new CourseRegistrationEntity();
-            courseRegistrationEntity.setTitle(courseRegistrationDTO.getTitle());
-            LocalDateTime startTime = LocalDateTime.parse(courseRegistrationDTO.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            courseRegistrationEntity.setStartTime(startTime);
-            courseRegistrationEntity.setMembers(courseRegistrationDTO.getMembers());
-            courseRegistrationEntity.setAddress(courseRegistrationDTO.getAddress());
-            courseRegistrationEntity.setDescription(courseRegistrationDTO.getDescription());
-            courseRegistrationEntity.setPrice(courseRegistrationDTO.getPrice());
-            courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationEntity, coverPicture, images, session);
+            CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
             if (courseRegistrationEntity != null) {
                 return ResponseBean.ok("新增成功");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return ResponseBean.error(e.getMessage());
+            return ResponseBean.error("返回失败", e.getMessage());
         }
         return ResponseBean.error(null);
     }
