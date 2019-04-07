@@ -41,7 +41,7 @@ public class CourseRegistrationController {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
             if (courseRegistrationEntity != null) {
-                return ResponseBean.ok("新增成功");
+                return ResponseBean.ok("操作成功");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

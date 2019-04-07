@@ -6,36 +6,29 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
+/**
+ * Copyright 2019 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName SolutionCourseEntity
+ * @CreateTime 2019/4/1 21:42
+ * @Description: TODO
+ */
+@Table(name = "tb_solution_course")
 @Entity
-@Table(name = "tb_images")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class Images extends BaseEntity {
+public class SolutionCourseEntity {
 
-    /**
-     * 自增主键
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
-    /**
-     * 图片名称
-     */
-    @Column(name = "file_name")
-    private String fileName;
+    @Column(name = "solution_id")
+    private Integer solutionId;
 
-    /**
-     * 图片大小
-     */
-    @Column(name = "size", columnDefinition = "int")
-    private Long size;
-
-    /**
-     * 图片路径
-     */
-    @Column(name = "path")
-    private String path;
+    @Column(name = "course_id")
+    private Integer courseId;
 }

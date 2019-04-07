@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "tb_images")
 @Data
-public class Images extends BaseEntity {
+public class ImagesEntity extends BaseEntity {
 
     /**
      * 自增主键

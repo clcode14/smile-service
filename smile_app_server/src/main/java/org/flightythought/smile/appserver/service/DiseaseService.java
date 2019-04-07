@@ -1,5 +1,7 @@
 package org.flightythought.smile.appserver.service;
 
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
 import org.flightythought.smile.appserver.database.entity.DiseaseClassEntity;
 import org.flightythought.smile.appserver.dto.UserFollowDiseaseDTO;
@@ -27,7 +29,7 @@ public interface DiseaseService {
     List<DiseaseClassEntity> getAllThousandDisease();
 
     /**
-     * 获取疾病小类
+     * 获取疾病小类内容展示
      */
-    DiseaseClassDetailEntity getThousandDiseaseDetail(Integer diseaseDetailId);
+    DiseaseClassDetailSimple getThousandDiseaseDetail(Integer diseaseDetailId) throws FlightyThoughtException;
 }

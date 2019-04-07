@@ -11,4 +11,6 @@ public interface DiseaseClassRepository extends JpaRepository<DiseaseClassEntity
     List<DiseaseClassEntity> findByDiseaseIdIn(List<Integer> diseaseIds);
 
     List<DiseaseClassEntity> findByDiseaseIdNotIn(List<Integer> diseaseIds);
+
+    DiseaseClassEntity findByDiseaseId(Integer diseaseId);
 }

@@ -12,10 +12,7 @@ import org.flightythought.smile.admin.service.SolutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -50,13 +47,12 @@ public class SolutionController {
         }
     }
 
-    @PostMapping("/add")
+    @PostMapping("/save")
     @ApiOperation(value = "增加解决方案", notes = "增加解决方案", position = 1)
-    public ResponseBean addSolution(SolutionDTO solutionDTO,
-                                    @ApiParam(value = "配图(支持多张上传)") List<MultipartFile> images,
+    public ResponseBean saveSolution(@RequestBody SolutionDTO solutionDTO,
                                     @ApiIgnore HttpSession session) {
         try {
-            SolutionEntity solutionEntity = solutionService.addSolution(solutionDTO, images, session);
+            SolutionEntity solutionEntity = solutionService.saveSolution(solutionDTO, session);
             return ResponseBean.ok("新增成功", solutionEntity);
         } catch (Exception e) {
             LOG.error("新增解决方案失败", e);

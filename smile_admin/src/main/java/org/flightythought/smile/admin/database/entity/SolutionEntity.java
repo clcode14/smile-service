@@ -64,6 +64,12 @@ public class SolutionEntity extends BaseEntity {
     private Integer agencyId;
 
     /**
+     * 康复人数
+     */
+    @Column(name = "recover_number")
+    private Integer recoverNumber;
+
+    /**
      * 阅读数
      */
     @Column(name = "read_num")
@@ -72,8 +78,9 @@ public class SolutionEntity extends BaseEntity {
     /**
      * 课程图片
      */
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    @JoinColumn(name = "solution_id")
-    private List<SolutionImage> courseImages;
+    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_solution_image", joinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
+    private List<ImagesEntity> images;
 
 }

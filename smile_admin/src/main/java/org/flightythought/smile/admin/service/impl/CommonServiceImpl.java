@@ -3,7 +3,7 @@ package org.flightythought.smile.admin.service.impl;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
-import org.flightythought.smile.admin.database.entity.Images;
+import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysParameterEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.repository.ImagesRepository;
@@ -48,6 +48,10 @@ public class CommonServiceImpl implements CommonService {
                     imageFileType = "course_image";
                     break;
                 }
+                case "2": {
+                    imageFileType = "solution";
+                    break;
+                }
                 default:
                     imageFileType = "";
             }
@@ -63,9 +67,9 @@ public class CommonServiceImpl implements CommonService {
         } else {
             imagePath = sysParameterEntity.getParameterValue();
             if (!"".equals(imageFileType)) {
-                userPath = File.separator + imageFileType + File.separator + sysUserEntity.getId();
+                userPath = File.separator + imageFileType + File.separator + sysUserEntity.getId() + "_system";
             } else {
-                userPath = File.separator + sysUserEntity.getId();
+                userPath = File.separator + sysUserEntity.getId() + "_system";
             }
             File file = new File(imagePath + userPath);
             if (!file.exists()) {
@@ -73,11 +77,11 @@ public class CommonServiceImpl implements CommonService {
             }
         }
         if (image != null) {
-            Images images = new Images();
+            ImagesEntity imagesEntity = new ImagesEntity();
             // 上传者
-            images.setCreateUserName(sysUserEntity.getId() + "");
+            imagesEntity.setCreateUserName(sysUserEntity.getLoginName());
             // 图片大小
-            images.setSize(image.getSize());
+            imagesEntity.setSize(image.getSize());
             // 上传封面图片到服务器
             // 获取原始图片名称
             String imageName = image.getOriginalFilename();
@@ -85,9 +89,9 @@ public class CommonServiceImpl implements CommonService {
             if (imageName != null) {
                 String path = userPath + File.separator + System.currentTimeMillis() + imageName.substring(imageName.lastIndexOf("."));
                 // 图片名称
-                images.setFileName(imageName);
+                imagesEntity.setFileName(imageName);
                 // 图片路径
-                images.setPath(path);
+                imagesEntity.setPath(path);
                 File coverPictureFile = new File(imagePath + path);
                 try {
                     // 创建文件输出流
@@ -96,12 +100,12 @@ public class CommonServiceImpl implements CommonService {
                     IOUtils.copy(image.getInputStream(), fileOutputStream);
                     fileOutputStream.flush();
                     fileOutputStream.close();
-                    images = imagesRepository.save(images);
+                    imagesEntity = imagesRepository.save(imagesEntity);
                     ImageInfo imageInfo = new ImageInfo();
-                    imageInfo.setId(images.getId());
-                    imageInfo.setName(images.getFileName());
-                    imageInfo.setSize(images.getSize());
-                    String imageUrl = domainPort + contentPath + imageRequest + images.getPath();
+                    imageInfo.setId(imagesEntity.getId());
+                    imageInfo.setName(imagesEntity.getFileName());
+                    imageInfo.setSize(imagesEntity.getSize());
+                    String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
                     imageInfo.setUrl(imageUrl.replace("\\", "/"));
                     return imageInfo;
                 } catch (IOException e) {
@@ -124,6 +128,10 @@ public class CommonServiceImpl implements CommonService {
                     imageFileType = "course_image";
                     break;
                 }
+                case "2": {
+                    imageFileType = "solution";
+                    break;
+                }
                 default:
                     imageFileType = "";
             }
@@ -139,26 +147,26 @@ public class CommonServiceImpl implements CommonService {
         } else {
             imagePath = sysParameterEntity.getParameterValue();
             if (!"".equals(imageFileType)) {
-                userPath = File.separator + imageFileType + File.separator + sysUserEntity.getId();
+                userPath = File.separator + imageFileType + File.separator + sysUserEntity.getId() + "_system";
             } else {
-                userPath = File.separator + sysUserEntity.getId();
+                userPath = File.separator + sysUserEntity.getId() + "_system";
             }
             File file = new File(imagePath + userPath);
             if (!file.exists()) {
                 file.mkdirs();
             }
         }
-        List<Images> imagesArrayList = new ArrayList<>();
+        List<ImagesEntity> imagesEntityArrayList = new ArrayList<>();
         if (images == null || images.size() == 0) {
             throw new FlightyThoughtException("请选择要上传的图片");
         }
         for (MultipartFile multipartFile : images) {
             if (multipartFile != null) {
-                Images images1 = new Images();
+                ImagesEntity imagesEntity1 = new ImagesEntity();
                 // 上传者
-                images1.setCreateUserName(sysUserEntity.getId() + "");
+                imagesEntity1.setCreateUserName(sysUserEntity.getLoginName());
                 // 图片大小
-                images1.setSize(multipartFile.getSize());
+                imagesEntity1.setSize(multipartFile.getSize());
                 // 上传封面图片到服务器
                 // 获取原始图片名称
                 String imageName = multipartFile.getOriginalFilename();
@@ -166,9 +174,9 @@ public class CommonServiceImpl implements CommonService {
                 if (imageName != null) {
                     String path = userPath + File.separator + System.currentTimeMillis() + imageName.substring(imageName.lastIndexOf("."));
                     // 图片名称
-                    images1.setFileName(imageName);
+                    imagesEntity1.setFileName(imageName);
                     // 图片路径
-                    images1.setPath(path);
+                    imagesEntity1.setPath(path);
                     File coverPictureFile = new File(imagePath + path);
                     try {
                         // 创建文件输出流
@@ -177,8 +185,8 @@ public class CommonServiceImpl implements CommonService {
                         IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
                         fileOutputStream.flush();
                         fileOutputStream.close();
-                        images1 = imagesRepository.save(images1);
-                        imagesArrayList.add(images1);
+                        imagesEntity1 = imagesRepository.save(imagesEntity1);
+                        imagesEntityArrayList.add(imagesEntity1);
                     } catch (IOException e) {
                         LOG.error("上传图片失败", e);
                         throw new FlightyThoughtException("上传图片失败", e);
@@ -186,9 +194,9 @@ public class CommonServiceImpl implements CommonService {
                 }
             }
         }
-        imagesArrayList = imagesRepository.saveAll(imagesArrayList);
+        imagesEntityArrayList = imagesRepository.saveAll(imagesEntityArrayList);
         List<ImageInfo> result = new ArrayList<>();
-        imagesArrayList.forEach(images1 -> {
+        imagesEntityArrayList.forEach(images1 -> {
             ImageInfo imageInfo = new ImageInfo();
             imageInfo.setId(images1.getId());
             imageInfo.setName(images1.getFileName());

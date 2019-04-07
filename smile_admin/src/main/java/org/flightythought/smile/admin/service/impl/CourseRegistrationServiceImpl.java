@@ -119,12 +119,12 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             courseInfo.setDescription(courseRegistrationEntity.getDescription());
             // 封面图
             ImageInfo coverImage = null;
-            Images images = courseRegistrationEntity.getCoverImage();
+            ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
             List<ImageInfo> coverImages = new ArrayList<>();
-            if (images != null) {
+            if (imagesEntity != null) {
                 coverImage = new ImageInfo();
-                String imageName = images.getFileName();
-                String url = domainPort + contentPath + imageRequest + images.getPath();
+                String imageName = imagesEntity.getFileName();
+                String url = domainPort + contentPath + imageRequest + imagesEntity.getPath();
                 coverImage.setUrl(url.replace("\\", "/"));
                 coverImage.setName(imageName);
                 coverImage.setId(coverImage.getId());
@@ -133,7 +133,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             }
             courseInfo.setCoverImage(coverImages);
             // 展示图
-            List<Images> courseImageEntities = courseRegistrationEntity.getCourseImages();
+            List<ImagesEntity> courseImageEntities = courseRegistrationEntity.getCourseImages();
             List<ImageInfo> courseImages = new ArrayList<>();
             if (courseImageEntities != null && courseImageEntities.size() > 0) {
                 courseImageEntities.forEach(courseImageEntity -> {

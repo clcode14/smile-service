@@ -1,6 +1,6 @@
 package org.flightythought.smile.admin.database.repository;
 
-import org.flightythought.smile.admin.database.entity.SolutionImage;
+import org.flightythought.smile.admin.database.entity.SolutionImageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +13,6 @@ import org.springframework.stereotype.Repository;
  * @Description: 解决方案图片持久层
  */
 @Repository
-public interface SolutionImageRepository extends JpaRepository<SolutionImage, Long> {
+public interface SolutionImageRepository extends JpaRepository<SolutionImageEntity, Long> {
+    void deleteAllBySolutionId(Integer solutionId);
 }

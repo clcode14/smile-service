@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
-import org.flightythought.smile.admin.database.entity.Images;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.CommonService;
 import org.slf4j.Logger;

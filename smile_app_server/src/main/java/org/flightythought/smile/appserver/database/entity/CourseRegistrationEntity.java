@@ -64,6 +64,10 @@ public class CourseRegistrationEntity extends BaseEntity {
     @Column(name = "members")
     private int members;
 
+    @Basic
+    @Column(name = "apply_count")
+    private Integer applyCount;
+
     /**
      * 地址
      */
@@ -80,7 +84,7 @@ public class CourseRegistrationEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cover_image_id", insertable = false, updatable = false)
-    private Images coverImage;
+    private ImagesEntity coverImage;
 
     /**
      * 详情描述
@@ -95,5 +99,5 @@ public class CourseRegistrationEntity extends BaseEntity {
     @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinTable(name = "tb_course_image", joinColumns = {@JoinColumn(name = "course_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
-    private List<Images> courseImages;
+    private List<ImagesEntity> courseImages;
 }

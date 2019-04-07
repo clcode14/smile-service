@@ -58,4 +58,22 @@ public class DiseaseClassDetailEntity extends BaseEntity {
     @Column(name = "disease_detail_name")
     private String diseaseDetailName;
 
+    /**
+     * 背景图
+     */
+    @Basic
+    @Column(name = "bg_images")
+    private Integer bgImages;
+
+    /**
+     * 内容
+     */
+    @Column(name = "content", columnDefinition = "text")
+    private String content;
+
+    /**
+     * 图标
+     */
+    @Column(name = "icon")
+    private Integer icon;
 }

@@ -1,7 +1,6 @@
 package org.flightythought.smile.admin.service;
 
 import org.flightythought.smile.admin.bean.ImageInfo;
-import org.flightythought.smile.admin.database.entity.Images;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.web.multipart.MultipartFile;
 

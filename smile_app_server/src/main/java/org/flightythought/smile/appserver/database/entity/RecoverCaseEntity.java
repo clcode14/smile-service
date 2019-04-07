@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class RecoverCase extends BaseEntity {
+public class RecoverCaseEntity extends BaseEntity {
 
 
     /**
@@ -27,16 +27,17 @@ public class RecoverCase extends BaseEntity {
     private Integer id;
 
     /**
+     * 养生旅程ID
+     */
+    @Column(name = "journey_id")
+    private Integer journeyId;
+
+    /**
      * 解决方案ID
      */
     @Column(name = "solution_id")
     private Integer solutionId;
 
-    /**
-     * 疾病小类ID
-     */
-    @Column(name = "disease_detail_id")
-    private Integer diseaseDetailId;
 
     /**
      * 标题
@@ -66,16 +67,6 @@ public class RecoverCase extends BaseEntity {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
-
-    @Column(name = "content", columnDefinition = "text")
-    private String content;
-
-    @Column(name = "images")
-    private Integer imageId;
-
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "images", insertable = false, updatable = false)
-    private Images images;
 
     @Column(name = "read_num")
     private Long readNum;

@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Table(name = "tb_course_image")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CourseImageEntity extends BaseEntity {
+public class CourseImageEntity {
     /**
      * 课程图片ID
      */

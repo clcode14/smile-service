@@ -18,6 +18,9 @@ public class UserFollowDiseaseEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "disease_detail_id", updatable = false, insertable = false)
+    private Integer diseaseDetailId;
+
     @OneToOne
     @JoinColumn(name = "disease_detail_id")
     private DiseaseClassDetailEntity diseaseClassDetailEntity;

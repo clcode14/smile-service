@@ -10,7 +10,7 @@ import javax.persistence.*;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName SolutionImage
+ * @ClassName SolutionImageEntity
  * @CreateTime 2019/3/27 17:17
  * @Description: 课程图片实体类
  */
@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Table(name = "tb_solution_image")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SolutionImage extends BaseEntity {
+public class SolutionImageEntity {
     /**
      * 图片主键ID
      */
@@ -35,27 +35,10 @@ public class SolutionImage extends BaseEntity {
     private Integer solutionId;
 
     /**
-     * 图片路径
+     * 图片ID
      */
-    @Column(name = "path")
-    private String path;
+    @Column(name = "image_id")
+    private Integer imageId;
 
-    /**
-     * 图片URL
-     */
-    @Column(name = "url")
-    private String url;
-
-    /**
-     * 图片名称
-     */
-    @Column(name = "image_name")
-    private String imageName;
-
-    /**
-     * 图片大小
-     */
-    @Column(name = "size", columnDefinition = "int")
-    private Long size;
 
 }

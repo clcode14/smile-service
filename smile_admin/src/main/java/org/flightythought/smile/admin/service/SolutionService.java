@@ -30,5 +30,5 @@ public interface SolutionService {
      * @param images      配图
      * @param session     SESSION
      */
-    SolutionEntity addSolution(SolutionDTO solutionDTO, List<MultipartFile> images, HttpSession session) throws FlightyThoughtException;
+    SolutionEntity saveSolution(SolutionDTO solutionDTO, HttpSession session) throws FlightyThoughtException;
 }

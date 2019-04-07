@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.Access;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -40,6 +41,7 @@ public abstract class BaseEntity implements Serializable {
     @Column(name = "create_time")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @CreationTimestamp
     protected LocalDateTime createTime;
 
     /**
@@ -54,6 +56,7 @@ public abstract class BaseEntity implements Serializable {
     @Column(name = "update_time")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @UpdateTimestamp
     protected LocalDateTime updateTime;
 
 }

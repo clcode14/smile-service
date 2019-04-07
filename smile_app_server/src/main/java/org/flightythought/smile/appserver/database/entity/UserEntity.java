@@ -61,7 +61,7 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     private String ip;
 
     @Column(name = "token")
-    @JsonIgnore
+//    @JsonIgnore
     private String token;
 
     @Override
