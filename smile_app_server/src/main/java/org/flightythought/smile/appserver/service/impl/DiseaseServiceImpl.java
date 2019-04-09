@@ -109,17 +109,26 @@ public class DiseaseServiceImpl implements DiseaseService {
         result.setDiseaseClassDetailName(diseaseClassDetailEntity.getDiseaseDetailName());
         // 获取背景图片
         String domainPort = platformUtils.getDomainPort();
-        ImagesEntity bgImage = imagesRepository.findById(diseaseClassDetailEntity.getBgImages());
-        // 背景图片URL
-        String bgImageUrl = platformUtils.getImageUrlByPath(bgImage.getPath(), domainPort);
-        result.setBgImageUrl(bgImageUrl);
+        if (diseaseClassDetailEntity.getBgImagesId() != null) {
+            ImagesEntity bgImage = imagesRepository.findById(diseaseClassDetailEntity.getBgImagesId());
+            if (bgImage != null) {
+                // 背景图片URL
+                String bgImageUrl = platformUtils.getImageUrlByPath(bgImage.getPath(), domainPort);
+                result.setBgImageUrl(bgImageUrl);
+            }
+        }
+
         // 内容介绍
         result.setContent(diseaseClassDetailEntity.getContent());
         // 图标ICON
-        ImagesEntity icon = imagesRepository.findById(diseaseClassDetailEntity.getIcon());
-        // 图标URL
-        String iconUrl = platformUtils.getImageUrlByPath(icon.getPath(), domainPort);
-        result.setIconUrl(iconUrl);
+        if (diseaseClassDetailEntity.getIconId() != null) {
+            ImagesEntity icon = imagesRepository.findById(diseaseClassDetailEntity.getIconId());
+            if (icon != null) {
+                // 图标URL
+                String iconUrl = platformUtils.getImageUrlByPath(icon.getPath(), domainPort);
+                result.setIconUrl(iconUrl);
+            }
+        }
         return result;
     }
 }

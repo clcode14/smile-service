@@ -63,7 +63,11 @@ public class DiseaseClassDetailEntity extends BaseEntity {
      */
     @Basic
     @Column(name = "bg_images")
-    private Integer bgImages;
+    private Integer bgImagesId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bg_images", updatable = false, insertable = false)
+    private ImagesEntity bgImage;
 
     /**
      * 内容
@@ -75,5 +79,9 @@ public class DiseaseClassDetailEntity extends BaseEntity {
      * 图标
      */
     @Column(name = "icon")
-    private Integer icon;
+    private Integer iconId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "icon", updatable = false, insertable = false)
+    private ImagesEntity icon;
 }

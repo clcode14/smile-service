@@ -172,6 +172,7 @@ public class HealthServiceImpl implements HealthService {
     @Override
     public HealthClassDetail getHealthDetailClass(Integer healthDetailClassId) {
         HealthClassDetailEntity healthClassDetailEntity = healthClassDetailRepository.findByHealthDetailId(healthDetailClassId);
+        String domainPort = platformUtils.getDomainPort();
         if (healthClassDetailEntity != null) {
             HealthClassDetail healthClassDetail = new HealthClassDetail();
             // 养生小类ID
@@ -182,9 +183,53 @@ public class HealthServiceImpl implements HealthService {
             healthClassDetail.setHealthDetailName(healthClassDetailEntity.getHealthDetailName());
             // 背景图片
             ImagesEntity imagesEntity = healthClassDetailEntity.getBgImage();
-            if (imagesEntity == null) {
-//                im
+            if (imagesEntity != null) {
+                ImageInfo imageInfo = new ImageInfo();
+                imageInfo.setId(imagesEntity.getId());
+                imageInfo.setName(imagesEntity.getFileName());
+                imageInfo.setSize(imagesEntity.getSize());
+                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                imageInfo.setUrl(imageUrl);
+                healthClassDetail.setBgImage(imageInfo);
             }
+            // 标题
+            healthClassDetail.setTitle(healthClassDetailEntity.getTitle());
+            // 编码
+            healthClassDetail.setNumber(healthClassDetailEntity.getNumber());
+            // 内容介绍
+            healthClassDetail.setContent(healthClassDetailEntity.getContent());
+            return healthClassDetail;
+        }
+        return null;
+    }
+
+    @Override
+    public HealthClass getHealthClass(Integer healthClassId) {
+        // 获取养生大类
+        HealthClassEntity healthClassEntity = healthClassRepository.findByHealthId(healthClassId);
+        String domainPort = platformUtils.getDomainPort();
+        if (healthClassEntity != null) {
+            HealthClass healthClass = new HealthClass();
+            // 养生大类ID
+            healthClass.setHealthId(healthClassEntity.getHealthId());
+            // 编码
+            healthClass.setNumber(healthClassEntity.getNumber());
+            // 养生大类名称
+            healthClass.setHealthName(healthClassEntity.getHealthName());
+            // 背景图片
+            ImagesEntity imagesEntity = healthClassEntity.getBgImage();
+            if (imagesEntity != null) {
+                ImageInfo imageInfo = new ImageInfo();
+                imageInfo.setId(imagesEntity.getId());
+                imageInfo.setSize(imagesEntity.getSize());
+                imageInfo.setName(imagesEntity.getFileName());
+                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                imageInfo.setUrl(imageUrl);
+                healthClass.setBgImage(imageInfo);
+            }
+            // 内容介绍
+            healthClass.setContent(healthClassEntity.getContent());
+            return healthClass;
         }
         return null;
     }

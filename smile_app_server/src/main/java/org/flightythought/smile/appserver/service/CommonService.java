@@ -1,7 +1,10 @@
 package org.flightythought.smile.appserver.service;
 
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
@@ -23,4 +26,7 @@ public interface CommonService {
      * @return 图片实体类
      */
     List<ImageInfo> uploadImages(List<MultipartFile> images, String type, HttpSession session) throws FlightyThoughtException;
+
+
+    Page<DiseaseClassDetailSimple> getDiseaseClassDetails(PageFilterDTO pageFilterDTO);
 }

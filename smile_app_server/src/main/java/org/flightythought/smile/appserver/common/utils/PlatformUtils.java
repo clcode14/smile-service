@@ -1,9 +1,11 @@
 package org.flightythought.smile.appserver.common.utils;
 
 import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,4 +35,9 @@ public class PlatformUtils {
     public String getDomainPort() {
         return sysParameterRepository.getDomainPortParam().getParameterValue();
     }
+
+    public UserEntity getCurrentLoginUser() {
+        return (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 }

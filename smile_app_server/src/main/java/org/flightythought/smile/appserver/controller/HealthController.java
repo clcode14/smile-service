@@ -61,6 +61,24 @@ public class HealthController {
     @GetMapping("/healthDetailClass/{healthDetailClassId}")
     @ApiOperation(value = "获取养生小类明细", notes = "根据养生小类ID获取养生小类明细")
     public ResponseBean getHealthDetailClass(@PathVariable("healthDetailClassId") Integer healthDetailClassId) {
-        return null;
+        try {
+            HealthClassDetail result = healthService.getHealthDetailClass(healthDetailClassId);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生小类明细失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @GetMapping("/healthClass/{healthClassId}")
+    @ApiOperation(value = "获取养生大类明细", notes = "根据养生大类ID获取养生大类明细")
+    public ResponseBean getHealthClass(@PathVariable("healthClassId") Integer healthClassId) {
+        try {
+            HealthClass result = healthService.getHealthClass(healthClassId);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生大类明细失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
     }
 }
