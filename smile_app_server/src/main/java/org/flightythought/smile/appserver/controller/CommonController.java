@@ -1,8 +1,6 @@
 package org.flightythought.smile.appserver.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
@@ -28,9 +26,12 @@ public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
 
-    @ApiOperation(value = "上传图片", notes = "上传图片接口", position = 0)
+    @ApiOperation(value = "上传图片", notes = "上传图片接口，model具体参数如下：<table><thead><tr><td>model</td><td>所属模块</td></tr></thead><tbody><tr><td>1001</td><td>行善记录图片地址</td></tr><tr><td>1002</td><td>忏悔记录图片地址</td></tr></tbody></table>", position = 0)
     @PostMapping("/uploadImage")
-    public ResponseBean uploadImage(@ApiParam(value = "上传的图片") MultipartFile image, @ApiParam(value = "上传图片所属模块") String model, @ApiIgnore HttpSession session) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "上传图片所属模块，用来确定保存在服务器那个文件夹下")
+    })
+    public ResponseBean uploadImage(@ApiParam(value = "上传的图片") MultipartFile image, String model, @ApiIgnore HttpSession session) {
         try {
             ImageInfo images = commonService.uploadImage(image, model, session);
             return ResponseBean.ok("上传图片成功", images);
@@ -40,9 +41,12 @@ public class CommonController {
         }
     }
 
-    @ApiOperation(value = "上传图片", notes = "上传图片接口", position = 1)
+    @ApiOperation(value = "上传图片", notes = "上传图片接口，多文件上传Swagger支持不了，请用Postman进行测试，model具体参数如下：<table><thead><tr><td>model</td><td>所属模块</td></tr></thead><tbody><tr><td>1001</td><td>行善记录图片地址</td></tr><tr><td>1002</td><td>忏悔记录图片地址</td></tr></tbody></table>", position = 1)
     @PostMapping("/uploadImages")
-    public ResponseBean uploadImages(@ApiParam(value = "上传的图片") List<MultipartFile> images, @ApiParam(value = "上传图片所属模块") String model, @ApiIgnore HttpSession session) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "上传图片所属模块，用来确定保存在服务器那个文件夹下")
+    })
+    public ResponseBean uploadImages(@ApiParam(value = "上传的图片") List<MultipartFile> images, String model, @ApiIgnore HttpSession session) {
         try {
             List<ImageInfo> result = commonService.uploadImages(images, model, session);
             return ResponseBean.ok("上传图片成功", result);

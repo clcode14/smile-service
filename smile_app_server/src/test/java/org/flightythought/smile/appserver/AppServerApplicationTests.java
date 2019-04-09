@@ -1,6 +1,8 @@
 package org.flightythought.smile.appserver;
 
+import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
 import org.flightythought.smile.appserver.database.repository.SolutionRepository;
+import org.flightythought.smile.appserver.database.repository.UserCharityFaultRecordRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class AppServerApplicationTests {
     @Autowired
     private EntityManager entityManager;
 
+    @Autowired
+    private UserCharityFaultRecordRepository userCharityFaultRecordRepository;
+
     @Test
     @Transactional
     public void contextLoads() {
@@ -35,6 +40,13 @@ public class AppServerApplicationTests {
                 "  LEFT JOIN `tb_solution` s\n" +
                 "    ON drts.`solution_id` = s.`id`").getResultList();
         System.out.println(object);
+    }
+
+    @Test
+    @Transactional
+    public void test01() {
+        UserCharityFaultRecordEntity result = userCharityFaultRecordRepository.findById(2);
+        System.out.println(result);
     }
 
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @ApiModel(value = "行善过失 DTO", description = "行善过失 DTO，新增行善和过失，需要传递哪个值就传递哪个值即可，关于行善类型如下表定义<table><thead><tr><th>cf_type_id(行善过失ID)</th><th>type name(类型名称)</th></tr></thead><tbody><tr><td>1</td><td>祝福</td></tr><tr><td>2</td><td>道歉</td></tr><tr><td>3</td><td>微笑</td></tr><tr><td>4</td><td>鼓励他人</td></tr><tr><td>5</td><td>捐款</td></tr><tr><td>6</td><td>捐物</td></tr><tr><td>7</td><td>做义工</td></tr></tbody></table>")
@@ -44,4 +45,7 @@ public class CharityFaultRecordDTO {
 
     @ApiModelProperty(value = "地址")
     private String address;
+
+    @ApiModelProperty(value = "上传的图片ID")
+    private List<FileImageDTO> images;
 }

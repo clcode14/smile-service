@@ -1,15 +1,14 @@
 package org.flightythought.smile.appserver.service.impl;
 
-import org.flightythought.smile.appserver.bean.CharityAndFault;
-import org.flightythought.smile.appserver.bean.CharityFaultTypeContentSimple;
-import org.flightythought.smile.appserver.bean.CharityFaultTypeSimple;
-import org.flightythought.smile.appserver.database.entity.CharityFaultTypeContentEntity;
-import org.flightythought.smile.appserver.database.entity.CharityFaultTypeEntity;
-import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.bean.*;
+import org.flightythought.smile.appserver.common.utils.PlatformUtils;
+import org.flightythought.smile.appserver.database.entity.*;
+import org.flightythought.smile.appserver.database.repository.CharityFaultRecordImageRepository;
 import org.flightythought.smile.appserver.database.repository.CharityFaultTypeRepository;
+import org.flightythought.smile.appserver.database.repository.ImagesRepository;
 import org.flightythought.smile.appserver.database.repository.UserCharityFaultRecordRepository;
 import org.flightythought.smile.appserver.dto.CharityFaultRecordDTO;
+import org.flightythought.smile.appserver.dto.FileImageDTO;
 import org.flightythought.smile.appserver.service.CharityFaultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +25,12 @@ public class CharityFaultServiceImpl implements CharityFaultService {
     private CharityFaultTypeRepository charityFaultTypeRepository;
     @Autowired
     private UserCharityFaultRecordRepository userCharityFaultRecordRepository;
+    @Autowired
+    private CharityFaultRecordImageRepository charityFaultRecordImageRepository;
+    @Autowired
+    private ImagesRepository imagesRepository;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     @Override
     @Transactional
@@ -78,6 +83,7 @@ public class CharityFaultServiceImpl implements CharityFaultService {
     }
 
     @Override
+    @Transactional
     public UserCharityFaultRecordEntity addCharityFaultRecord(CharityFaultRecordDTO charityFaultRecordDTO) {
         // 获取当前登陆用户
         UserEntity userEntity = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -106,6 +112,45 @@ public class CharityFaultServiceImpl implements CharityFaultService {
         // 地址
         userCharityFaultRecord.setAddress(charityFaultRecordDTO.getAddress());
         userCharityFaultRecordRepository.save(userCharityFaultRecord);
+        // 获取上传图片
+        List<FileImageDTO> images = charityFaultRecordDTO.getImages();
+        List<CharityFaultRecordImageEntity> charityFaultRecordImageEntities = new ArrayList<>();
+        images.forEach(fileImageDTO -> {
+            CharityFaultRecordImageEntity charityFaultRecordImageEntity = new CharityFaultRecordImageEntity();
+            charityFaultRecordImageEntity.setImageId(fileImageDTO.getImageId());
+            charityFaultRecordImageEntity.setCharityFaultRecordId(userCharityFaultRecord.getId());
+            charityFaultRecordImageEntities.add(charityFaultRecordImageEntity);
+        });
+        charityFaultRecordImageRepository.saveAll(charityFaultRecordImageEntities);
         return userCharityFaultRecord;
+    }
+
+    @Override
+    public UserCharityFaultRecord getUserCharityFaultRecord(Integer id) {
+        // 获取用户善行过失记录
+        UserCharityFaultRecordEntity charityFaultRecordEntity = userCharityFaultRecordRepository.findById(id);
+        if (charityFaultRecordEntity != null) {
+            // 根据ID获取图片关联数据
+            List<CharityFaultRecordImageEntity> charityFaultRecordImageEntities = charityFaultRecordImageRepository.findByCharityFaultRecordId(charityFaultRecordEntity.getId());
+            List<Integer> imagesId = new ArrayList<>();
+            charityFaultRecordImageEntities.forEach(charityFaultRecordImageEntity -> imagesId.add(charityFaultRecordImageEntity.getImageId()));
+            // 获取图片
+            List<ImagesEntity> imagesEntities = imagesRepository.findByIdIn(imagesId);
+            List<ImageInfo> imageInfos = new ArrayList<>();
+            String domainPort = platformUtils.getDomainPort();
+            if (imagesEntities != null) {
+                imagesEntities.forEach(imagesEntity -> {
+                    ImageInfo imageInfo = new ImageInfo();
+                    String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    imageInfo.setId(imagesEntity.getId());
+                    imageInfo.setName(imagesEntity.getFileName());
+                    imageInfo.setSize(imagesEntity.getSize());
+                    imageInfo.setUrl(url);
+                    imageInfos.add(imageInfo);
+                });
+            }
+            return new UserCharityFaultRecord(charityFaultRecordEntity, imageInfos);
+        }
+        return null;
     }
 }

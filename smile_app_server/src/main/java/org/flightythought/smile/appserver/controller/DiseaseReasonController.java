@@ -54,6 +54,9 @@ public class DiseaseReasonController {
     public ResponseBean getDiseaseReasonInfo(@PathVariable String reasonId) {
         try {
             DiseaseReason diseaseReason = diseaseReasonService.getDiseaseReasonInfo(reasonId);
+            if (diseaseReason == null) {
+                return ResponseBean.error("没有找到对应的原因详情");
+            }
             return ResponseBean.ok("获取疾病原因详情成功", diseaseReason);
         } catch (Exception e) {
             LOG.error("获取疾病原因详情失败", e);

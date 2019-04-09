@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserCharityFaultRecordRepository extends JpaRepository<UserCharityFaultRecordEntity, Long> {
+    UserCharityFaultRecordEntity findById(Integer id);
 }

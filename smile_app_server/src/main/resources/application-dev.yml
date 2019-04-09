@@ -7,8 +7,8 @@ spring:
   application:
     name: smile-appserver
   mvc:
-    # 资源映射路径为/image/**，你想在url访问的请求路径
-    static-path-pattern: /image/**
+    # 资源映射路径为/static/**，你想在url访问的请求路径
+    static-path-pattern: /static/**
   # 资源映射地址，图片存放的真实路径
   resources:
     static-locations: file:G://cache/smile/

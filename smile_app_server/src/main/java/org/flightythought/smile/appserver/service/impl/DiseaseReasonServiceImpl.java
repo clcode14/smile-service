@@ -6,7 +6,7 @@ import org.flightythought.smile.appserver.bean.SolutionSimple;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.DiseaseReasonEntity;
-import org.flightythought.smile.appserver.database.entity.DiseaseReasonType;
+import org.flightythought.smile.appserver.database.entity.DiseaseReasonTypeEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.SolutionEntity;
 import org.flightythought.smile.appserver.database.repository.DiseaseReasonRepository;
@@ -47,18 +47,18 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         Integer pageNumber = diseaseDetailQueryDTO.getPageNumber();
         boolean isPage = (pageSize != null && pageSize != 0) && (pageNumber != null && pageNumber != 0);
         // 类型 1：中医， 2：西医
-        String type = diseaseDetailQueryDTO.getType();
+        Integer type = diseaseDetailQueryDTO.getType();
         if (isPage) {
             PageRequest pageRequest = PageRequest.of(diseaseDetailQueryDTO.getPageNumber() - 1, diseaseDetailQueryDTO.getPageSize());
             // 获取疾病
-            if (StringUtils.isNotBlank(type)) {
+            if (type != null && type != 0) {
                 return diseaseReasonRepository.findByDiseaseDetailIdAndType(diseaseDetailId, type, pageRequest);
             } else {
                 return diseaseReasonRepository.findByDiseaseDetailId(diseaseDetailId, pageRequest);
             }
         } else {
             List<DiseaseReasonEntity> diseaseReasonEntities;
-            if (StringUtils.isNotBlank(type)) {
+            if (type != null && type != 0) {
                 diseaseReasonEntities = diseaseReasonRepository.findByDiseaseDetailIdAndType(diseaseDetailId, type);
             } else {
                 diseaseReasonEntities = diseaseReasonRepository.findByDiseaseDetailId(diseaseDetailId);
@@ -73,12 +73,12 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
 
     @Override
     public List<Map<String, String>> getDiseaseTypes() {
-        List<DiseaseReasonType> diseaseReasonTypes = diseaseReasonTypeRepository.findAll();
+        List<DiseaseReasonTypeEntity> diseaseReasonTypeEntities = diseaseReasonTypeRepository.findAll();
         List<Map<String, String>> result = new ArrayList<>();
-        diseaseReasonTypes.forEach(diseaseReasonType -> {
+        diseaseReasonTypeEntities.forEach(diseaseReasonTypeEntity -> {
             Map<String, String> map = new HashMap<>();
-            map.put("type", diseaseReasonType.getTypeName());
-            map.put("value", diseaseReasonType.getTypeId().toString());
+            map.put("type", diseaseReasonTypeEntity.getTypeName());
+            map.put("value", diseaseReasonTypeEntity.getTypeId().toString());
             result.add(map);
         });
         return result;
@@ -88,7 +88,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     @Transactional
     public DiseaseReason getDiseaseReasonInfo(String id) throws FlightyThoughtException {
         // 根据疾病原因ID获取疾病原因
-        Integer reasonId = null;
+        Integer reasonId;
         try {
             reasonId = Integer.parseInt(id);
         } catch (NumberFormatException e) {

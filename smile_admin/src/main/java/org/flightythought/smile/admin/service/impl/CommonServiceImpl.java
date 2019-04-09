@@ -34,8 +34,8 @@ public class CommonServiceImpl implements CommonService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
-    @Value("${image-url}")
-    private String imageRequest;
+    @Value("${static-url}")
+    private String staticUrl;
     @Value("${server.servlet.context-path}")
     private String contentPath;
 
@@ -105,7 +105,7 @@ public class CommonServiceImpl implements CommonService {
                     imageInfo.setId(imagesEntity.getId());
                     imageInfo.setName(imagesEntity.getFileName());
                     imageInfo.setSize(imagesEntity.getSize());
-                    String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
+                    String imageUrl = domainPort + contentPath + staticUrl + imagesEntity.getPath();
                     imageInfo.setUrl(imageUrl.replace("\\", "/"));
                     return imageInfo;
                 } catch (IOException e) {
@@ -201,7 +201,7 @@ public class CommonServiceImpl implements CommonService {
             imageInfo.setId(images1.getId());
             imageInfo.setName(images1.getFileName());
             imageInfo.setSize(images1.getSize());
-            String imageUrl = domainPort + contentPath + imageRequest + images1.getPath();
+            String imageUrl = domainPort + contentPath + staticUrl + images1.getPath();
             imageInfo.setUrl(imageUrl.replace("\\", "/"));
             result.add(imageInfo);
         });

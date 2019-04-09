@@ -3,6 +3,7 @@ package org.flightythought.smile.appserver.controller;
 import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.CharityAndFault;
 import org.flightythought.smile.appserver.bean.ResponseBean;
+import org.flightythought.smile.appserver.bean.UserCharityFaultRecord;
 import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
 import org.flightythought.smile.appserver.dto.CharityFaultRecordDTO;
 import org.flightythought.smile.appserver.service.CharityFaultService;
@@ -39,7 +40,10 @@ public class CharityFaultController {
     @ApiOperation(value = "新增行善或过失记录", notes = "新增行善或过失通用接口，根据不同行善类型和过失类型，传递不同的参数")
     public ResponseBean addCharityFaultRecord(@RequestBody CharityFaultRecordDTO charityFaultRecordDTO) {
         try {
-            UserCharityFaultRecordEntity result = charityFaultService.addCharityFaultRecord(charityFaultRecordDTO);
+            UserCharityFaultRecordEntity userCharityFaultRecordEntity = charityFaultService.addCharityFaultRecord(charityFaultRecordDTO);
+            UserCharityFaultRecord result = charityFaultService.getUserCharityFaultRecord(userCharityFaultRecordEntity.getId());
+
+            // 根据结果获取新的实体返回给前端
             return ResponseBean.ok("新增成功", result);
         } catch (Exception e) {
             LOG.error("新增行善或过失记录失败", e);

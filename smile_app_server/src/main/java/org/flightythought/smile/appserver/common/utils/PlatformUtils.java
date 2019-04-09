@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PlatformUtils {
-    @Value("${image-url}")
-    private String imageRequest;
+    @Value("${static-url}")
+    private String staticUrl;
     @Value("${server.servlet.context-path}")
     private String contentPath;
 
@@ -25,7 +25,7 @@ public class PlatformUtils {
     private SysParameterRepository sysParameterRepository;
 
     public String getImageUrlByPath(String path, String domainPort) {
-        String url = domainPort + contentPath + imageRequest + path;
+        String url = domainPort + contentPath + staticUrl + path;
         url = url.replace("\\", "/");
         return url;
     }

@@ -11,13 +11,13 @@ import java.util.List;
 @Repository
 public interface DiseaseReasonRepository extends JpaRepository<DiseaseReasonEntity, Long> {
 
-    Page<DiseaseReasonEntity> findByDiseaseDetailIdAndType(Integer diseaseDetailId, String type, Pageable pageable);
+    Page<DiseaseReasonEntity> findByDiseaseDetailIdAndType(Integer diseaseDetailId, Integer type, Pageable pageable);
 
     Page<DiseaseReasonEntity> findByDiseaseDetailId(Integer diseaseDetailId, Pageable pageable);
 
     List<DiseaseReasonEntity> findByDiseaseDetailId(Integer diseaseDetailId);
 
-    List<DiseaseReasonEntity> findByDiseaseDetailIdAndType(Integer diseaseDetailId, String type);
+    List<DiseaseReasonEntity> findByDiseaseDetailIdAndType(Integer diseaseDetailId, Integer type);
 
     DiseaseReasonEntity findById(Integer reasonId);
 }

@@ -10,6 +10,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_user_charity_fault_record")
@@ -92,4 +93,9 @@ public class UserCharityFaultRecordEntity extends BaseEntity {
      */
     @Column(name = "address")
     private String address;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_charity_fault_record_image", joinColumns = {@JoinColumn(name = "charity_fault_record_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
+    private List<ImagesEntity> images;
 }

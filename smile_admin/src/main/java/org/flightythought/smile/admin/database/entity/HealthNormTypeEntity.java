@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Table(name = "tb_health_norm_type")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HealthNormTypeEntity {
+public class HealthNormTypeEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -21,5 +21,6 @@ public class HealthNormTypeEntity {
     @Column(name = "norm_number")
     private String normNumber;
 
-//    private String normNam
+    @Column(name = "norm_name")
+    private String normName;
 }
