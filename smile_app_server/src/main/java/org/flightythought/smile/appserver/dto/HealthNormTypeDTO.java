@@ -19,6 +19,9 @@ public class HealthNormTypeDTO {
     @ApiModelProperty(value = "体检指标类型ID")
     private Integer normTypeId;
 
-    @ApiModelProperty(value = "体检指标对应数值")
-    private String value;
+    @ApiModelProperty(value = "体检指标对应数值1")
+    private String value1;
+
+    @ApiModelProperty(value = "体检指标对应的数值2")
+    private String value2;
 }

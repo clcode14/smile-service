@@ -115,12 +115,14 @@ public class CharityFaultServiceImpl implements CharityFaultService {
         // 获取上传图片
         List<FileImageDTO> images = charityFaultRecordDTO.getImages();
         List<CharityFaultRecordImageEntity> charityFaultRecordImageEntities = new ArrayList<>();
-        images.forEach(fileImageDTO -> {
-            CharityFaultRecordImageEntity charityFaultRecordImageEntity = new CharityFaultRecordImageEntity();
-            charityFaultRecordImageEntity.setImageId(fileImageDTO.getImageId());
-            charityFaultRecordImageEntity.setCharityFaultRecordId(userCharityFaultRecord.getId());
-            charityFaultRecordImageEntities.add(charityFaultRecordImageEntity);
-        });
+        if (images != null && images.size() > 0) {
+            images.forEach(fileImageDTO -> {
+                CharityFaultRecordImageEntity charityFaultRecordImageEntity = new CharityFaultRecordImageEntity();
+                charityFaultRecordImageEntity.setImageId(fileImageDTO.getId());
+                charityFaultRecordImageEntity.setCharityFaultRecordId(userCharityFaultRecord.getId());
+                charityFaultRecordImageEntities.add(charityFaultRecordImageEntity);
+            });
+        }
         charityFaultRecordImageRepository.saveAll(charityFaultRecordImageEntities);
         return userCharityFaultRecord;
     }

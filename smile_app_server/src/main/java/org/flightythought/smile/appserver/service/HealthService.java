@@ -20,4 +20,6 @@ public interface HealthService {
     Page<HealthClassDetail> findHealthDetailClass(HealthDetailQueryDTO healthDetailQueryDTO);
 
     HealthClassDetail getHealthDetailClass(Integer healthDetailClassId);
+
+    HealthClass getHealthClass(Integer healthClassId);
 }

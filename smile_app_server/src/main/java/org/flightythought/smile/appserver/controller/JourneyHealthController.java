@@ -5,6 +5,7 @@ import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.dto.HealthJourneyStartDTO;
 import org.flightythought.smile.appserver.service.JourneyHealthService;
 import org.slf4j.Logger;
@@ -72,8 +73,12 @@ public class JourneyHealthController {
     @ApiOperation(value = "开启养生旅程", notes = "开启养生旅程")
     @PostMapping("/startJourney")
     public ResponseBean startHealthJourney(@RequestBody HealthJourneyStartDTO healthJourneyStartDTO) {
-        return null;
+        try {
+            JourneyEntity result = journeyHealthService.startHealthJourney(healthJourneyStartDTO);
+            return ResponseBean.ok("开启养生旅程成功", result);
+        } catch (Exception e) {
+            LOG.error("开启养生旅程失败", e);
+            return ResponseBean.error("开启养生旅程失败", e.getMessage());
+        }
     }
-
-
 }

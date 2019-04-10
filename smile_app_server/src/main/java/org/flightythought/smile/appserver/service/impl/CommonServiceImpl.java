@@ -2,20 +2,29 @@ package org.flightythought.smile.appserver.service.impl;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.common.utils.PlatformUtils;
+import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.repository.DiseaseClassDetailRepository;
 import org.flightythought.smile.appserver.database.repository.ImagesRepository;
 import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.CommonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
@@ -29,9 +38,13 @@ import java.util.List;
 public class CommonServiceImpl implements CommonService {
     @Autowired
     private SysParameterRepository sysParameterRepository;
+    @Autowired
+    private DiseaseClassDetailRepository diseaseClassDetailRepository;
 
     @Autowired
     private ImagesRepository imagesRepository;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
@@ -209,5 +222,59 @@ public class CommonServiceImpl implements CommonService {
             result.add(imageInfo);
         });
         return result;
+    }
+
+    @Override
+    @Transactional
+    public Page<DiseaseClassDetailSimple> getDiseaseClassDetails(PageFilterDTO pageFilterDTO) {
+        Integer pageSize = pageFilterDTO.getPageSize();
+        Integer pageNumber = pageFilterDTO.getPageNumber();
+        List<DiseaseClassDetailEntity> diseaseClassDetailEntities;
+        PageRequest pageRequest;
+        Long total;
+        if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
+            // 不分页
+            diseaseClassDetailEntities = diseaseClassDetailRepository.findAll();
+            pageRequest = PageRequest.of(0, diseaseClassDetailEntities.size());
+            total = (long) diseaseClassDetailEntities.size();
+        } else {
+            // 分页
+            pageRequest = PageRequest.of(pageNumber - 1, pageSize);
+            Page<DiseaseClassDetailEntity> diseaseClassDetailEntityPage = diseaseClassDetailRepository.findAll(pageRequest);
+            diseaseClassDetailEntities = diseaseClassDetailEntityPage.getContent();
+            total = diseaseClassDetailEntityPage.getTotalElements();
+        }
+        String domainPort = platformUtils.getDomainPort();
+        List<DiseaseClassDetailSimple> diseaseClassDetailSimples = new ArrayList<>();
+        if (diseaseClassDetailEntities.size() > 0) {
+            diseaseClassDetailEntities.forEach(diseaseClassDetailEntity -> {
+                DiseaseClassDetailSimple diseaseClassDetailSimple = new DiseaseClassDetailSimple();
+                // 疾病小类ID
+                diseaseClassDetailSimple.setDiseaseDetailId(diseaseClassDetailEntity.getDiseaseDetailId());
+                // 疾病大类ID
+                diseaseClassDetailSimple.setDiseaseId(diseaseClassDetailEntity.getDiseaseId());
+                // 疾病大类名称
+//                diseaseClassDetailSimple.setDiseaseClassName();
+                // 疾病小类名称
+                diseaseClassDetailSimple.setDiseaseClassDetailName(diseaseClassDetailEntity.getDiseaseDetailName());
+                // 背景图片URL
+                ImagesEntity bgImagesEntity = diseaseClassDetailEntity.getBgImage();
+                if (bgImagesEntity != null) {
+                    String bgImageUrl = platformUtils.getImageUrlByPath(bgImagesEntity.getPath(), domainPort);
+                    diseaseClassDetailSimple.setBgImageUrl(bgImageUrl);
+                }
+                // 内容介绍
+                diseaseClassDetailSimple.setContent(diseaseClassDetailEntity.getContent());
+                // 图标URL
+                ImagesEntity iconImageEntity = diseaseClassDetailEntity.getBgImage();
+                if (iconImageEntity != null) {
+                    String iconImageUrl = platformUtils.getImageUrlByPath(iconImageEntity.getPath(), domainPort);
+                    diseaseClassDetailSimple.setIconUrl(iconImageUrl);
+                }
+                diseaseClassDetailSimples.add(diseaseClassDetailSimple);
+            });
+            return new PageImpl<>(diseaseClassDetailSimples, pageRequest, total);
+        }
+        return null;
     }
 }

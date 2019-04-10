@@ -7,6 +7,7 @@ import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
 import org.flightythought.smile.appserver.database.entity.DiseaseClassEntity;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.dto.UserFollowDiseaseDTO;
 import org.flightythought.smile.appserver.service.DiseaseService;
 import org.slf4j.Logger;

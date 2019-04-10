@@ -1,14 +1,18 @@
 package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.*;
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.CommonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,6 +57,19 @@ public class CommonController {
         } catch (FlightyThoughtException e) {
             LOG.error("上传图片失败", e);
             return ResponseBean.error("上传图片失败", e.getMessage());
+        }
+    }
+
+
+    @ApiOperation(value = "获取疾病小类", notes = "获取疾病小类，分页查询，不传递参数则返回全部数据")
+    @PostMapping("/diseaseDetails")
+    public ResponseBean getDiseaseDetails(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<DiseaseClassDetailSimple> result = commonService.getDiseaseClassDetails(pageFilterDTO);
+            return ResponseBean.ok("获取成功", result);
+        } catch (Exception e) {
+            LOG.error("获取疾病小类失败", e);
+            return ResponseBean.error("获取失败", e.getMessage());
         }
     }
 }
