@@ -1,16 +1,17 @@
 package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.*;
-import org.flightythought.smile.appserver.bean.FileInfo;
-import org.flightythought.smile.appserver.bean.ResponseBean;
+import org.flightythought.smile.appserver.bean.*;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
-import org.flightythought.smile.appserver.dto.HealthJourneyStartDTO;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
+import org.flightythought.smile.appserver.dto.*;
 import org.flightythought.smile.appserver.service.JourneyHealthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,4 +82,81 @@ public class JourneyHealthController {
             return ResponseBean.error("开启养生旅程失败", e.getMessage());
         }
     }
+
+    @ApiOperation(value = "修改当前登录用户的养生旅程", notes = "修改当前登录用户的养生旅程信息，该接口不会修改创建旅程时的体检指标、体检报告、和现有症状（疾病小类）其他内容会被传参所替换")
+    @PostMapping("/updateJourney")
+    public ResponseBean updateHealthJourney(@RequestBody HealthJourneyStartDTO healthJourneyStartDTO) {
+        try {
+            JourneyEntity result = journeyHealthService.updateHealthJourney(healthJourneyStartDTO);
+            return ResponseBean.ok("修改成功", result);
+        } catch (Exception e) {
+            LOG.error("修改当前登录用户的养生旅程失败", e);
+            return ResponseBean.error("修改失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "获取当前用户的养生旅程", notes = "获取当前用户的养生旅程")
+    @PostMapping("/healthJourney")
+    public ResponseBean getHealthJourney(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(null, pageFilterDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取当前用户养生旅程失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "根据用户ID获取养生旅程", notes = "根据用户ID获取养生旅程")
+    @PostMapping("/healthJourneyByUser")
+    public ResponseBean getHealthJourneyByUserId(@RequestBody HealthJourneyQueryDTO healthJourneyQueryDTO) {
+        try {
+            Long userId = healthJourneyQueryDTO.getUserId();
+            PageFilterDTO pageFilterDTO = new PageFilterDTO();
+            pageFilterDTO.setPageNumber(healthJourneyQueryDTO.getPageNumber());
+            pageFilterDTO.setPageSize(healthJourneyQueryDTO.getPageSize());
+            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(userId, pageFilterDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "根据养生旅程ID获取养生旅程信息", notes = "根据养生旅程ID获取养生旅程信息，访问非自己的养生旅程会增加一次访问量")
+    @GetMapping("/healthJourney/{journeyId}")
+    public ResponseBean getJourneyByJourneyId(@PathVariable("journeyId") Integer journeyId) {
+        try {
+            HealthJourney result = journeyHealthService.getHealthJourney(journeyId);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生旅程信息失败", e);
+            return ResponseBean.error("获取养生旅程失敗", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "新增养生日记", notes = "用户新增养生日记")
+    @PostMapping("/addNote")
+    public ResponseBean saveJourneyHealthNote(@RequestBody JourneyNoteDTO journeyNoteDTO) {
+        try {
+            JourneyNoteEntity journeyNoteEntity = journeyHealthService.addJourneyNoteEntity(journeyNoteDTO);
+            return ResponseBean.ok("新增养生日记成功", journeyNoteEntity);
+        } catch (Exception e) {
+            LOG.error("新增养生日记失败", e);
+            return ResponseBean.error("新增养生日记失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "根据养生旅程ID获取养生日记", notes = "根据养生旅程ID获取养生日记")
+    @PostMapping("/notes")
+    public ResponseBean getJourneyHealthNote(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
+        try {
+            Page<JourneyNote> result = journeyHealthService.getJourneyHealthNote(journeyNoteQueryDTO);
+            return ResponseBean.ok("获取养生日记成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生日记失败", e);
+            return ResponseBean.error("获取养生日记失败", e.getMessage());
+        }
+    }
+
 }

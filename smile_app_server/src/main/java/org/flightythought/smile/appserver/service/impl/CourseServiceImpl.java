@@ -5,6 +5,7 @@ import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.repository.CourseRegistrationRepository;
+import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
 import org.flightythought.smile.appserver.dto.CourseQueryDTO;
 import org.flightythought.smile.appserver.service.CourseService;
 import org.hibernate.query.internal.NativeQueryImpl;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +30,6 @@ public class CourseServiceImpl implements CourseService {
     private EntityManager entityManager;
     @Autowired
     private CourseRegistrationRepository courseRegistrationRepository;
-
     @Autowired
     private PlatformUtils platformUtils;
 
@@ -36,6 +37,12 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public Page<CourseSimple> getCourseSimples(CourseQueryDTO courseQueryDTO) {
         Page<CourseRegistrationEntity> courseRegistrationEntities = getCourses(courseQueryDTO);
+        return getCourseSimples(courseRegistrationEntities);
+    }
+
+    @Override
+    @Transactional
+    public Page<CourseSimple> getCourseSimples(Page<CourseRegistrationEntity> courseRegistrationEntities) {
         List<CourseSimple> courseSimples = new ArrayList<>();
         String domainPort = platformUtils.getDomainPort();
         courseRegistrationEntities.forEach(courseRegistrationEntity -> {
@@ -117,6 +124,56 @@ public class CourseServiceImpl implements CourseService {
                 .addScalar("course_id", IntegerType.INSTANCE)
                 .list();
         // 获取全部SolutionEntities
+        List<CourseRegistrationEntity> courseRegistrationEntities = courseRegistrationRepository.findByCourseIdIn(courseIds);
+        PageImpl<CourseRegistrationEntity> result = new PageImpl<>(courseRegistrationEntities, pageable, total);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Page<CourseSimple> getCoursesInfo(CourseInfoQueryDTO courseInfoQueryDTO) {
+        Page<CourseRegistrationEntity> courseRegistrationEntities = getCourses(courseInfoQueryDTO);
+        return getCourseSimples(courseRegistrationEntities);
+    }
+
+    @Override
+    @Transactional
+    public Page<CourseRegistrationEntity> getCourses(CourseInfoQueryDTO courseInfoQueryDTO) {
+        // 组装SQL语句
+        String totalSql = "SELECT COUNT(*) as total FROM (";
+        String sql = "SELECT\n" +
+                "  cr.`course_id`\n" +
+                "FROM\n" +
+                "  `tb_course_registration` cr\n" +
+                "WHERE 1 = 1 ";
+        // 开始时间
+        if (courseInfoQueryDTO.getStartTime() != null) {
+            String startTime = courseInfoQueryDTO.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            sql += " AND sr.`start_time` >= '" + startTime + "'";
+        }
+        // 结束时间
+        if (courseInfoQueryDTO.getEndTime() != null) {
+            String endTime = courseInfoQueryDTO.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            sql += " AND sr.`start_time` <= '" + endTime + "'";
+        }
+        totalSql += sql + ") T";
+        // 获取ToTal总数
+        Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        // 是否存在分页查询
+        Integer pageNumber = courseInfoQueryDTO.getPageNumber();
+        Integer pageSize = courseInfoQueryDTO.getPageSize();
+        Pageable pageable;
+        if (pageNumber != null && pageNumber > 0 && pageSize != null && pageSize > 0) {
+            sql += " LIMIT " + (pageNumber - 1) * pageSize + "," + pageSize;
+            pageable = PageRequest.of(pageNumber - 1, pageSize);
+        } else {
+            pageable = PageRequest.of(0, total);
+        }
+        // 查询结果
+        List<Integer> courseIds = entityManager.createNativeQuery(sql)
+                .unwrap(NativeQueryImpl.class)
+                .addScalar("course_id", IntegerType.INSTANCE)
+                .list();
         List<CourseRegistrationEntity> courseRegistrationEntities = courseRegistrationRepository.findByCourseIdIn(courseIds);
         PageImpl<CourseRegistrationEntity> result = new PageImpl<>(courseRegistrationEntities, pageable, total);
         return result;

@@ -10,6 +10,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,6 +47,10 @@ public class JourneyNoteEntity extends BaseEntity {
     @Column(name = "cover_image_id")
     private Integer coverImageId;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image_id", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
+
     /**
      * 日记内容
      */
@@ -65,5 +70,14 @@ public class JourneyNoteEntity extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "note_date")
     private LocalDateTime noteDate;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_note_to_image", joinColumns = {@JoinColumn(name = "note_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
+    private List<ImagesEntity> images;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "note_id", insertable = false, updatable = false)
+    private List<JourneyNoteNormEntity> journeyNoteNorms;
 
 }

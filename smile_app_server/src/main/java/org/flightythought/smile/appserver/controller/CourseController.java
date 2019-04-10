@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.CourseSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
+import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
 import org.flightythought.smile.appserver.dto.CourseQueryDTO;
 import org.flightythought.smile.appserver.service.CourseService;
 import org.slf4j.Logger;
@@ -33,6 +34,18 @@ public class CourseController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取相关课程失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "根据时间区间、分页获取课程", notes = "可以根据时间区间、分页获取课程，也可以获取全部课程")
+    @PostMapping("/info")
+    public ResponseBean getCoursesInfo(CourseInfoQueryDTO courseInfoQueryDTO) {
+        try {
+            Page<CourseSimple> result = courseService.getCoursesInfo(courseInfoQueryDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取课程失败", e);
             return ResponseBean.error("返回失败", e.getMessage());
         }
     }
