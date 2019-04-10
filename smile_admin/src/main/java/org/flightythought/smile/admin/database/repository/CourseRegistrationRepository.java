@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CourseRegistrationRepository extends JpaRepository<CourseRegistrationEntity, Long> {
+public interface CourseRegistrationRepository extends JpaRepository<CourseRegistrationEntity, Integer> {
     CourseRegistrationEntity findByCourseId(Integer courseId);
 }

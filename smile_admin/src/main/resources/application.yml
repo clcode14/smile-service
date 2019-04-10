@@ -9,3 +9,5 @@ spring:
     static-locations: file:G://cache/smile/
 
 static-url: /static
+
+image-url: /image
