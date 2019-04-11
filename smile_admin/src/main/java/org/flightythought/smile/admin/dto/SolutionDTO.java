@@ -36,4 +36,7 @@ public class SolutionDTO {
     @ApiModelProperty(value = "相关课程ID")
     private List<Integer> courseIds;
 
+    @ApiModelProperty(value = "相关机构ID")
+    private List<Integer> officeIds;
+
 }

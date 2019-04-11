@@ -155,6 +155,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     }
 
     @Override
+    @Transactional
     public CourseInfo getCourseRegistrationDetail(Integer courseId) {
         CourseRegistrationEntity courseRegistrationEntity = courseRegistrationRepository.findByCourseId(courseId);
 
@@ -211,6 +212,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     }
 
     @Override
+    @Transactional
     public void deleteCourseRegistration(Integer courseId) {
         courseRegistrationRepository.deleteById(courseId);
     }

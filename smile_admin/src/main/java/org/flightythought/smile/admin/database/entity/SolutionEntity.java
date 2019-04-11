@@ -58,6 +58,14 @@ public class SolutionEntity extends BaseEntity {
     private Set<CourseRegistrationEntity> courseRegistrations;
 
     /**
+     * 机构
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_solution_office", joinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "office_id", nullable = false, updatable = false)})
+    private Set<OfficeEntity> offices;
+
+    /**
      * 机构ID
      */
     @Column(name = "agency_id")
