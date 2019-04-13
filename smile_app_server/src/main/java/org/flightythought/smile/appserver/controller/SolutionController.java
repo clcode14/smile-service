@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.bean.SolutionPage;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
+import org.flightythought.smile.appserver.dto.HealthOrDiseaseQuerySolutionDTO;
 import org.flightythought.smile.appserver.dto.SolutionQueryDTO;
 import org.flightythought.smile.appserver.service.SolutionService;
 import org.slf4j.Logger;
@@ -23,12 +24,24 @@ public class SolutionController {
     private static final Logger LOG = LoggerFactory.getLogger(SolutionController.class);
 
 
-    @ApiOperation(value = "获取解决方案", notes = "可以根据疾病小类ID或解决方案ID查询获取解决方案")
+    @ApiOperation(value = "获取解决方案1（千病万方模块调用）", notes = "可以根据疾病小类ID或解决方案ID查询获取解决方案")
     @PostMapping("/results")
     public ResponseBean getSolutions(@RequestBody SolutionQueryDTO solutionQueryDTO) {
         try {
             Page<SolutionSimple> solutionSimples = solutionService.getSolutionSimples(solutionQueryDTO);
             return ResponseBean.ok("获取成功", solutionSimples);
+        } catch (Exception e) {
+            LOG.error("获取解决方案失败", e);
+            return ResponseBean.error("获取解决方案失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "获取解决方案2（结束养生模块调用）", notes = "根据养生小类ID或疾病小类ID，可选择分页查询获取解决方案，重复部分滤重返回")
+    @PostMapping("/resultsByHD")
+    public ResponseBean getSolutions(@RequestBody HealthOrDiseaseQuerySolutionDTO querySolutionDTO) {
+        try {
+            Page<SolutionSimple> result = solutionService.getSolutionSimples(querySolutionDTO);
+            return ResponseBean.ok("获取解决方案成功", result);
         } catch (Exception e) {
             LOG.error("获取解决方案失败", e);
             return ResponseBean.error("获取解决方案失败", e.getMessage());

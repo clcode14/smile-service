@@ -95,8 +95,10 @@ public class CharityFaultServiceImpl implements CharityFaultService {
         userCharityFaultRecord.setType(charityFaultRecordDTO.getType());
         // 内容记录
         userCharityFaultRecord.setContent(charityFaultRecordDTO.getContent());
-        // 行善日期
-        userCharityFaultRecord.setCharityTime(charityFaultRecordDTO.getCharityTime());
+        // 行善日期 开始时间
+        userCharityFaultRecord.setCharityTimeStart(charityFaultRecordDTO.getCharityTimeStart());
+        // 行善日记 结束时间
+        userCharityFaultRecord.setCharityTimeEnd(charityFaultRecordDTO.getCharityTimeEnd());
         // 行善类型ID
         userCharityFaultRecord.setCfTypeId(charityFaultRecordDTO.getCfTypeId());
         // 行善类型对应的内容ID

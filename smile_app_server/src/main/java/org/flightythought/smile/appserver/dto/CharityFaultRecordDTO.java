@@ -23,7 +23,12 @@ public class CharityFaultRecordDTO {
     @ApiModelProperty(value = "行善日期 格式：yyyy-MM-dd HH:mm:ss", example = "2019-01-01 00:00:00")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime charityTime;
+    private LocalDateTime charityTimeStart;
+
+    @ApiModelProperty(value = "行善日期 格式：yyyy-MM-dd HH:mm:ss", example = "2019-01-01 00:00:00")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime charityTimeEnd;
 
     @ApiModelProperty(value = "行善过失类型ID，详情参照上表或查看：获取行善过失类型以及内容接口 【/auth/charityFault/typeAndContents】")
     private Integer cfTypeId;

@@ -78,12 +78,6 @@ public class JourneyEntity extends BaseEntity {
     private Boolean finished;
 
     /**
-     * 解决方案ID
-     */
-    @Column(name = "solution_id")
-    private Integer solutionId;
-
-    /**
      * 访问量
      */
     @Column(name = "read_num")

@@ -14,4 +14,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface JourneyNormRepository extends JpaRepository<JourneyNormEntity, Long> {
+    JourneyNormEntity findByJourneyIdAndNormTypeId(Integer journeyId, Integer normTypeId);
 }

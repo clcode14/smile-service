@@ -1,11 +1,16 @@
 package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.CourseSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
+import org.flightythought.smile.appserver.dto.ApplyCourseDTO;
 import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
 import org.flightythought.smile.appserver.dto.CourseQueryDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.CourseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +52,30 @@ public class CourseController {
         } catch (Exception e) {
             LOG.error("获取课程失败", e);
             return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "预约报名课程", notes = "预约报名课程，发送短信验证码可调用登录时候的请求验证码接口")
+    @PostMapping("/applyCourse")
+    public ResponseBean applyCourse(@RequestBody ApplyCourseDTO applyCourseDTO) {
+        try {
+            UserFollowCourseEntity result = courseService.applyCourse(applyCourseDTO);
+            return ResponseBean.ok("预约报名课程成功", result);
+        } catch (Exception e) {
+            LOG.error("预约报名课程失败", e);
+            return ResponseBean.error("预约报名课程失败", e.getMessage());
+        }
+    }
+
+    @ApiModelProperty(value = "获取当前用户参加的课程", notes = "获取当前用户所参见的课程")
+    @PostMapping("userCourses")
+    public ResponseBean getUserApplyCourse(PageFilterDTO pageFilterDTO) {
+        try {
+            Page<CourseSimple> result = courseService.getUserCourses(pageFilterDTO);
+            return ResponseBean.ok("获取成功", result);
+        } catch (Exception e) {
+            LOG.error("获取当前用户参加的课程失败", e);
+            return ResponseBean.error("获取失败", e.getMessage());
         }
     }
 }

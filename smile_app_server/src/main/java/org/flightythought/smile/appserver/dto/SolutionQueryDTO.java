@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
-@ApiModel(value = "解决方案查询DTO", description = "解决方案查询DTO")
+@ApiModel(value = "解决方案查询1DTO", description = "解决方案查询DTO")
 public class SolutionQueryDTO extends PageFilterDTO {
     @ApiModelProperty(value = "疾病小类ID")
     private Integer diseaseDetailId;

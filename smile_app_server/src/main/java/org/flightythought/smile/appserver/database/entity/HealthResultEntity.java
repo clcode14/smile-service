@@ -5,23 +5,23 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName JourneyToReportEntity
- * @CreateTime 2019/4/10 2:12
+ * @ClassName HealthResultEntity
+ * @CreateTime 2019/4/14 0:46
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_journey_to_report", schema = "smile_dev", catalog = "")
+@Table(name = "tb_health_result")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class JourneyToReportEntity {
+public class HealthResultEntity extends BaseEntity {
+
     /**
-     * 自增主键
+     * 自增主键ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -30,20 +30,14 @@ public class JourneyToReportEntity {
     private Integer id;
 
     /**
-     * 养生旅程ID
+     * 养生成果名称
      */
-    @Column(name = "journey_id")
-    private Integer journeyId;
+    @Column(name = "name")
+    private String name;
 
     /**
-     * 体检报告ID
+     * 养生成果编码
      */
-    @Column(name = "report_id")
-    private Integer reportId;
-
-    /**
-     * 是否是开启旅程的体检报告
-     */
-    @Column(name = "start_flag")
-    private Boolean startFlag;
+    @Column(name = "number")
+    private String number;
 }

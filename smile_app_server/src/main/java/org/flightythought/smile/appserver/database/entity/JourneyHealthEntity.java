@@ -41,4 +41,10 @@ public class JourneyHealthEntity {
     @Column(name = "health_detail_id")
     private Integer healthDetailId;
 
+    /**
+     * 养生成果ID
+     */
+    @Column(name = "health_result_id")
+    private Integer healthResultId;
+
 }

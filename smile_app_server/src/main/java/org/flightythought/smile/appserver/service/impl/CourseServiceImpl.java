@@ -1,12 +1,23 @@
 package org.flightythought.smile.appserver.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang.StringUtils;
 import org.flightythought.smile.appserver.bean.CourseSimple;
+import org.flightythought.smile.appserver.bean.SmsCodeData;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.common.utils.AesUtils;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
+import org.flightythought.smile.appserver.config.properties.AppProperties;
 import org.flightythought.smile.appserver.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
 import org.flightythought.smile.appserver.database.repository.CourseRegistrationRepository;
+import org.flightythought.smile.appserver.database.repository.UserFollowCourseRepository;
+import org.flightythought.smile.appserver.dto.ApplyCourseDTO;
 import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
 import org.flightythought.smile.appserver.dto.CourseQueryDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.CourseService;
 import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
@@ -15,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +44,10 @@ public class CourseServiceImpl implements CourseService {
     private CourseRegistrationRepository courseRegistrationRepository;
     @Autowired
     private PlatformUtils platformUtils;
+    @Autowired
+    private AppProperties appProperties;
+    @Autowired
+    private UserFollowCourseRepository userFollowCourseRepository;
 
     @Override
     @Transactional
@@ -82,6 +98,135 @@ public class CourseServiceImpl implements CourseService {
 
         PageImpl<CourseSimple> result = new PageImpl<>(courseSimples, courseRegistrationEntities.getPageable(), courseRegistrationEntities.getTotalElements());
         return result;
+    }
+
+    @Override
+    public UserFollowCourseEntity applyCourse(ApplyCourseDTO applyCourseDTO) throws FlightyThoughtException {
+        // 判断输入的课程ID是否有效
+        Integer courseId = applyCourseDTO.getCourseId();
+        CourseRegistrationEntity courseRegistrationEntity = courseRegistrationRepository.findByCourseId(courseId);
+        if (courseRegistrationEntity == null) {
+            throw new FlightyThoughtException("输入的课程ID无效!");
+        }
+        // 判断用户是否输入姓名
+        String name = applyCourseDTO.getName();
+        if (StringUtils.isBlank(name)) {
+            throw new FlightyThoughtException("请输入姓名");
+        }
+        // 判断用户是否输入手机号码
+        String phone = applyCourseDTO.getPhone();
+        if (StringUtils.isBlank(phone)) {
+            throw new FlightyThoughtException("请输入手机号码");
+        }
+        // 短信验证码
+        String vCode = applyCourseDTO.getVCode();
+        if (StringUtils.isBlank(vCode)) {
+            throw new FlightyThoughtException("请输入短信验证码");
+        }
+        // 判断Token有无输入
+        String token = applyCourseDTO.getToken();
+        if (StringUtils.isBlank(token)) {
+            throw new FlightyThoughtException("请传递有效Token!");
+        }
+        // 判断短信验证码是否正确
+        String params;
+        try {
+            //解密短信验证码
+            params = AesUtils.aesDecryptHexString(token, appProperties.getCodeKey());
+        } catch (Exception e) {
+            throw new FlightyThoughtException("短信加密Token输入有误");
+        }
+        SmsCodeData smsCodeData = JSON.parseObject(params, SmsCodeData.class);
+        // 短信验证码不正确
+        if (!vCode.equals(smsCodeData.getVCode())) {
+            throw new FlightyThoughtException("短信验证码不正确");
+        }
+        // 手机号不符
+        if (!phone.equals(smsCodeData.getPhone())) {
+            throw new FlightyThoughtException("手机号不符");
+        }
+        // 验证码失效
+        Long now = System.currentTimeMillis();
+        if ((now - smsCodeData.getTime()) > 10 * 60 * 1000) {
+            throw new FlightyThoughtException("短信验证码失效，请重新获取");
+        }
+        // 保存预约课程对象
+        UserFollowCourseEntity userFollowCourseEntity = new UserFollowCourseEntity();
+        // 获取登录用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        userFollowCourseEntity.setUserId(userEntity.getId());
+        // 课程ID
+        userFollowCourseEntity.setCourseId(courseId);
+        // 预约报名姓名
+        userFollowCourseEntity.setName(name);
+        // 手机号码
+        userFollowCourseEntity.setPhone(phone);
+        return userFollowCourseRepository.save(userFollowCourseEntity);
+    }
+
+    @Override
+    @Transactional
+    public Page<CourseSimple> getUserCourses(PageFilterDTO pageFilterDTO) {
+        Integer pageNumber = pageFilterDTO.getPageNumber();
+        Integer pageSize = pageFilterDTO.getPageSize();
+        PageRequest pageRequest;
+        List<UserFollowCourseEntity> userFollowCourseEntities;
+        long total;
+        if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
+            pageRequest = PageRequest.of(pageNumber - 1, pageSize);
+            Page<UserFollowCourseEntity> userFollowCourseEntityPage = userFollowCourseRepository.findAll(pageRequest);
+            userFollowCourseEntities = userFollowCourseEntityPage.getContent();
+            total = userFollowCourseEntityPage.getTotalElements();
+        } else {
+            userFollowCourseEntities = userFollowCourseRepository.findAll();
+            pageRequest = PageRequest.of(0, userFollowCourseEntities.size());
+            total = (long) userFollowCourseEntities.size();
+        }
+        List<Integer> courseIds = new ArrayList<>();
+        userFollowCourseEntities.forEach(userFollowCourseEntity -> courseIds.add(userFollowCourseEntity.getCourseId()));
+        List<CourseRegistrationEntity> courseRegistrationEntities = courseRegistrationRepository.findByCourseIdIn(courseIds);
+        List<CourseSimple> courseSimples = getCourseSimple(courseRegistrationEntities);
+        return new PageImpl<>(courseSimples, pageRequest, total);
+    }
+
+    @Override
+    public List<CourseSimple> getCourseSimple(List<CourseRegistrationEntity> courseRegistrationEntities) {
+        List<CourseSimple> courseSimples = new ArrayList<>();
+        String domainPort = platformUtils.getDomainPort();
+        courseRegistrationEntities.forEach(courseRegistrationEntity -> {
+            // 课程ID
+            CourseSimple courseSimple = new CourseSimple();
+            // 课程ID
+            courseSimple.setCourseId(courseRegistrationEntity.getCourseId());
+            // 课程标题
+            courseSimple.setTitle(courseRegistrationEntity.getTitle());
+            // 开始时间
+            courseSimple.setStartTime(courseRegistrationEntity.getStartTime());
+            // 价格
+            courseSimple.setPrice(courseRegistrationEntity.getPrice());
+            // 可报名人数
+            courseSimple.setMembers(courseRegistrationEntity.getMembers());
+            // 活动地址
+            courseSimple.setAddress(courseRegistrationEntity.getAddress());
+            // 封面图片
+            ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
+            if (imagesEntity != null) {
+                String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                courseSimple.setCoverImageUrl(url);
+            }
+            // 课程图片
+            List<String> courseImages = new ArrayList<>();
+            List<ImagesEntity> imagesEntities = courseRegistrationEntity.getCourseImages();
+            imagesEntities.forEach(imagesEntity1 -> {
+                String url = platformUtils.getImageUrlByPath(imagesEntity1.getPath(), domainPort);
+                courseImages.add(url);
+            });
+            courseSimple.setCourseImages(courseImages);
+            // 详情描述
+            courseSimple.setDescription(courseRegistrationEntity.getDescription());
+            courseSimples.add(courseSimple);
+        });
+        return courseSimples;
     }
 
     @Override

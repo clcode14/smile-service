@@ -33,11 +33,18 @@ public class UserCharityFaultRecord {
     private String content;
 
     /**
-     * 行善日期
+     * 行善日期 开始时间
      */
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime charityTime;
+    private LocalDateTime charityTimeStart;
+
+    /**
+     * 行善日期 结束时间
+     */
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime charityTimeEnd;
 
     /**
      * 行善类型ID
@@ -87,7 +94,8 @@ public class UserCharityFaultRecord {
         this.userId = userCharityFaultRecordEntity.getUserId();
         this.type = userCharityFaultRecordEntity.getType();
         this.content = userCharityFaultRecordEntity.getContent();
-        this.charityTime = userCharityFaultRecordEntity.getCharityTime();
+        this.charityTimeStart = userCharityFaultRecordEntity.getCharityTimeStart();
+        this.charityTimeEnd = userCharityFaultRecordEntity.getCharityTimeEnd();
         this.cfTypeId = userCharityFaultRecordEntity.getCfTypeId();
         this.typeContentId = userCharityFaultRecordEntity.getTypeContentId();
         this.donateAmount = userCharityFaultRecordEntity.getDonateAmount();

@@ -2,7 +2,6 @@ package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.*;
-import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
@@ -156,6 +155,18 @@ public class JourneyHealthController {
         } catch (Exception e) {
             LOG.error("获取养生日记失败", e);
             return ResponseBean.error("获取养生日记失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "结束养生旅程", notes = "结束养生旅程")
+    @PostMapping("/finished")
+    public ResponseBean finishedHealthJourney(HealthJourneyEndDTO healthJourneyEndDTO) {
+        try {
+            HealthJourney result = journeyHealthService.endHealthJourney(healthJourneyEndDTO);
+            return ResponseBean.ok("操作成功", result);
+        } catch (Exception e) {
+            LOG.error("结束养生旅程失败", e);
+            return ResponseBean.error("结束养生旅程失败", e.getMessage());
         }
     }
 

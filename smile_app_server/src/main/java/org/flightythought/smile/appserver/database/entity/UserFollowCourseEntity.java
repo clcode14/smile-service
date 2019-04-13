@@ -5,45 +5,50 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName JourneyToReportEntity
- * @CreateTime 2019/4/10 2:12
+ * @ClassName UserFollowCourseEntity
+ * @CreateTime 2019/4/13 18:37
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_journey_to_report", schema = "smile_dev", catalog = "")
+@Table(name = "tb_user_follow_course")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class JourneyToReportEntity {
+public class UserFollowCourseEntity {
     /**
      * 自增主键
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
-    @GenericGenerator(name = "identity", strategy = "identity")
+    @GenericGenerator(name = "id", strategy = "identity")
     @Column(name = "id")
     private Integer id;
 
     /**
-     * 养生旅程ID
+     * 用户ID
      */
-    @Column(name = "journey_id")
-    private Integer journeyId;
+    @Column(name = "user_id")
+    private Long userId;
 
     /**
-     * 体检报告ID
+     * 课程ID
      */
-    @Column(name = "report_id")
-    private Integer reportId;
+    @Column(name = "course_id")
+    private Integer courseId;
 
     /**
-     * 是否是开启旅程的体检报告
+     * 报名者姓名
      */
-    @Column(name = "start_flag")
-    private Boolean startFlag;
+    @Column(name = "name")
+    private String name;
+
+    /**
+     * 报名者手机号码
+     */
+    @Column(name = "phone")
+    private String phone;
 }
