@@ -1,10 +1,11 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.flightythought.smile.admin.bean.DiseaseReasonInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
-import org.flightythought.smile.admin.database.entity.DiseaseReasonEntity;
-import org.flightythought.smile.admin.database.entity.DiseaseReasonToSolutionEntity;
-import org.flightythought.smile.admin.database.entity.SysUserEntity;
+import org.flightythought.smile.admin.database.entity.*;
+import org.flightythought.smile.admin.database.repository.DiseaseClassDetailRepository;
+import org.flightythought.smile.admin.database.repository.DiseaseClassRepository;
 import org.flightythought.smile.admin.database.repository.DiseaseReasonRepository;
 import org.flightythought.smile.admin.database.repository.DiseaseReasonToSolutionRepository;
 import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
@@ -13,6 +14,7 @@ import org.flightythought.smile.admin.service.DiseaseReasonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -33,6 +37,10 @@ import java.util.Map;
 @Service
 public class DiseaseReasonServiceImpl implements DiseaseReasonService {
 
+    @Autowired
+    private DiseaseClassDetailRepository diseaseClassDetailRepository;
+    @Autowired
+    private DiseaseClassRepository diseaseClassRepository;
     @Autowired
     private DiseaseReasonRepository diseaseReasonRepository;
     @Autowired
@@ -132,7 +140,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     }
 
     @Override
-    public Page<DiseaseReasonEntity> findAllDiseaseReason(Map<String, String> params, HttpSession session) {
+    public Page<DiseaseReasonInfo> findAllDiseaseReason(Map<String, String> params, HttpSession session) {
         String pageNumber = params.get("pageNumber");
         String pageSize = params.get("pageSize");
         String diseaseId = params.get("diseaseId");
@@ -151,13 +159,56 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         if (StringUtils.isBlank(pageSize)) {
             pageSize = "10";
         }
-        PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber)-1, Integer.valueOf(pageSize));
-        return diseaseReasonRepository.findAll(Example.of(diseaseReasonEntity), pageRequest);
+        PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
+        Page<DiseaseReasonEntity> page = diseaseReasonRepository.findAll(Example.of(diseaseReasonEntity), pageRequest);
+        List<DiseaseReasonInfo> diseaseReasonInfos = page.getContent()
+                .stream()
+                .map(diseaseReason -> {
+                    DiseaseReasonInfo diseaseReasonInfo = new DiseaseReasonInfo();
+                    //获取疾病大类名和疾病详情名称
+                    DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(diseaseReason.getDiseaseId());
+                    DiseaseClassDetailEntity diseaseClassDetail = diseaseClassDetailRepository.findByDiseaseDetailId(diseaseReason.getDiseaseDetailId());
+
+                    diseaseReasonInfo.setId(diseaseReason.getId());
+                    diseaseReasonInfo.setDiseaseName(diseaseClassEntity.getDiseaseName());
+                    diseaseReasonInfo.setDiseaseDetailName(diseaseClassDetail.getDiseaseDetailName());
+                    List<String> solutions = diseaseReason.getSolutions()
+                            .stream()
+                            .map(solutionEntity -> solutionEntity.getTitle())
+                            .collect(Collectors.toList());
+                    diseaseReasonInfo.setSolutionNames(solutions);
+                    diseaseReasonInfo.setContent(diseaseReason.getContent());
+                    diseaseReasonInfo.setNumber(diseaseReason.getNumber());
+                    diseaseReasonInfo.setTitle(diseaseReason.getTitle());
+                    return diseaseReasonInfo;
+                }).collect(Collectors.toList());
+        PageImpl<DiseaseReasonInfo> result = new PageImpl<>(diseaseReasonInfos, pageRequest, page.getTotalElements());
+        return result;
     }
 
     @Override
-    public DiseaseReasonEntity findDiseaseReasonById(Integer id, HttpSession session) {
-        return diseaseReasonRepository.findById(id);
+    public DiseaseReasonInfo findDiseaseReasonById(Integer id, HttpSession session) {
+        return Optional.ofNullable(diseaseReasonRepository
+                .findById(id))
+                .map(diseaseReasonEntity -> {
+                    DiseaseReasonInfo diseaseReasonInfo = new DiseaseReasonInfo();
+                    DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(diseaseReasonEntity.getDiseaseId());
+                    DiseaseClassDetailEntity diseaseClassDetail = diseaseClassDetailRepository.findByDiseaseDetailId(diseaseReasonEntity.getDiseaseDetailId());
+
+                    diseaseReasonInfo.setId(diseaseReasonEntity.getId());
+                    diseaseReasonInfo.setDiseaseName(diseaseClassEntity.getDiseaseName());
+                    diseaseReasonInfo.setDiseaseDetailName(diseaseClassDetail.getDiseaseDetailName());
+                    List<String> solutions = diseaseReasonEntity.getSolutions()
+                            .stream()
+                            .map(solutionEntity -> String.valueOf(solutionEntity.getId()))
+                            .collect(Collectors.toList());
+                    diseaseReasonInfo.setSolutionNames(solutions);
+                    diseaseReasonInfo.setContent(diseaseReasonEntity.getContent());
+                    diseaseReasonInfo.setNumber(diseaseReasonEntity.getNumber());
+                    diseaseReasonInfo.setTitle(diseaseReasonEntity.getTitle());
+
+                    return diseaseReasonInfo;
+                }).orElse(null);
     }
 
     @Override

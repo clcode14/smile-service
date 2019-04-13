@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.SelectItemOption;
+import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.database.entity.SolutionEntity;
 import org.flightythought.smile.admin.dto.SolutionDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
@@ -49,12 +50,24 @@ public class SolutionController {
         }
     }
 
+    @GetMapping("/officeItems")
+    @ApiOperation(value = "获取相关机构", notes = "获取相关机构Option", position = 0)
+    public ResponseBean getOfficeItems() {
+        try {
+            List<SelectItemOption> result = solutionService.getOfficeItems();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("返回失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
     @GetMapping("/list")
     @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)
-    public ResponseBean modifySolution(Map<String, String> params,
-                                       @ApiIgnore HttpSession session) {
+    public ResponseBean findAllSolution(Map<String, String> params,
+                                        @ApiIgnore HttpSession session) {
         try {
-            Page<SolutionEntity> solutionEntity = solutionService.findAllSolution(params, session);
+            Page<SolutionInfo> solutionEntity = solutionService.findAllSolution(params, session);
             return ResponseBean.ok("查询成功", solutionEntity);
         } catch (Exception e) {
             LOG.error("查询方案失败", e);
@@ -65,7 +78,7 @@ public class SolutionController {
     @GetMapping("/{id}")
     @ApiOperation(value = "查询解决方案", notes = "查询解决方案", position = 1)
     public ResponseBean findSolution(@PathVariable @ApiParam("方案id") Integer id,
-                                       @ApiIgnore HttpSession session) {
+                                     @ApiIgnore HttpSession session) {
         try {
             SolutionEntity solutionEntity = solutionService.findSolution(id, session);
             return ResponseBean.ok("查询成功", solutionEntity);
@@ -77,7 +90,7 @@ public class SolutionController {
 
     @PostMapping("/save")
     @ApiOperation(value = "增加解决方案", notes = "增加解决方案", position = 1)
-    public ResponseBean saveSolution(@RequestBody SolutionDTO solutionDTO,
+    public ResponseBean saveSolution(@RequestBody @ApiParam SolutionDTO solutionDTO,
                                      @ApiIgnore HttpSession session) {
         try {
             SolutionEntity solutionEntity = solutionService.saveSolution(solutionDTO, session);
@@ -90,7 +103,7 @@ public class SolutionController {
 
     @PostMapping("/modify")
     @ApiOperation(value = "编辑解决方案", notes = "增加解决方案", position = 1)
-    public ResponseBean modifySolution(@RequestBody SolutionDTO solutionDTO,
+    public ResponseBean modifySolution(@RequestBody @ApiParam SolutionDTO solutionDTO,
                                        @ApiIgnore HttpSession session) {
         try {
             SolutionEntity solutionEntity = solutionService.modifySolution(solutionDTO, session);

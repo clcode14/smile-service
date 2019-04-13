@@ -2,7 +2,9 @@ package org.flightythought.smile.admin.service.impl;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.SelectItemOption;
+import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.*;
@@ -11,8 +13,10 @@ import org.flightythought.smile.admin.dto.SolutionDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,8 @@ import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -45,6 +51,12 @@ public class SolutionServiceImpl implements SolutionService {
     private SolutionCourseRepository solutionCourseRepository;
     @Autowired
     private SolutionOfficeRepository solutionOfficeRepository;
+    @Autowired
+    private OfficeRepository officeRepository;
+    @Value("${image-url}")
+    private String imageRequest;
+    @Value("${server.servlet.context-path}")
+    private String contentPath;
 
     @Override
     public List<SelectItemOption> getCourseItems() {
@@ -198,7 +210,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionEntity> findAllSolution(Map<String, String> params, HttpSession session) {
+    public Page<SolutionInfo> findAllSolution(Map<String, String> params, HttpSession session) {
         String pageNumber = params.get("pageNumber");
         String pageSize = params.get("pageSize");
         String title = params.get("title");
@@ -218,11 +230,83 @@ public class SolutionServiceImpl implements SolutionService {
             pageSize = "10";
         }
         PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
-        return solutionRepository.findAll(Example.of(solutionEntity), pageRequest);
+        Page<SolutionEntity> page = solutionRepository.findAll(Example.of(solutionEntity), pageRequest);
+
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = sysParameterEntity.getParameterValue();
+
+        List<SolutionInfo> solutionInfos = page.getContent()
+                .stream()
+                .map(solution -> {
+                    SolutionInfo solutionInfo = new SolutionInfo();
+
+                    solutionInfo.setId(solution.getId());
+                    solutionInfo.setNumber(solution.getNumber());
+                    solutionInfo.setContent(solution.getContent());
+                    solutionInfo.setTitle(solution.getTitle());
+                    solutionInfo.setRecoverNumber(solution.getRecoverNumber());
+                    List<String> solutionCourse = solution.getCourseRegistrations()
+                            .stream()
+                            .map(CourseRegistrationEntity::getTitle)
+                            .collect(Collectors.toList());
+
+                    List<String> solutionOffices = solution.getOffices()
+                            .stream()
+                            .map(OfficeEntity::getName)
+                            .collect(Collectors.toList());
+
+                    List<ImageInfo> imageInfos = solution.getImages()
+                            .stream()
+                            .map(imagesEntity -> {
+                                ImageInfo imageInfo = new ImageInfo();
+
+                                imageInfo.setName(imagesEntity.getFileName());
+                                imageInfo.setId(imagesEntity.getId());
+                                imageInfo.setSize(imagesEntity.getSize());
+                                String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
+                                imageInfo.setUrl(imageUrl.replace("\\", "/"));
+
+                                return imageInfo;
+                            }).collect(Collectors.toList());
+                    solutionInfo.setImages(imageInfos);
+                    solutionInfo.setRefCourses(solutionCourse);
+                    solutionInfo.setRefOffices(solutionOffices);
+
+                    return solutionInfo;
+                }).collect(Collectors.toList());
+
+        PageImpl<SolutionInfo> result = new PageImpl<>(solutionInfos, pageRequest, page.getTotalElements());
+        return result;
     }
 
     @Override
     public SolutionEntity findSolution(Integer id, HttpSession session) {
-        return solutionRepository.findById(id);
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = sysParameterEntity.getParameterValue();
+        return Optional.ofNullable(solutionRepository.findById(id))
+                .map(solutionEntity -> {
+                    List<ImagesEntity> images = solutionEntity.getImages();
+                    List<ImagesEntity> newImages = images.stream()
+                            .map(imagesEntity -> {
+                                String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
+                                imagesEntity.setPath(imageUrl.replace("\\", "/"));
+                                return imagesEntity;
+                            }).collect(Collectors.toList());
+                    solutionEntity.setImages(newImages);
+                    return solutionEntity;
+                }).orElse(null);
+    }
+
+    @Override
+    public List<SelectItemOption> getOfficeItems() {
+        return officeRepository
+                .findAll()
+                .stream()
+                .map(officeEntity -> {
+                    SelectItemOption selectItemOption = new SelectItemOption();
+                    selectItemOption.setKey(String.valueOf(officeEntity.getOfficeId()));
+                    selectItemOption.setValue(officeEntity.getName());
+                    return selectItemOption;
+                }).collect(Collectors.toList());
     }
 }

@@ -29,7 +29,7 @@ public class SolutionEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "id", strategy = "identity")
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     /**
      * 编码
@@ -64,13 +64,6 @@ public class SolutionEntity extends BaseEntity {
     @JoinTable(name = "tb_solution_office", joinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "office_id", nullable = false, updatable = false)})
     private Set<OfficeEntity> offices;
-
-    /**
-     * 机构ID
-     */
-    @Column(name = "agency_id")
-    private Integer agencyId;
-
     /**
      * 康复人数
      */

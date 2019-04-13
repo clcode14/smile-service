@@ -2,6 +2,7 @@ package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.*;
 import io.swagger.models.auth.In;
+import org.flightythought.smile.admin.bean.DiseaseReasonInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.DiseaseReasonEntity;
 import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
@@ -37,7 +38,7 @@ public class DiseaseReasonController {
     })
     public ResponseBean findAllDiseaseReason(@ApiParam Map<String, String> params, @ApiIgnore HttpSession session) {
         try {
-            Page<DiseaseReasonEntity> diseaseReasonEntity = diseaseReasonService.findAllDiseaseReason(params, session);
+            Page<DiseaseReasonInfo> diseaseReasonEntity = diseaseReasonService.findAllDiseaseReason(params, session);
             return ResponseBean.ok("操作成功", diseaseReasonEntity);
         } catch (Exception e) {
             LOG.error("操作失败", e);
@@ -49,8 +50,8 @@ public class DiseaseReasonController {
     @ApiOperation(value = "查询单个疾病原因")
     public ResponseBean findDiseaseReason(@ApiParam(name = "id") @PathVariable Integer id, @ApiIgnore HttpSession session) {
         try {
-            DiseaseReasonEntity diseaseReasonEntity = diseaseReasonService.findDiseaseReasonById(id, session);
-            return ResponseBean.ok("操作成功", diseaseReasonEntity);
+            DiseaseReasonInfo diseaseReasonInfo = diseaseReasonService.findDiseaseReasonById(id, session);
+            return ResponseBean.ok("操作成功", diseaseReasonInfo);
         } catch (Exception e) {
             LOG.error("操作失败", e);
             return ResponseBean.error("操作失败", e.getMessage());
