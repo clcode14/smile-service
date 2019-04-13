@@ -40,7 +40,9 @@ public class CourseRegistrationDTO {
     @ApiModelProperty(value = "描述")
     private String description;
 
+    @ApiModelProperty(value = "封面图片")
     private ImageDTO coverImage;
 
+    @ApiModelProperty(value = "展示图片")
     private List<ImageDTO> courseImages;
 }

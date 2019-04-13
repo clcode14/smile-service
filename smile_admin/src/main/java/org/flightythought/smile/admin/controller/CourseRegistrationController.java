@@ -1,9 +1,6 @@
 package org.flightythought.smile.admin.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.flightythought.smile.admin.bean.CourseInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
@@ -41,7 +38,7 @@ public class CourseRegistrationController {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
             if (courseRegistrationEntity != null) {
-                return ResponseBean.ok("操作成功");
+                return ResponseBean.ok("添加成功", courseRegistrationEntity);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -50,7 +47,22 @@ public class CourseRegistrationController {
         return ResponseBean.error(null);
     }
 
-    @GetMapping("getCourseInfo")
+    @PutMapping("/modify")
+    @ApiOperation(value = "修改课程")
+    public ResponseBean modifyCourseRegistration(@RequestBody CourseRegistrationDTO courseRegistrationDTO, @ApiIgnore HttpSession session) {
+        try {
+            CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
+            if (courseRegistrationEntity != null) {
+                return ResponseBean.ok("修改成功", courseRegistrationEntity);
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+        return ResponseBean.error(null);
+    }
+
+    @GetMapping("list")
     @ApiOperation(value = "获取课程", notes = "获取课程", position = 2)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNumber", value = "当前页数从1开始"),
@@ -62,5 +74,17 @@ public class CourseRegistrationController {
         return ResponseBean.ok("返回成功", courseRegistrationEntities);
     }
 
+    @GetMapping("detail/{courseId}")
+    @ApiOperation(value = "获取课程详情", notes = "获取课程", position = 2)
+    public ResponseBean getCourseRegistrationDetail(@PathVariable @ApiParam("课程id") Integer courseId) {
+        CourseInfo courseRegistrationEntities = courseRegistrationService.getCourseRegistrationDetail(courseId);
+        return ResponseBean.ok("返回成功", courseRegistrationEntities);
+    }
 
+    @DeleteMapping("delete/{courseId}")
+    @ApiOperation(value = "删除课程", notes = "获取课程", position = 2)
+    public ResponseBean deleteCourseRegistrationDetail(@PathVariable @ApiParam("课程id") Integer courseId) {
+        courseRegistrationService.deleteCourseRegistration(courseId);
+        return ResponseBean.ok("删除成功");
+    }
 }

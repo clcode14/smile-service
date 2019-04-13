@@ -30,4 +30,17 @@ public interface CourseRegistrationService {
      * @return 分页课程实体
      */
     Page<CourseInfo> getCourseRegistration(int pageNumber, int pageSize);
+
+    /**
+     * 查看课程详情
+     * @param courseId
+     * @return
+     */
+    CourseInfo getCourseRegistrationDetail(Integer courseId);
+
+    /**
+     * 删除课程
+     * @param courseId
+     */
+    void deleteCourseRegistration(Integer courseId);
 }

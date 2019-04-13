@@ -153,4 +153,67 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         PageImpl<CourseInfo> result = new PageImpl<>(courseInfos, pageable, courseRegistrationEntities.getTotalElements());
         return result;
     }
+
+    @Override
+    @Transactional
+    public CourseInfo getCourseRegistrationDetail(Integer courseId) {
+        CourseRegistrationEntity courseRegistrationEntity = courseRegistrationRepository.findByCourseId(courseId);
+
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = sysParameterEntity.getParameterValue();
+
+        CourseInfo courseInfo = new CourseInfo();
+        // 课程ID
+        courseInfo.setCourseId(courseRegistrationEntity.getCourseId());
+        // 标题
+        courseInfo.setTitle(courseRegistrationEntity.getTitle());
+        // 开始时间
+        courseInfo.setStartTime(courseRegistrationEntity.getStartTime());
+        // 报名人数
+        courseInfo.setMembers(courseRegistrationEntity.getMembers());
+        // 价格
+        courseInfo.setPrice(courseRegistrationEntity.getPrice());
+        // 活动地址
+        courseInfo.setAddress(courseRegistrationEntity.getAddress());
+        // 详情描述
+        courseInfo.setDescription(courseRegistrationEntity.getDescription());
+        // 封面图
+        ImageInfo coverImage = null;
+        ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
+        List<ImageInfo> coverImages = new ArrayList<>();
+        if (imagesEntity != null) {
+            coverImage = new ImageInfo();
+            String imageName = imagesEntity.getFileName();
+            String url = domainPort + contentPath + imageRequest + imagesEntity.getPath();
+            coverImage.setUrl(url.replace("\\", "/"));
+            coverImage.setName(imageName);
+            coverImage.setId(coverImage.getId());
+            coverImage.setSize(coverImage.getSize());
+            coverImages.add(coverImage);
+        }
+        courseInfo.setCoverImage(coverImages);
+        // 展示图
+        List<ImagesEntity> courseImageEntities = courseRegistrationEntity.getCourseImages();
+        List<ImageInfo> courseImages = new ArrayList<>();
+        if (courseImageEntities != null && courseImageEntities.size() > 0) {
+            courseImageEntities.forEach(courseImageEntity -> {
+                ImageInfo imageInfo = new ImageInfo();
+                imageInfo.setName(courseImageEntity.getFileName());
+                imageInfo.setId(courseImageEntity.getId());
+                imageInfo.setSize(courseImageEntity.getSize());
+                String imageUrl = domainPort + contentPath + imageRequest + courseImageEntity.getPath();
+                imageInfo.setUrl(imageUrl.replace("\\", "/"));
+                courseImages.add(imageInfo);
+            });
+        }
+        courseInfo.setCourseImages(courseImages);
+
+        return courseInfo;
+    }
+
+    @Override
+    @Transactional
+    public void deleteCourseRegistration(Integer courseId) {
+        courseRegistrationRepository.deleteById(courseId);
+    }
 }
