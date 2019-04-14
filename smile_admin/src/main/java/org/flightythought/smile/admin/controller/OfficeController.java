@@ -2,6 +2,7 @@ package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
 import org.flightythought.smile.admin.dto.OfficeDTO;
@@ -29,7 +30,7 @@ public class OfficeController {
     @GetMapping("/list")
     @ApiOperation(value = "机构列表", notes = "机构列表", position = 1)
     public ResponseBean findAllOffice(Map<String, String> params,
-                                        @ApiIgnore HttpSession session) {
+                                      @ApiIgnore HttpSession session) {
         try {
             Page<OfficeEntity> office = officeService.findAllOffice(params, session);
             return ResponseBean.ok("查询成功", office);
@@ -41,7 +42,7 @@ public class OfficeController {
 
     @GetMapping("{officeId}")
     @ApiOperation(value = "机构列表", notes = "机构列表", position = 1)
-    public ResponseBean findOffice(@PathVariable Integer officeId, @ApiIgnore HttpSession session) {
+    public ResponseBean findOffice(@PathVariable Long officeId, @ApiIgnore HttpSession session) {
         try {
             OfficeEntity officeInfo = officeService.findOffice(officeId, session);
             return ResponseBean.ok("查询成功", officeInfo);
@@ -53,7 +54,7 @@ public class OfficeController {
 
     @PostMapping("/create")
     @ApiOperation(value = "新增机构", notes = "新增机构", position = 1)
-    public ResponseBean createOffice(OfficeDTO officeDTO, @ApiIgnore HttpSession session) {
+    public ResponseBean createOffice(@RequestBody @ApiParam OfficeDTO officeDTO, @ApiIgnore HttpSession session) {
         try {
             OfficeEntity officeEntity = officeService.save(officeDTO, session);
             return ResponseBean.ok("新增成功", officeEntity);
@@ -66,7 +67,7 @@ public class OfficeController {
 
     @PutMapping("/modify")
     @ApiOperation(value = "修改机构", notes = "修改机构", position = 1)
-    public ResponseBean modifyOffice(OfficeDTO officeDTO, @ApiIgnore HttpSession session) {
+    public ResponseBean modifyOffice(@RequestBody @ApiParam OfficeDTO officeDTO, @ApiIgnore HttpSession session) {
         try {
             OfficeEntity officeEntity = officeService.modify(officeDTO, session);
             return ResponseBean.ok("修改成功", officeEntity);
@@ -79,7 +80,7 @@ public class OfficeController {
 
     @DeleteMapping("/delete/{officeId}")
     @ApiOperation(value = "删除机构", notes = "删除机构", position = 1)
-    public ResponseBean modifyOffice(@PathVariable Integer officeId, @ApiIgnore HttpSession session) {
+    public ResponseBean modifyOffice(@PathVariable Long officeId, @ApiIgnore HttpSession session) {
         try {
             officeService.deleteById(officeId, session);
             return ResponseBean.ok("删除机构成功");

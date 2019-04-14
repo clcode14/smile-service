@@ -10,7 +10,7 @@ import java.util.List;
 @ApiModel(value = "机构 DTO", description = "机构 DTO")
 public class OfficeDTO {
     @ApiModelProperty(value = "机构ID")
-    private Integer officeId;
+    private Long officeId;
 
     @ApiModelProperty(value = "机构name")
     private String name;

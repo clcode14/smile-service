@@ -1,9 +1,9 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.flightythought.smile.admin.database.entity.ImagesEntity;
-import org.flightythought.smile.admin.database.entity.OfficeEntity;
-import org.flightythought.smile.admin.database.entity.SysParameterEntity;
+import org.flightythought.smile.admin.common.GlobalConstant;
+import org.flightythought.smile.admin.database.entity.*;
+import org.flightythought.smile.admin.database.repository.OfficeImageRepository;
 import org.flightythought.smile.admin.database.repository.OfficeRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.OfficeDTO;
@@ -27,6 +27,8 @@ public class OfficeServiceImpl implements OfficeService {
     @Autowired
     private OfficeRepository officeRepository;
     @Autowired
+    private OfficeImageRepository officeImageRepository;
+    @Autowired
     private SysParameterRepository sysParameterRepository;
     @Value("${image-url}")
     private String imageRequest;
@@ -36,18 +38,65 @@ public class OfficeServiceImpl implements OfficeService {
     @Transactional
     @Override
     public OfficeEntity save(OfficeDTO officeDTO, HttpSession session) {
-        return null;
+        SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
+        OfficeEntity officeEntity = new OfficeEntity();
+
+        officeEntity.setName(officeDTO.getName());
+        officeEntity.setContactName(officeDTO.getContactName());
+        officeEntity.setPhone(officeDTO.getPhone());
+        officeEntity.setAddress(officeDTO.getAddress());
+        officeEntity.setNumber(officeDTO.getNumber());
+        officeEntity.setCreateUserName(sysUserEntity.getUserName());
+        OfficeEntity office = officeRepository.save(officeEntity);
+        //保存机构图片
+        List<OfficeImageEntity> officeImageEntities = officeDTO.getOfficeImages()
+                .stream()
+                .map(imageDTO -> {
+                    OfficeImageEntity officeImageEntity = new OfficeImageEntity();
+                    officeImageEntity.setImageId(imageDTO.getImageId());
+                    officeImageEntity.setOfficeId(office.getOfficeId());
+                    return officeImageEntity;
+                }).collect(Collectors.toList());
+        officeImageRepository.saveAll(officeImageEntities);
+        return office;
     }
 
     @Transactional
     @Override
     public OfficeEntity modify(OfficeDTO officeDTO, HttpSession session) {
-        return null;
+        SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
+        //查找机构对应的图片
+        List<OfficeImageEntity> imageEntities = officeImageRepository.findByOfficeId(officeDTO.getOfficeId());
+        imageEntities.forEach(officeImageEntity -> {
+            //删除
+            officeImageRepository.deleteById(officeImageEntity.getId());
+        });
+
+        OfficeEntity officeEntity = new OfficeEntity();
+        officeEntity.setOfficeId(officeDTO.getOfficeId());
+        officeEntity.setName(officeDTO.getName());
+        officeEntity.setContactName(officeDTO.getContactName());
+        officeEntity.setPhone(officeDTO.getPhone());
+        officeEntity.setAddress(officeDTO.getAddress());
+        officeEntity.setNumber(officeDTO.getNumber());
+        officeEntity.setUpdateUserName(sysUserEntity.getUserName());
+        OfficeEntity office = officeRepository.save(officeEntity);
+        //保存机构图片
+        List<OfficeImageEntity> officeImageEntities = officeDTO.getOfficeImages()
+                .stream()
+                .map(imageDTO -> {
+                    OfficeImageEntity officeImageEntity = new OfficeImageEntity();
+                    officeImageEntity.setImageId(imageDTO.getImageId());
+                    officeImageEntity.setOfficeId(office.getOfficeId());
+                    return officeImageEntity;
+                }).collect(Collectors.toList());
+        officeImageRepository.saveAll(officeImageEntities);
+        return office;
     }
 
     @Transactional
     @Override
-    public void deleteById(Integer officeId, HttpSession session) {
+    public void deleteById(Long officeId, HttpSession session) {
         officeRepository.deleteById(officeId);
     }
 
@@ -77,7 +126,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    public OfficeEntity findOffice(Integer officeId, HttpSession session) {
+    public OfficeEntity findOffice(Long officeId, HttpSession session) {
         SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
         String domainPort = sysParameterEntity.getParameterValue();
         return officeRepository.findById(officeId)
