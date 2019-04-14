@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -72,6 +73,11 @@ public class CustomServiceImpl implements CustomService {
 
     @Override
     public CustomEntity findCustom(Long id) {
-        return customRepository.findById(id).orElse(null);
+        AtomicReference<CustomEntity> customEntity = new AtomicReference<>();
+        customRepository.findById(id)
+                .ifPresent(custom -> {
+                    customEntity.set(custom);
+                });
+        return customEntity.get();
     }
 }
