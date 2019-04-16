@@ -118,7 +118,7 @@ public class SolutionServiceImpl implements SolutionService {
 
             //获取相关机构
             List<SolutionOfficeEntity> solutionOfficeEntities = Lists.newArrayList();
-            List<Integer> officeIds = solutionDTO.getOfficeIds();
+            List<Long> officeIds = solutionDTO.getOfficeIds();
             officeIds.forEach(officeId -> {
                 SolutionOfficeEntity solutionOfficeEntity = new SolutionOfficeEntity();
                 solutionOfficeEntity.setOfficeId(officeId);
@@ -184,7 +184,7 @@ public class SolutionServiceImpl implements SolutionService {
 
             //获取相关机构
             List<SolutionOfficeEntity> solutionOfficeEntities = Lists.newArrayList();
-            List<Integer> officeIds = solutionDTO.getOfficeIds();
+            List<Long> officeIds = solutionDTO.getOfficeIds();
             officeIds.forEach(officeId -> {
                 SolutionOfficeEntity solutionOfficeEntity = new SolutionOfficeEntity();
                 solutionOfficeEntity.setOfficeId(officeId);

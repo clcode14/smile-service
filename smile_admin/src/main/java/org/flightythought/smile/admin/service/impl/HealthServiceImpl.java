@@ -1,23 +1,19 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.flightythought.smile.admin.bean.HealthClassDetailInfo;
 import org.flightythought.smile.admin.bean.HealthClassInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
-import org.flightythought.smile.admin.database.entity.HealthClassDetailEntity;
-import org.flightythought.smile.admin.database.entity.HealthClassEntity;
+import org.flightythought.smile.admin.database.entity.HealthEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
-import org.flightythought.smile.admin.database.repository.HealthClassDetailRepository;
-import org.flightythought.smile.admin.database.repository.HealthClassRepository;
+import org.flightythought.smile.admin.database.repository.HealthRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
-import org.flightythought.smile.admin.service.HealthClassService;
+import org.flightythought.smile.admin.service.HealthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,12 +34,10 @@ import java.util.Map;
  * @Description: TODO
  */
 @Service
-public class HealthClassServiceImpl implements HealthClassService {
+public class HealthServiceImpl implements HealthService {
 
     @Autowired
-    private HealthClassRepository healthClassRepository;
-    @Autowired
-    private HealthClassDetailRepository healthClassDetailRepository;
+    private HealthRepository healthRepository;
     @Autowired
     private PlatformUtils platformUtils;
     @Autowired
@@ -67,7 +61,7 @@ public class HealthClassServiceImpl implements HealthClassService {
             pageSize = "10";
         }
         PageRequest pageRequest = PageRequest.of(Integer.parseInt(pageNumber) - 1, Integer.parseInt(pageSize));
-        Page<HealthClassEntity> healthClassEntities = healthClassRepository.findAll(pageRequest);
+        Page<HealthEntity> healthClassEntities = healthRepository.findAll(pageRequest);
         List<HealthClassInfo> healthClassInfos = new ArrayList<>();
         healthClassEntities.forEach(healthClassEntity -> {
             HealthClassInfo healthClassInfo = new HealthClassInfo();
@@ -98,18 +92,18 @@ public class HealthClassServiceImpl implements HealthClassService {
     @Override
     public HealthClassInfo getHealthClass(Integer healthClassId) {
         // 获取养生大类
-        HealthClassEntity healthClassEntity = healthClassRepository.findByHealthId(healthClassId);
+        HealthEntity healthEntity = healthRepository.findByHealthId(healthClassId);
         String domainPort = platformUtils.getDomainPort();
-        if (healthClassEntity != null) {
+        if (healthEntity != null) {
             HealthClassInfo healthClassInfo = new HealthClassInfo();
             // 养生大类ID
-            healthClassInfo.setHealthId(healthClassEntity.getHealthId());
+            healthClassInfo.setHealthId(healthEntity.getHealthId());
             // 编码
-            healthClassInfo.setNumber(healthClassEntity.getNumber());
+            healthClassInfo.setNumber(healthEntity.getNumber());
             // 养生大类名称
-            healthClassInfo.setHealthName(healthClassEntity.getHealthName());
+            healthClassInfo.setHealthName(healthEntity.getHealthName());
             // 背景图片
-            ImagesEntity imagesEntity = healthClassEntity.getBgImage();
+            ImagesEntity imagesEntity = healthEntity.getBgImage();
             if (imagesEntity != null) {
                 ImageInfo imageInfo = new ImageInfo();
                 imageInfo.setId(imagesEntity.getId());
@@ -120,39 +114,39 @@ public class HealthClassServiceImpl implements HealthClassService {
                 healthClassInfo.setBgImage(imageInfo);
             }
             // 内容介绍
-            healthClassInfo.setContent(healthClassEntity.getContent());
+            healthClassInfo.setContent(healthEntity.getContent());
             return healthClassInfo;
         }
         return null;
     }
 
     @Override
-    public HealthClassEntity saveHealthClass(HealthClassDTO healthClassDTO, HttpSession session) {
+    public HealthEntity saveHealthClass(HealthClassDTO healthClassDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-        HealthClassEntity healthClassEntity = new HealthClassEntity();
-        healthClassEntity.setBgImageId(healthClassDTO.getBgImageId());
-        healthClassEntity.setContent(healthClassDTO.getContent());
-        healthClassEntity.setHealthName(healthClassDTO.getHealthName());
-        healthClassEntity.setNumber(healthClassDTO.getNumber());
-        healthClassEntity.setCreateUserName(sysUserEntity.getUserName());
-        return healthClassRepository.save(healthClassEntity);
+        HealthEntity healthEntity = new HealthEntity();
+        healthEntity.setBgImageId(healthClassDTO.getBgImageId());
+        healthEntity.setContent(healthClassDTO.getContent());
+        healthEntity.setHealthName(healthClassDTO.getHealthName());
+        healthEntity.setNumber(healthClassDTO.getNumber());
+        healthEntity.setCreateUserName(sysUserEntity.getUserName());
+        return healthRepository.save(healthEntity);
     }
 
     @Override
-    public HealthClassEntity modifyHealthClass(HealthClassDTO healthClassDTO, HttpSession session) {
+    public HealthEntity modifyHealthClass(HealthClassDTO healthClassDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-        HealthClassEntity healthClassEntity = new HealthClassEntity();
-        healthClassEntity.setBgImageId(healthClassDTO.getBgImageId());
-        healthClassEntity.setContent(healthClassDTO.getContent());
-        healthClassEntity.setHealthName(healthClassDTO.getHealthName());
-        healthClassEntity.setNumber(healthClassDTO.getNumber());
-        healthClassEntity.setCreateUserName(sysUserEntity.getUserName());
-        healthClassEntity.setHealthId(healthClassDTO.getHealthId());
-        return healthClassRepository.save(healthClassEntity);
+        HealthEntity healthEntity = new HealthEntity();
+        healthEntity.setBgImageId(healthClassDTO.getBgImageId());
+        healthEntity.setContent(healthClassDTO.getContent());
+        healthEntity.setHealthName(healthClassDTO.getHealthName());
+        healthEntity.setNumber(healthClassDTO.getNumber());
+        healthEntity.setCreateUserName(sysUserEntity.getUserName());
+        healthEntity.setHealthId(healthClassDTO.getHealthId());
+        return healthRepository.save(healthEntity);
     }
 
     @Override
     public void deleteHealthClass(Long healthId, HttpSession session) {
-        healthClassRepository.deleteById(healthId);
+        healthRepository.deleteById(healthId);
     }
 }

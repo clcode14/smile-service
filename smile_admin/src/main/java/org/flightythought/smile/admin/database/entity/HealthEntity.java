@@ -13,15 +13,15 @@ import java.util.List;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName HealthClassEntity
+ * @ClassName HealthEntity
  * @CreateTime 2019/4/9 17:43
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_health_class")
+@Table(name = "tb_health")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HealthClassEntity extends BaseEntity {
+public class HealthEntity extends BaseEntity {
 
     /**
      * 养生大类ID

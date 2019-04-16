@@ -10,25 +10,33 @@ import javax.persistence.*;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName SolutionCourseEntity
- * @CreateTime 2019/4/1 21:42
+ * @ClassName JourneyDiseaseEntity
+ * @CreateTime 2019/4/10 2:12
  * @Description: TODO
  */
-@Table(name = "tb_solution_office")
 @Entity
+@Table(name = "tb_journey_disease")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SolutionOfficeEntity {
-
+public class JourneyDiseaseEntity {
+    /**
+     * 自增主键
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "solution_id")
-    private Integer solutionId;
+    /**
+     * 养生旅程Id
+     */
+    @Column(name = "journey_id")
+    private Integer journeyId;
 
-    @Column(name = "office_id")
-    private Long officeId;
+    /**
+     * 疾病小类ID
+     */
+    @Column(name = "disease_detail_id")
+    private Integer diseaseDetailId;
 }

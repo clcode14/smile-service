@@ -2,12 +2,11 @@ package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.flightythought.smile.admin.bean.HealthClassDetailInfo;
 import org.flightythought.smile.admin.bean.HealthClassInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
-import org.flightythought.smile.admin.database.entity.HealthClassEntity;
+import org.flightythought.smile.admin.database.entity.HealthEntity;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
-import org.flightythought.smile.admin.service.HealthClassService;
+import org.flightythought.smile.admin.service.HealthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +26,13 @@ import java.util.Map;
  * @Description: TODO
  */
 @RestController
-@RequestMapping("healthClass")
+@RequestMapping("health")
 @Api(tags = "健康养生控制层", description = "健康养生相关接口")
-public class HealthClassController {
+public class HealthController {
 
     @Autowired
-    private HealthClassService healthService;
-    private static final Logger LOG = LoggerFactory.getLogger(HealthClassController.class);
+    private HealthService healthService;
+    private static final Logger LOG = LoggerFactory.getLogger(HealthController.class);
 
     @GetMapping("/list")
     @ApiOperation(value = "获取养生大类", notes = "获取养生大类，分页查询，不传递参数为获取全部")
@@ -63,7 +62,7 @@ public class HealthClassController {
     @ApiOperation(value = "养生大类添加", notes = "养生大类添加")
     public ResponseBean createHealthClass(@RequestBody HealthClassDTO healthClassDTO,@ApiIgnore HttpSession session) {
         try {
-            HealthClassEntity result = healthService.saveHealthClass(healthClassDTO,session);
+            HealthEntity result = healthService.saveHealthClass(healthClassDTO,session);
             return ResponseBean.ok("添加成功", result);
         } catch (Exception e) {
             LOG.error("养生大类添加失败", e);
@@ -75,7 +74,7 @@ public class HealthClassController {
     @ApiOperation(value = "养生大类修改", notes = "养生大类修改")
     public ResponseBean modifyHealthClass(@RequestBody HealthClassDTO healthClassDTO,@ApiIgnore HttpSession session) {
         try {
-            HealthClassEntity result = healthService.modifyHealthClass(healthClassDTO,session);
+            HealthEntity result = healthService.modifyHealthClass(healthClassDTO,session);
             return ResponseBean.ok("修改成功", result);
         } catch (Exception e) {
             LOG.error("养生大类修改失败", e);
