@@ -1,5 +1,6 @@
 package org.flightythought.smile.appserver.service.impl;
 
+import org.flightythought.smile.appserver.bean.DiseaseClass;
 import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
@@ -14,6 +15,7 @@ import org.flightythought.smile.appserver.service.DiseaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,8 +37,39 @@ public class DiseaseServiceImpl implements DiseaseService {
 
 
     @Override
-    public List<DiseaseClassDetailEntity> getCommonDiseases() {
-        return diseaseClassDetailRepository.findByType(Constants.DISEASE_COMMON);
+    @Transactional
+    public List<DiseaseClassDetailSimple> getCommonDiseases() {
+        List<DiseaseClassDetailEntity> diseaseClassDetailEntities = diseaseClassDetailRepository.findByType(Constants.DISEASE_COMMON);
+        return getDiseaseClassDetailSimple(diseaseClassDetailEntities);
+    }
+
+    @Override
+    public List<DiseaseClassDetailSimple> getDiseaseClassDetailSimple(List<DiseaseClassDetailEntity> diseaseClassDetailEntities) {
+        List<DiseaseClassDetailSimple> result = new ArrayList<>();
+        String domain = platformUtils.getDomainPort();
+        diseaseClassDetailEntities.forEach(diseaseClassDetailEntity -> {
+            DiseaseClassDetailSimple diseaseClassDetailSimple = new DiseaseClassDetailSimple();
+            // 疾病小类ID
+            diseaseClassDetailSimple.setDiseaseDetailId(diseaseClassDetailEntity.getDiseaseDetailId());
+            // 疾病大类ID
+            diseaseClassDetailSimple.setDiseaseId(diseaseClassDetailEntity.getDiseaseId());
+            // 疾病小类名称
+            diseaseClassDetailSimple.setDiseaseClassDetailName(diseaseClassDetailEntity.getDiseaseDetailName());
+            // 背景图片
+            ImagesEntity bgImage = diseaseClassDetailEntity.getBgImage();
+            if (bgImage != null) {
+                diseaseClassDetailSimple.setBgImageUrl(platformUtils.getImageUrlByPath(bgImage.getPath(), domain));
+            }
+            // 内容介绍
+            diseaseClassDetailSimple.setContent(diseaseClassDetailEntity.getContent());
+            // 图标URL
+            ImagesEntity icon = diseaseClassDetailEntity.getIcon();
+            if (icon != null) {
+                diseaseClassDetailSimple.setIconUrl(platformUtils.getImageUrlByPath(icon.getPath(), domain));
+            }
+            result.add(diseaseClassDetailSimple);
+        });
+        return result;
     }
 
     @Override
@@ -64,7 +97,8 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Override
-    public List<DiseaseClassEntity> getAllThousandDisease() {
+    @Transactional
+    public List<DiseaseClass> getAllThousandDisease() {
         // 获取当前登陆用户
         UserEntity userEntity = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // 获取用户关注的疾病
@@ -73,14 +107,63 @@ public class DiseaseServiceImpl implements DiseaseService {
         List<Integer> diseaseIds = new ArrayList<>();
         userFollowDiseaseEntities.forEach(userFollowDiseaseEntity -> diseaseIds.add(userFollowDiseaseEntity.getDiseaseClassDetailEntity().getDiseaseId()));
         // 获取疾病大类
-        List<DiseaseClassEntity> result = new ArrayList<>();
+        List<DiseaseClassEntity> diseaseClassEntities = new ArrayList<>();
         List<DiseaseClassEntity> diseaseClassEntitiesIn = diseaseClassRepository.findByDiseaseIdIn(diseaseIds);
         if (diseaseClassEntitiesIn != null && diseaseClassEntitiesIn.size() > 0) {
-            result.addAll(diseaseClassEntitiesIn);
+            diseaseClassEntities.addAll(diseaseClassEntitiesIn);
             List<DiseaseClassEntity> diseaseClassEntitiesNotIn = diseaseClassRepository.findByDiseaseIdNotIn(diseaseIds);
-            result.addAll(diseaseClassEntitiesNotIn);
+            diseaseClassEntities.addAll(diseaseClassEntitiesNotIn);
         } else {
-            result.addAll(diseaseClassRepository.findAll());
+            diseaseClassEntities.addAll(diseaseClassRepository.findAll());
+        }
+        return getDiseaseClass(diseaseClassEntities);
+    }
+
+    @Override
+    public List<DiseaseClass> getDiseaseClass(List<DiseaseClassEntity> diseaseClassEntities) {
+        List<DiseaseClass> result = new ArrayList<>();
+        if (diseaseClassEntities != null) {
+            String domain = platformUtils.getDomainPort();
+            diseaseClassEntities.forEach(diseaseClassEntity -> {
+                DiseaseClass diseaseClass = new DiseaseClass();
+                // 疾病大类ID
+                diseaseClass.setDiseaseId(diseaseClassEntity.getDiseaseId());
+                // 编码
+                diseaseClass.setNumber(diseaseClassEntity.getNumber());
+                // 疾病类目名称
+                diseaseClass.setDiseaseName(diseaseClassEntity.getDiseaseName());
+                // 疾病小类
+                List<DiseaseClassDetailSimple> diseaseClassDetails = new ArrayList<>();
+                List<DiseaseClassDetailEntity> diseaseClassDetailEntities = diseaseClassEntity.getDiseaseClassDetails();
+                if (diseaseClassDetailEntities != null) {
+                    diseaseClassDetailEntities.forEach(diseaseClassDetailEntity -> {
+                        DiseaseClassDetailSimple diseaseClassDetailSimple = new DiseaseClassDetailSimple();
+                        // 疾病小类ID
+                        diseaseClassDetailSimple.setDiseaseDetailId(diseaseClassDetailEntity.getDiseaseDetailId());
+                        // 疾病大类ID
+                        diseaseClassDetailSimple.setDiseaseId(diseaseClassDetailEntity.getDiseaseId());
+                        // 疾病大类名称
+                        diseaseClassDetailSimple.setDiseaseClassName(diseaseClassEntity.getDiseaseName());
+                        // 疾病小类名称
+                        diseaseClassDetailSimple.setDiseaseClassDetailName(diseaseClassDetailEntity.getDiseaseDetailName());
+                        // 背景图片URL
+                        ImagesEntity bgImage = diseaseClassDetailEntity.getBgImage();
+                        if (bgImage != null) {
+                            diseaseClassDetailSimple.setBgImageUrl(platformUtils.getImageUrlByPath(bgImage.getPath(), domain));
+                        }
+                        // 内容介绍
+                        diseaseClassDetailSimple.setContent(diseaseClassDetailEntity.getContent());
+                        // 图标URL
+                        ImagesEntity icon = diseaseClassDetailEntity.getIcon();
+                        if (icon != null) {
+                            diseaseClassDetailSimple.setIconUrl(platformUtils.getImageUrlByPath(icon.getPath(), domain));
+                        }
+                        diseaseClassDetails.add(diseaseClassDetailSimple);
+                    });
+                }
+                diseaseClass.setDiseaseClassDetails(diseaseClassDetails);
+                result.add(diseaseClass);
+            });
         }
         return result;
     }

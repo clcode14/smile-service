@@ -3,6 +3,7 @@ package org.flightythought.smile.appserver.database.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
@@ -12,8 +13,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @Entity
@@ -23,46 +26,103 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 用户ID 自增主键
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "id", strategy = "identity")
     @Column(name = "id")
     private Long id;
 
+    /**
+     * 手机号
+     */
     @Column(name = "mobile")
     private String mobile;
 
+    /**
+     * 用户名
+     */
     @Column(name = "user_name")
     private String username;
 
+    /**
+     * 密码
+     */
     @Column(name = "password")
     @JsonIgnore
     private String password;
 
+    /**
+     * 昵称
+     */
     @Column(name = "nick_name")
     private String nickName;
 
+    /**
+     * 身份证
+     */
     @Column(name = "id_card")
     private String idCard;
 
+    /**
+     * 登陆时间
+     */
     @Column(name = "login_time")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime loginTime;
 
+    /**
+     * 登陆次数
+     */
     @Column(name = "login_count")
     private Integer loginCount;
 
+    /**
+     * 照片头像
+     */
     @Column(name = "photo")
-    private String photo;
+    private Integer photo;
 
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "photo", insertable = false, updatable = false)
+    private ImagesEntity photoImage;
+
+    /**
+     * IP地址
+     */
     @Column(name = "ip")
     @JsonIgnore
     private String ip;
 
+    /**
+     * Token
+     */
     @Column(name = "token")
-//    @JsonIgnore
     private String token;
+
+    /**
+     * 身高
+     */
+    @Column(name = "height")
+    private Double height;
+
+    /**
+     * 体重
+     */
+    @Column(name = "body_weight")
+    private Double bodyWeight;
+
+    /**
+     * 生日
+     */
+    @Column(name = "birthday")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthday;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

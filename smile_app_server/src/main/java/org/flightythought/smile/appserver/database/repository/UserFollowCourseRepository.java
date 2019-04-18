@@ -14,4 +14,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UserFollowCourseRepository extends JpaRepository<UserFollowCourseEntity, Long> {
+    UserFollowCourseEntity findByUserIdAndCourseId(Long userId, Integer courseId);
 }

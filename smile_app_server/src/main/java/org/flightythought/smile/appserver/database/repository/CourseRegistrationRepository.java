@@ -13,4 +13,6 @@ public interface CourseRegistrationRepository extends JpaRepository<CourseRegist
     List<CourseRegistrationEntity> findByCourseIdIn(List<Integer> courseIds);
 
     CourseRegistrationEntity findByCourseId(Integer courseId);
+
+
 }

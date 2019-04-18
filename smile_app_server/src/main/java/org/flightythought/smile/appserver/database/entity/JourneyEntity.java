@@ -2,18 +2,14 @@ package org.flightythought.smile.appserver.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.flightythought.smile.appserver.bean.HealthClassDetail;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -72,6 +68,12 @@ public class JourneyEntity extends BaseEntity {
     private LocalDateTime endTime;
 
     /**
+     * 日记数量
+     */
+    @Column(name = "note_num")
+    private Integer noteNum;
+
+    /**
      * 是否完成
      */
     @Column(name = "finished")
@@ -103,8 +105,8 @@ public class JourneyEntity extends BaseEntity {
      */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "tb_journey_health", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "health_detail_id", nullable = false, updatable = false)})
-    private List<HealthClassDetailEntity> healthClassDetails;
+            inverseJoinColumns = {@JoinColumn(name = "health_id", nullable = false, updatable = false)})
+    private List<HealthEntity> healthClassDetails;
 
     /**
      * 体检报告

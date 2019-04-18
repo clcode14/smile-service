@@ -15,7 +15,7 @@ public class HealthJourney extends HealthJourneySimple {
     /**
      * 关联的养生方式
      */
-    private List<HealthClassDetail> healthClassDetails;
+    private List<HealthClass> healthClasses;
 
     /**
      * 旅程体检指标

@@ -17,6 +17,9 @@ public class CourseInfoQueryDTO extends PageFilterDTO {
     @ApiModelProperty(value = "课程ID")
     private Integer courseId;
 
+    @ApiModelProperty(value = "课程分类ID")
+    private Integer typeId;
+
     @ApiModelProperty(value = "课程开始时间")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

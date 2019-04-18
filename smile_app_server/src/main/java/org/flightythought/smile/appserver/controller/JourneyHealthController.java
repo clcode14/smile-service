@@ -3,6 +3,7 @@ package org.flightythought.smile.appserver.controller;
 import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.*;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
+import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
 import org.flightythought.smile.appserver.dto.*;
@@ -82,11 +83,12 @@ public class JourneyHealthController {
         }
     }
 
-    @ApiOperation(value = "修改当前登录用户的养生旅程", notes = "修改当前登录用户的养生旅程信息，该接口不会修改创建旅程时的体检指标、体检报告、和现有症状（疾病小类）其他内容会被传参所替换")
+    @ApiOperation(value = "修改当前登录用户的养生旅程", notes = "修改当前登录用户的养生旅程信息，" +
+            "该接口不会修改创建旅程时的体检指标、体检报告、和现有症状（疾病小类）只会修改旅程名称和概述")
     @PostMapping("/updateJourney")
     public ResponseBean updateHealthJourney(@RequestBody HealthJourneyStartDTO healthJourneyStartDTO) {
         try {
-            JourneyEntity result = journeyHealthService.updateHealthJourney(healthJourneyStartDTO);
+            HealthJourney result = journeyHealthService.updateHealthJourney(healthJourneyStartDTO);
             return ResponseBean.ok("修改成功", result);
         } catch (Exception e) {
             LOG.error("修改当前登录用户的养生旅程失败", e);
@@ -158,9 +160,21 @@ public class JourneyHealthController {
         }
     }
 
+    @ApiOperation(value = "获取养生成果", notes = "获取养生成果选项用于结束养生旅程所用")
+    @PostMapping("/healthResultStatus")
+    public ResponseBean getJourneyHealthResultStatus(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<HealthResultEntity> result = journeyHealthService.getHealthResultList(pageFilterDTO);
+            return ResponseBean.ok("获取养生成果成果", result);
+        } catch (Exception e) {
+            LOG.error("获取养生成果失败", e);
+            return ResponseBean.error("获取养生成果失败", e.getMessage());
+        }
+    }
+
     @ApiOperation(value = "结束养生旅程", notes = "结束养生旅程")
     @PostMapping("/finished")
-    public ResponseBean finishedHealthJourney(HealthJourneyEndDTO healthJourneyEndDTO) {
+    public ResponseBean finishedHealthJourney(@RequestBody HealthJourneyEndDTO healthJourneyEndDTO) {
         try {
             HealthJourney result = journeyHealthService.endHealthJourney(healthJourneyEndDTO);
             return ResponseBean.ok("操作成功", result);
@@ -170,4 +184,9 @@ public class JourneyHealthController {
         }
     }
 
+    @ApiOperation(value = "删除养生旅程", notes = "删除养生旅程，会删除该旅程关联的全部信息，同时会删除服务器上的上传文件")
+    @DeleteMapping("/deleteJourney/{journeyId}")
+    public ResponseBean deleteHealthJourney(@PathVariable(value = "journeyId") Integer journeyId) {
+        return null;
+    }
 }

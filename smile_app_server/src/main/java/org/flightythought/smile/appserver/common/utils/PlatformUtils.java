@@ -40,4 +40,8 @@ public class PlatformUtils {
         return (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public String getFilePath() {
+        return sysParameterRepository.getFilePathParam().getParameterValue();
+    }
+
 }

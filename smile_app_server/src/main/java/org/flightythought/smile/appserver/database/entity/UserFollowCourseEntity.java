@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Table(name = "tb_user_follow_course")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UserFollowCourseEntity {
+public class UserFollowCourseEntity extends BaseEntity{
     /**
      * 自增主键
      */

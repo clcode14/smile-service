@@ -38,8 +38,8 @@ public class JourneyHealthEntity {
     /**
      * 养生方式ID
      */
-    @Column(name = "health_detail_id")
-    private Integer healthDetailId;
+    @Column(name = "health_id")
+    private Integer healthId;
 
     /**
      * 养生成果ID

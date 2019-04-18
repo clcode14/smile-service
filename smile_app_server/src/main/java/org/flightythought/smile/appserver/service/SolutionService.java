@@ -2,6 +2,7 @@ package org.flightythought.smile.appserver.service;
 
 import org.flightythought.smile.appserver.bean.SolutionPage;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.SolutionEntity;
 import org.flightythought.smile.appserver.dto.HealthOrDiseaseQuerySolutionDTO;
 import org.flightythought.smile.appserver.dto.SolutionQueryDTO;
@@ -16,7 +17,7 @@ public interface SolutionService {
 
     SolutionPage getSolutionPage(Integer solutionId);
 
-    Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseQuerySolutionDTO querySolutionDTO);
+    Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException;
 
-    Page<SolutionEntity> getSolutions(HealthOrDiseaseQuerySolutionDTO querySolutionDTO);
+    Page<SolutionEntity> getSolutions(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException;
 }

@@ -61,13 +61,22 @@ public class RecoverCaseEntity extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime caseEndTime;
 
+    /**
+     * 用户ID
+     */
     @Column(name = "user_id")
     private Long userId;
 
+    /**
+     * 关联的用户
+     */
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
 
+    /**
+     * 阅读数
+     */
     @Column(name = "read_num")
     private Long readNum;
 }

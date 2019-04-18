@@ -25,7 +25,7 @@ public class HealthJourneyEndDTO {
     private String journeyName;
 
     @ApiModelProperty(value = "养生方式ID以及对应的养生成果ID")
-    private List<HealthDetailAndResultIdDTO> healthDetailAndResultIds;
+    private List<HealthAndResultIdDTO> healthDetailAndResultIds;
 
     @ApiModelProperty(value = "养生概述")
     private String summarize;

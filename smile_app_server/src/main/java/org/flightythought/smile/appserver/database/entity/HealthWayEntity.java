@@ -11,15 +11,15 @@ import java.util.List;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName HealthClassDetailEntity
+ * @ClassName HealthWayEntity
  * @CreateTime 2019/4/9 17:45
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_health_class_detail")
+@Table(name = "tb_health_way")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HealthClassDetailEntity extends BaseEntity {
+public class HealthWayEntity extends BaseEntity {
 
     /**
      * 养生小类ID
@@ -27,20 +27,14 @@ public class HealthClassDetailEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
-    @Column(name = "health_detail_id")
-    private Integer healthDetailId;
+    @Column(name = "health_way_id")
+    private Integer healthWayId;
 
     /**
-     * 所属养生大类ID
+     * 养生方式名称
      */
-    @Column(name = "health_id")
-    private Integer healthId;
-
-    /**
-     * 养生小类名称
-     */
-    @Column(name = "health_detail_name")
-    private String healthDetailName;
+    @Column(name = "way_name")
+    private String wayName;
 
     /**
      * 背景图
@@ -56,12 +50,6 @@ public class HealthClassDetailEntity extends BaseEntity {
     private ImagesEntity bgImage;
 
     /**
-     * 标题
-     */
-    @Column(name = "title")
-    private String title;
-
-    /**
      * 编码
      */
     @Column(name = "number")
@@ -74,10 +62,8 @@ public class HealthClassDetailEntity extends BaseEntity {
     private String content;
 
     /**
-     * 解决方案
+     * 音乐链接
      */
-    @ManyToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    @JoinTable(name = "tb_health_class_detail_to_solution", joinColumns = {@JoinColumn(name = "health_detail_id", nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)})
-    private List<SolutionEntity> solutions;
+    @Column(name = "music_url")
+    private String musicUrl;
 }

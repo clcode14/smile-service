@@ -63,4 +63,9 @@ public class CourseSimple {
      * 详情描述
      */
     private String description;
+
+    /**
+     * 课程类型ID
+     */
+    private Integer typeId;
 }

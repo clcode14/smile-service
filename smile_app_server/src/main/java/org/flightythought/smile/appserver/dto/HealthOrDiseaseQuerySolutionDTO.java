@@ -21,6 +21,6 @@ public class HealthOrDiseaseQuerySolutionDTO extends PageFilterDTO {
     @ApiModelProperty(value = "疾病小类ID集合")
     private List<Integer> diseaseDetailIds;
 
-    @ApiModelProperty(value = "养生小类ID集合")
-    private List<Integer> healthDetailIds;
+    @ApiModelProperty(value = "养生ID集合")
+    private List<Integer> healthIds;
 }

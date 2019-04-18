@@ -2,6 +2,7 @@ package org.flightythought.smile.appserver.service.impl;
 
 import org.flightythought.smile.appserver.bean.SolutionPage;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.SolutionEntity;
@@ -92,6 +93,9 @@ public class SolutionServiceImpl implements SolutionService {
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("没有查询到对应的解决方案");
+        }
         // 是否存在分页查询
         Integer pageNumber = solutionQueryDTO.getPageNumber();
         Integer pageSize = solutionQueryDTO.getPageSize();
@@ -143,7 +147,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) {
+    public Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException {
         Page<SolutionEntity> solutionEntities = getSolutions(querySolutionDTO);
         List<SolutionSimple> result = new ArrayList<>();
         String domainPort = platformUtils.getDomainPort();
@@ -171,7 +175,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionEntity> getSolutions(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) {
+    public Page<SolutionEntity> getSolutions(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException {
         // 组装SQL语句
         String totalSql = "SELECT COUNT(*) AS total FROM (";
         StringBuilder sql = new StringBuilder("SELECT DISTINCT a.`id` AS solutionId FROM `vw_disease_health_solution` a WHERE 1 = 1");
@@ -182,16 +186,19 @@ public class SolutionServiceImpl implements SolutionService {
             sql.deleteCharAt(sql.length() - 1);
             sql.append(")");
         }
-        List<Integer> healthDetailIds = querySolutionDTO.getHealthDetailIds();
-        if (healthDetailIds != null && healthDetailIds.size() > 0) {
-            sql.append(" OR a.`health_detail_id` IN (");
-            healthDetailIds.forEach(integer -> sql.append(integer).append(","));
+        List<Integer> healthIds = querySolutionDTO.getHealthIds();
+        if (healthIds != null && healthIds.size() > 0) {
+            sql.append(" OR a.`health_id` IN (");
+            healthIds.forEach(integer -> sql.append(integer).append(","));
             sql.deleteCharAt(sql.length() - 1);
             sql.append(")");
         }
         totalSql += sql.toString() + ") T";
         // 获取Total总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("没有查询到对应的解决方案");
+        }
         // 是否存在分页查询
         Integer pageNumber = querySolutionDTO.getPageNumber();
         Integer pageSize = querySolutionDTO.getPageSize();

@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.CourseSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
-import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.bean.SelectItemOption;
 import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
 import org.flightythought.smile.appserver.dto.ApplyCourseDTO;
 import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
@@ -31,7 +31,7 @@ public class CourseController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CourseController.class);
 
-    @ApiOperation(value = "获取相关课程", notes = "可以根据解决方案ID或课程ID获取相关课程")
+    @ApiOperation(value = "获取相关课程", notes = "可以根据解决方案ID或课程ID获取相关课程，不传任何参数可获取全部课程")
     @PostMapping("/results")
     public ResponseBean getCourses(@RequestBody CourseQueryDTO courseQueryDTO) {
         try {
@@ -43,15 +43,27 @@ public class CourseController {
         }
     }
 
-    @ApiOperation(value = "根据时间区间、分页获取课程", notes = "可以根据时间区间、分页获取课程，也可以获取全部课程")
+    @ApiOperation(value = "根据时间区间、分页获取课程", notes = "可以根据时间区间、分类、分页获取课程，也可以获取全部课程（typeId为0获取其他课程类型）")
     @PostMapping("/info")
-    public ResponseBean getCoursesInfo(CourseInfoQueryDTO courseInfoQueryDTO) {
+    public ResponseBean getCoursesInfo(@RequestBody CourseInfoQueryDTO courseInfoQueryDTO) {
         try {
             Page<CourseSimple> result = courseService.getCoursesInfo(courseInfoQueryDTO);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取课程失败", e);
             return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "获取课程类型", notes = "获取课程类型")
+    @PostMapping("/courseType")
+    public ResponseBean getCoursesType(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<SelectItemOption> result = courseService.getCourseType(pageFilterDTO);
+            return ResponseBean.ok("获取课程类型成功", result);
+        } catch (Exception e) {
+            LOG.error("获取课程类型失败", e);
+            return ResponseBean.error("获取课程类型失败", e.getMessage());
         }
     }
 
@@ -69,7 +81,7 @@ public class CourseController {
 
     @ApiModelProperty(value = "获取当前用户参加的课程", notes = "获取当前用户所参见的课程")
     @PostMapping("userCourses")
-    public ResponseBean getUserApplyCourse(PageFilterDTO pageFilterDTO) {
+    public ResponseBean getUserApplyCourse(@RequestBody PageFilterDTO pageFilterDTO) {
         try {
             Page<CourseSimple> result = courseService.getUserCourses(pageFilterDTO);
             return ResponseBean.ok("获取成功", result);

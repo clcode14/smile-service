@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,10 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private JourneyHealthRepository journeyHealthRepository;
     @Autowired
     private JourneyToCourseRepository journeyToCourseRepository;
+    @Autowired
+    private HealthResultRepository healthResultRepository;
+    @Autowired
+    private UserFollowCourseRepository userFollowCourseRepository;
 
     @Value("${static-url}")
     private String staticUrl;
@@ -176,6 +181,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         JourneyEntity journeyEntity = new JourneyEntity();
         // 养生旅程名称
         journeyEntity.setJourneyName(healthJourneyStartDTO.getJourneyName());
+        // 养生旅程概述
+        journeyEntity.setSummarize(healthJourneyStartDTO.getSummarize());
         // 获得当前登录用户
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         Long userId = userEntity.getId();
@@ -184,6 +191,10 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setStartTime(LocalDateTime.now());
         // 创建者
         journeyEntity.setCreateUserName(userId + "");
+        // 日记数量为0
+        journeyEntity.setNoteNum(0);
+        // 阅读数
+        journeyEntity.setReadNum(0);
         // 保存养生旅程
         journeyEntity = journeyRepository.save(journeyEntity);
         // 获取体检指标
@@ -209,10 +220,23 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             journeyNormRepository.saveAll(journeyNormEntities);
         }
         // 获取体检报告
+        // TODO 还需要判断体检报告是不是开始类型的体检报告
         List<FileImageDTO> files = healthJourneyStartDTO.getFiles();
         if (files != null && files.size() > 0) {
             List<JourneyToReportEntity> journeyToReportEntities = new ArrayList<>();
             for (FileImageDTO fileImageDTO : files) {
+                // 判断绑定的体检报告是不是开启养生旅程的体检报告
+                MedicalReportEntity medicalReportEntity = medicalReportRepository.findById(fileImageDTO.getId());
+                if (medicalReportEntity == null) {
+                    throw new FlightyThoughtException("id:" + fileImageDTO.getId() + "找不到对应的体检报告");
+                } else {
+                    if (medicalReportEntity.getType() != 0) {
+                        throw new FlightyThoughtException("id：" + fileImageDTO.getId() + "的体检报告类型非开启养生旅程上传类型，不能绑定");
+                    }
+                    if (!medicalReportEntity.getCreateUserName().equals(userEntity.getId() + "")) {
+                        throw new FlightyThoughtException("id：" + fileImageDTO.getId() + "的体检报告非自己上传不能绑定自身的养生旅程！");
+                    }
+                }
                 JourneyToReportEntity journeyToReportEntity = new JourneyToReportEntity();
                 journeyToReportEntity.setJourneyId(journeyEntity.getJourneyId());
                 journeyToReportEntity.setReportId(fileImageDTO.getId());
@@ -238,7 +262,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     }
 
     @Override
-    public JourneyEntity updateHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO) throws FlightyThoughtException {
+    public HealthJourney updateHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO) throws FlightyThoughtException {
         Integer journeyId = healthJourneyStartDTO.getJourneyId();
         // 获取当前登录用户
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
@@ -247,13 +271,18 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             throw new FlightyThoughtException("修改接口需传递journeyId");
         } else {
             JourneyEntity journeyEntity = journeyRepository.findByJourneyIdAndUserId(journeyId, userId);
+            if (journeyEntity == null) {
+                throw new FlightyThoughtException("未找到对应的养生旅程");
+            }
             // 旅程名称
             journeyEntity.setJourneyName(healthJourneyStartDTO.getJourneyName());
             // 概述
             journeyEntity.setSummarize(healthJourneyStartDTO.getSummarize());
+            // 更新者
+            journeyEntity.setUpdateUserName(userEntity.getId() + "");
             // 更新
             journeyEntity = journeyRepository.save(journeyEntity);
-            return journeyEntity;
+            return getHealthJourney(journeyEntity.getJourneyId());
         }
     }
 
@@ -270,7 +299,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         }
         if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
             journeyEntities = journeyRepository.findByUserId(userId);
-            pageRequest = PageRequest.of(0, journeyEntities.size());
+            pageRequest = PageRequest.of(0, journeyEntities.size() + 1);
             total = (long) journeyEntities.size();
         } else {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
@@ -279,6 +308,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             total = journeyEntityPage.getTotalElements();
         }
         List<HealthJourneySimple> result = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
         if (journeyEntities.size() > 0) {
             journeyEntities.forEach(journeyEntity -> {
                 HealthJourneySimple healthJourneySimple = new HealthJourneySimple();
@@ -290,11 +320,13 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 healthJourneySimple.setEndTime(journeyEntity.getEndTime());
                 healthJourneySimple.setFinished(journeyEntity.getFinished());
                 healthJourneySimple.setReadNum(journeyEntity.getReadNum());
+                healthJourneySimple.setNoteNum(journeyEntity.getNoteNum());
+                long daysDiff = ChronoUnit.DAYS.between(journeyEntity.getStartTime(), now);
+                healthJourneySimple.setDays(daysDiff);
                 result.add(healthJourneySimple);
             });
-            return new PageImpl<>(result, pageRequest, total);
         }
-        return null;
+        return new PageImpl<>(result, pageRequest, total);
     }
 
     @Override
@@ -330,6 +362,10 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             healthJourney.setEndTime(journeyEntity.getEndTime());
             // 阅读数
             healthJourney.setReadNum(journeyEntity.getReadNum());
+            // 日记天数
+            healthJourney.setDays(ChronoUnit.DAYS.between(journeyEntity.getStartTime(), LocalDateTime.now()));
+            // 日记数量
+            healthJourney.setNoteNum(journeyEntity.getNoteNum());
             // 获取关联的疾病小类
             List<DiseaseClassDetailSimple> diseaseClassDetailSimples = new ArrayList<>();
             List<DiseaseClassDetailEntity> diseaseClassDetailEntities = journeyEntity.getDiseaseClassDetails();
@@ -403,6 +439,35 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             }
             healthJourney.setStartReports(startReports);
             healthJourney.setEndReports(endReports);
+            // 获取旅程对应的养生
+            List<HealthClass> healthClasses = new ArrayList<>();
+            List<HealthEntity> healthEntities = journeyEntity.getHealthClassDetails();
+            if (healthEntities != null && healthEntities.size() > 0) {
+                healthEntities.forEach(healthEntity -> {
+                    HealthClass healthClass = new HealthClass();
+                    // 养生ID
+                    healthClass.setHealthId(healthEntity.getHealthId());
+                    // 编码
+                    healthClass.setNumber(healthEntity.getNumber());
+                    // 养生大类名称
+                    healthClass.setHealthName(healthEntity.getHealthName());
+                    // 背景图片
+                    ImagesEntity imagesEntity = healthEntity.getBgImage();
+                    if (imagesEntity != null) {
+                        ImageInfo bgImage = new ImageInfo();
+                        bgImage.setUrl(platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort));
+                        bgImage.setName(imagesEntity.getFileName());
+                        bgImage.setSize(imagesEntity.getSize());
+                        bgImage.setId(imagesEntity.getId());
+                        healthClass.setBgImage(bgImage);
+                    }
+                    // 内容介绍
+                    healthClass.setContent(healthEntity.getContent());
+                    // 养生对应的解决方案。。。
+                    healthClasses.add(healthClass);
+                });
+            }
+            healthJourney.setHealthClasses(healthClasses);
             return healthJourney;
         }
         return null;
@@ -468,6 +533,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             });
             journeyNoteNormRepository.saveAll(journeyNoteNormEntities);
         }
+        // 养生旅程日记+1
+        journeyEntity.setNoteNum(journeyEntity.getNoteNum() + 1);
+        journeyRepository.save(journeyEntity);
         return journeyNoteEntity;
     }
 
@@ -554,6 +622,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                         journeyNorm.setValue1(journeyNoteNormEntity.getValue1());
                         // 数值2
                         journeyNorm.setValue2(journeyNoteNormEntity.getValue2());
+                        journeyNorms.add(journeyNorm);
                     });
                     journeyNote.setJourneyNoteNorms(journeyNorms);
                 }
@@ -573,6 +642,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         JourneyEntity journeyEntity = journeyRepository.findByJourneyIdAndUserId(healthJourneyEndDTO.getJourneyId(), userEntity.getId());
         if (journeyEntity == null) {
             throw new FlightyThoughtException("要修改的养生旅程非当前登录用户所创建的，无权限操作！");
+        }
+        if (journeyEntity.getFinished() != null && journeyEntity.getFinished()) {
+            throw new FlightyThoughtException("该养生旅程已结束！");
         }
         // 体检指标
         List<HealthNormTypeDTO> healthNormTypeDTOS = healthJourneyEndDTO.getHealthNormTypes();
@@ -608,17 +680,17 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         // 保存修改的养生旅程
         journeyRepository.save(journeyEntity);
         // 关联养生方式以及对应的养生成果
-        List<HealthDetailAndResultIdDTO> healthDetailAndResultIdDTOS = healthJourneyEndDTO.getHealthDetailAndResultIds();
-        if (healthDetailAndResultIdDTOS != null && healthDetailAndResultIdDTOS.size() > 0) {
+        List<HealthAndResultIdDTO> healthAndResultIdDTOS = healthJourneyEndDTO.getHealthDetailAndResultIds();
+        if (healthAndResultIdDTOS != null && healthAndResultIdDTOS.size() > 0) {
             List<JourneyHealthEntity> journeyHealthEntities = new ArrayList<>();
-            healthDetailAndResultIdDTOS.forEach(healthDetailAndResultIdDTO -> {
+            healthAndResultIdDTOS.forEach(healthAndResultIdDTO -> {
                 JourneyHealthEntity journeyHealthEntity = new JourneyHealthEntity();
                 // 旅程ID
                 journeyHealthEntity.setJourneyId(journeyEntity.getJourneyId());
-                // 养生小类ID
-                journeyHealthEntity.setHealthDetailId(healthDetailAndResultIdDTO.getHealthDetailId());
+                // 养生ID
+                journeyHealthEntity.setHealthId(healthAndResultIdDTO.getHealthId());
                 // 养生结果ID
-                journeyHealthEntity.setHealthResultId(healthDetailAndResultIdDTO.getHealthResultId());
+                journeyHealthEntity.setHealthResultId(healthAndResultIdDTO.getHealthResultId());
                 journeyHealthEntities.add(journeyHealthEntity);
             });
             journeyHealthRepository.saveAll(journeyHealthEntities);
@@ -628,6 +700,11 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         if (courseIds != null && courseIds.size() > 0) {
             List<JourneyToCourseEntity> journeyToCourseEntities = new ArrayList<>();
             courseIds.forEach(courseId -> {
+                // 判断是否是当前用户报名课程
+                UserFollowCourseEntity userFollowCourseEntity = userFollowCourseRepository.findByUserIdAndCourseId(userEntity.getId(), courseId);
+                if (userFollowCourseEntity == null) {
+                    throw new FlightyThoughtException("所选课程用户未报名参加");
+                }
                 JourneyToCourseEntity journeyToCourseEntity = new JourneyToCourseEntity();
                 // 旅程ID
                 journeyToCourseEntity.setJourneyId(journeyEntity.getJourneyId());
@@ -642,6 +719,18 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         if (files != null && files.size() > 0) {
             List<JourneyToReportEntity> journeyToReportEntities = new ArrayList<>();
             for (FileImageDTO fileImageDTO : files) {
+                // 判断体检报告是不是结束旅程上传报告
+                MedicalReportEntity medicalReportEntity = medicalReportRepository.findById(fileImageDTO.getId());
+                if (medicalReportEntity == null) {
+                    throw new FlightyThoughtException("id：" + fileImageDTO.getId() + "，找不到对应的体检报告");
+                } else {
+                    if (medicalReportEntity.getType() != 1) {
+                        throw new FlightyThoughtException("id：" + fileImageDTO.getId() + "，体检报告类型非结束养生旅程上传类型，不能绑定");
+                    }
+                    if (!medicalReportEntity.getCreateUserName().equals(userEntity.getId() + "")) {
+                        throw new FlightyThoughtException("id：" + fileImageDTO.getId() + "，体检报告非自己上传不能绑定自身的养生旅程！");
+                    }
+                }
                 JourneyToReportEntity journeyToReportEntity = new JourneyToReportEntity();
                 journeyToReportEntity.setJourneyId(journeyEntity.getJourneyId());
                 journeyToReportEntity.setReportId(fileImageDTO.getId());
@@ -670,5 +759,45 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             journeyDiseaseRepository.saveAll(finalJourneyDiseaseEntities);
         }
         return getHealthJourney(journeyEntity.getJourneyId());
+    }
+
+    @Override
+    public Page<HealthResultEntity> getHealthResultList(PageFilterDTO pageFilterDTO) {
+        PageRequest pageRequest;
+        List<HealthResultEntity> healthResultEntities;
+        Page<HealthResultEntity> result;
+        Integer pageSize = pageFilterDTO.getPageSize();
+        Integer pageNumber = pageFilterDTO.getPageNumber();
+        if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
+            healthResultEntities = healthResultRepository.findAll();
+            pageRequest = PageRequest.of(0, healthResultEntities.size() + 1);
+            result = new PageImpl<>(healthResultEntities, pageRequest, healthResultEntities.size());
+        } else {
+            pageRequest = PageRequest.of(pageSize, pageNumber);
+            result = healthResultRepository.findAll(pageRequest);
+        }
+        return result;
+    }
+
+    @Override
+@Transactional(rollbackFor = Exception.class)
+    public void deleteJourneyById(Integer journeyId) {
+        // 获取养生旅程
+        String filePath = platformUtils.getFilePath();
+        JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyId);
+        if (journeyEntity != null) {
+            // 获取养生旅程对应的体检报告
+            List<MedicalReportEntity> medicalReportEntities = journeyEntity.getMedicalReports();
+            if (medicalReportEntities != null && medicalReportEntities.size() > 0) {
+                medicalReportEntities.forEach(medicalReportEntity -> {
+                    String path = filePath + medicalReportEntity.getPath();
+                    File file = new File(path);
+                    if (file.exists()) {
+                        boolean isDelete = file.delete();
+                        LOG.info("ID:{},体检报告已删除", medicalReportEntity.getId());
+                    }
+                });
+            }
+        }
     }
 }

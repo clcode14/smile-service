@@ -11,18 +11,18 @@ import java.util.List;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName HealthClassEntity
+ * @ClassName HealthEntity
  * @CreateTime 2019/4/9 17:43
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_health_class")
+@Table(name = "tb_health")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HealthClassEntity extends BaseEntity {
+public class HealthEntity extends BaseEntity {
 
     /**
-     * 养生大类ID
+     * 养生ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -59,9 +59,10 @@ public class HealthClassEntity extends BaseEntity {
     private String content;
 
     /**
-     * 疾病小类
+     * 养生关联的解决方案
      */
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    @JoinColumn(name = "health_id")
-    private List<HealthClassDetailEntity> healthClassDetails;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_health_to_solution", joinColumns = {@JoinColumn(name = "health_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)})
+    private List<SolutionEntity> solutions;
 }

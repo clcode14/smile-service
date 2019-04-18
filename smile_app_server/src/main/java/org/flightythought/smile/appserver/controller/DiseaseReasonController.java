@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.DiseaseReason;
 import org.flightythought.smile.appserver.bean.ResponseBean;
-import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.DiseaseReasonEntity;
 import org.flightythought.smile.appserver.dto.AboutDiseaseDetailQueryDTO;
 import org.flightythought.smile.appserver.service.DiseaseReasonService;
@@ -14,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,8 +42,14 @@ public class DiseaseReasonController {
     @ApiOperation(value = "获取疾病原因类型", notes = "获取疾病原因类型")
     @GetMapping("diseaseReasonType")
     public ResponseBean getDiseaseReasonType() {
-        List<Map<String, String>> result = diseaseReasonService.getDiseaseTypes();
-        return ResponseBean.ok("返回成功", result);
+        List<Map<String, String>> result;
+        try {
+            result = diseaseReasonService.getDiseaseTypes();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取疾病原因类型失败", e);
+            return ResponseBean.error("获取疾病原因失败", e.getMessage());
+        }
     }
 
     @ApiOperation(value = "获取疾病原因详情", notes = "获取疾病原因详情")

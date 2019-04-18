@@ -1,8 +1,6 @@
 package org.flightythought.smile.appserver.service;
 
 import org.flightythought.smile.appserver.bean.HealthClass;
-import org.flightythought.smile.appserver.bean.HealthClassDetail;
-import org.flightythought.smile.appserver.dto.HealthDetailQueryDTO;
 import org.springframework.data.domain.Page;
 
 /**
@@ -15,11 +13,7 @@ import org.springframework.data.domain.Page;
  */
 public interface HealthService {
 
-    Page<HealthClass> findHealthClass(Integer pageSize, Integer pageNumber);
+    Page<HealthClass> findHealth(Integer pageSize, Integer pageNumber);
 
-    Page<HealthClassDetail> findHealthDetailClass(HealthDetailQueryDTO healthDetailQueryDTO);
-
-    HealthClassDetail getHealthDetailClass(Integer healthDetailClassId);
-
-    HealthClass getHealthClass(Integer healthClassId);
+    HealthClass getHealthClass(Integer healthId);
 }

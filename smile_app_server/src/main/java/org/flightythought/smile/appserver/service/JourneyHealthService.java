@@ -6,6 +6,7 @@ import org.flightythought.smile.appserver.bean.HealthJourneySimple;
 import org.flightythought.smile.appserver.bean.JourneyNote;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
+import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
 import org.flightythought.smile.appserver.dto.*;
@@ -21,7 +22,7 @@ public interface JourneyHealthService {
 
     JourneyEntity startHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO);
 
-    JourneyEntity updateHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO) throws FlightyThoughtException;
+    HealthJourney updateHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO) throws FlightyThoughtException;
 
     Page<HealthJourneySimple> getHealthJourney(Long userId, PageFilterDTO pageFilterDTO);
 
@@ -32,4 +33,8 @@ public interface JourneyHealthService {
     Page<JourneyNote> getJourneyHealthNote(JourneyNoteQueryDTO journeyNoteQueryDTO) throws FlightyThoughtException;
 
     HealthJourney endHealthJourney(HealthJourneyEndDTO healthJourneyEndDTO) throws FlightyThoughtException;
+
+    Page<HealthResultEntity> getHealthResultList(PageFilterDTO pageFilterDTO);
+
+    void deleteJourneyById(Integer journeyId);
 }

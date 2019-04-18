@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MedicalReportRepository extends JpaRepository<MedicalReportEntity, Long> {
-
+    MedicalReportEntity findById(Integer id);
 }

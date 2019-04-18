@@ -26,7 +26,7 @@ public class ApplyCourseDTO {
     private String phone;
 
     @ApiModelProperty(value = "验证码")
-    private String vCode;
+    private String code;
 
     @ApiModelProperty(value = "TOKEN")
     private String token;

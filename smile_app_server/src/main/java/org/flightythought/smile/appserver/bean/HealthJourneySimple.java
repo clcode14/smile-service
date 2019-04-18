@@ -53,4 +53,14 @@ public class HealthJourneySimple {
      * 阅读数
      */
     private Integer readNum;
+
+    /**
+     * 日记数量
+     */
+    private Integer noteNum;
+
+    /**
+     * 天数
+     */
+    private Long days;
 }

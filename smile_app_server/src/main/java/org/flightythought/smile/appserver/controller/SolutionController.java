@@ -24,7 +24,8 @@ public class SolutionController {
     private static final Logger LOG = LoggerFactory.getLogger(SolutionController.class);
 
 
-    @ApiOperation(value = "获取解决方案1（千病万方模块调用）", notes = "可以根据疾病小类ID或解决方案ID查询获取解决方案")
+    @ApiOperation(value = "获取解决方案1（适用于：千病万方模块调用）", notes = "可以根据疾病小类ID或疾病原因ID查询获取解决方案，" +
+            "疾病小类ID、疾病原因ID以及分页参数都不是必填项，可以根据自己需要选择性的传参获取对应的解决方案")
     @PostMapping("/results")
     public ResponseBean getSolutions(@RequestBody SolutionQueryDTO solutionQueryDTO) {
         try {
@@ -36,7 +37,7 @@ public class SolutionController {
         }
     }
 
-    @ApiOperation(value = "获取解决方案2（结束养生模块调用）", notes = "根据养生小类ID或疾病小类ID，可选择分页查询获取解决方案，重复部分滤重返回")
+    @ApiOperation(value = "获取解决方案2（适用于：结束养生模块调用）", notes = "根据养生ID或疾病小类ID，可选择分页查询获取解决方案，重复部分滤重返回")
     @PostMapping("/resultsByHD")
     public ResponseBean getSolutions(@RequestBody HealthOrDiseaseQuerySolutionDTO querySolutionDTO) {
         try {

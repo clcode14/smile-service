@@ -2,6 +2,8 @@ package org.flightythought.smile.appserver.bean;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -14,7 +16,7 @@ import lombok.Data;
 public class HealthClass {
 
     /**
-     * 养生大类ID
+     * 养生ID
      */
     private Integer healthId;
 
@@ -37,4 +39,9 @@ public class HealthClass {
      * 内容介绍
      */
     private String content;
+
+    /**
+     * 养生对应的解决方案
+     */
+    private List<SolutionSimple> solutions;
 }

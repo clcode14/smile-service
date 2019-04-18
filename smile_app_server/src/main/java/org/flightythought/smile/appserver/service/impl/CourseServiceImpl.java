@@ -3,16 +3,15 @@ package org.flightythought.smile.appserver.service.impl;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.flightythought.smile.appserver.bean.CourseSimple;
+import org.flightythought.smile.appserver.bean.SelectItemOption;
 import org.flightythought.smile.appserver.bean.SmsCodeData;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.AesUtils;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.config.properties.AppProperties;
-import org.flightythought.smile.appserver.database.entity.CourseRegistrationEntity;
-import org.flightythought.smile.appserver.database.entity.ImagesEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
-import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
+import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.CourseRegistrationRepository;
+import org.flightythought.smile.appserver.database.repository.CourseTypeRepository;
 import org.flightythought.smile.appserver.database.repository.UserFollowCourseRepository;
 import org.flightythought.smile.appserver.dto.ApplyCourseDTO;
 import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
@@ -26,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +32,7 @@ import javax.persistence.EntityManager;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -48,6 +47,8 @@ public class CourseServiceImpl implements CourseService {
     private AppProperties appProperties;
     @Autowired
     private UserFollowCourseRepository userFollowCourseRepository;
+    @Autowired
+    private CourseTypeRepository courseTypeRepository;
 
     @Override
     @Transactional
@@ -93,6 +94,8 @@ public class CourseServiceImpl implements CourseService {
             courseSimple.setAddress(courseRegistrationEntity.getAddress());
             // 详情描述
             courseSimple.setDescription(courseRegistrationEntity.getDescription());
+            // 课程类型ID
+            courseSimple.setTypeId(courseRegistrationEntity.getTypeId());
             courseSimples.add(courseSimple);
         });
 
@@ -119,7 +122,7 @@ public class CourseServiceImpl implements CourseService {
             throw new FlightyThoughtException("请输入手机号码");
         }
         // 短信验证码
-        String vCode = applyCourseDTO.getVCode();
+        String vCode = applyCourseDTO.getCode();
         if (StringUtils.isBlank(vCode)) {
             throw new FlightyThoughtException("请输入短信验证码");
         }
@@ -161,6 +164,8 @@ public class CourseServiceImpl implements CourseService {
         userFollowCourseEntity.setName(name);
         // 手机号码
         userFollowCourseEntity.setPhone(phone);
+        // 创建者
+        userFollowCourseEntity.setCreateUserName(userEntity.getId() + "");
         return userFollowCourseRepository.save(userFollowCourseEntity);
     }
 
@@ -173,14 +178,14 @@ public class CourseServiceImpl implements CourseService {
         List<UserFollowCourseEntity> userFollowCourseEntities;
         long total;
         if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
+            userFollowCourseEntities = userFollowCourseRepository.findAll();
+            pageRequest = PageRequest.of(0, userFollowCourseEntities.size());
+            total = (long) userFollowCourseEntities.size();
+        } else {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
             Page<UserFollowCourseEntity> userFollowCourseEntityPage = userFollowCourseRepository.findAll(pageRequest);
             userFollowCourseEntities = userFollowCourseEntityPage.getContent();
             total = userFollowCourseEntityPage.getTotalElements();
-        } else {
-            userFollowCourseEntities = userFollowCourseRepository.findAll();
-            pageRequest = PageRequest.of(0, userFollowCourseEntities.size());
-            total = (long) userFollowCourseEntities.size();
         }
         List<Integer> courseIds = new ArrayList<>();
         userFollowCourseEntities.forEach(userFollowCourseEntity -> courseIds.add(userFollowCourseEntity.getCourseId()));
@@ -230,6 +235,41 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Page<SelectItemOption> getCourseType(PageFilterDTO pageFilterDTO) {
+        List<SelectItemOption> result = new ArrayList<>();
+        // 获取课程类型
+        Integer pageSize = pageFilterDTO.getPageSize();
+        Integer pageNumber = pageFilterDTO.getPageNumber();
+        Pageable pageable;
+        List<CourseTypeEntity> courseTypeEntities;
+        Long total;
+        if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
+            // 获取全部课程分类
+            courseTypeEntities = courseTypeRepository.findAll();
+            pageable = PageRequest.of(0, courseTypeEntities.size() == 0 ? 1 : courseTypeEntities.size());
+            total = (long) courseTypeEntities.size();
+        } else {
+            pageable = PageRequest.of(pageNumber - 1, pageSize);
+            Page<CourseTypeEntity> courseTypeEntityPage = courseTypeRepository.findAll(pageable);
+            courseTypeEntities = courseTypeEntityPage.getContent();
+            total = courseTypeEntityPage.getTotalElements();
+        }
+        if (courseTypeEntities.size() > 0) {
+            courseTypeEntities.forEach(courseTypeEntity -> {
+                SelectItemOption selectItemOption = new SelectItemOption();
+                selectItemOption.setKey(courseTypeEntity.getId() + "");
+                selectItemOption.setValue(courseTypeEntity.getCourseTypeName());
+                result.add(selectItemOption);
+            });
+        }
+        SelectItemOption selectItemOption = new SelectItemOption();
+        selectItemOption.setKey("0");
+        selectItemOption.setValue("其他课程");
+        result.add(selectItemOption);
+        return new PageImpl<>(result, pageable, total + 1);
+    }
+
+    @Override
     @Transactional
     public Page<CourseRegistrationEntity> getCourses(CourseQueryDTO courseQueryDTO) {
         // 组装SQL语句
@@ -253,6 +293,9 @@ public class CourseServiceImpl implements CourseService {
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("未查询到相关课程");
+        }
         // 是否存在分页查询
         Integer pageNumber = courseQueryDTO.getPageNumber();
         Integer pageSize = courseQueryDTO.getPageSize();
@@ -301,9 +344,24 @@ public class CourseServiceImpl implements CourseService {
             String endTime = courseInfoQueryDTO.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             sql += " AND sr.`start_time` <= '" + endTime + "'";
         }
+        // 课程ID
+        if (courseInfoQueryDTO.getCourseId() != null) {
+            sql += " AND cr.`course_id` = " + courseInfoQueryDTO.getCourseId();
+        }
+        // 课程类型ID
+        if (courseInfoQueryDTO.getTypeId() != null) {
+            if (courseInfoQueryDTO.getTypeId() == 0) {
+                sql += " AND cr.`type_id` IS NULL ";
+            } else {
+                sql += " AND cr.`type_id` = " + courseInfoQueryDTO.getTypeId();
+            }
+        }
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("未查询到相关课程");
+        }
         // 是否存在分页查询
         Integer pageNumber = courseInfoQueryDTO.getPageNumber();
         Integer pageSize = courseInfoQueryDTO.getPageSize();
