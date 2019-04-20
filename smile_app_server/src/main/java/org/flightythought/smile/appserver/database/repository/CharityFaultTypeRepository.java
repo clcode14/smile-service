@@ -9,5 +9,7 @@ import java.util.List;
 @Repository
 public interface CharityFaultTypeRepository extends JpaRepository<CharityFaultTypeEntity, Long> {
 
-    List<CharityFaultTypeEntity> findByCfTypeId(Integer cfTypeId);
+    CharityFaultTypeEntity findByCfTypeId(Integer cfTypeId);
+
+
 }

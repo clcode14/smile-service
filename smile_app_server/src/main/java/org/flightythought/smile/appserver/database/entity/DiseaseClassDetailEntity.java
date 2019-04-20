@@ -26,19 +26,17 @@ public class DiseaseClassDetailEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "disease_detail_id")
-    private int diseaseDetailId;
+    private Integer diseaseDetailId;
 
     /**
      * 疾病大类ID
      */
-    @Basic
     @Column(name = "disease_id")
-    private int diseaseId;
+    private Integer diseaseId;
 
     /**
      * 编码
      */
-    @Basic
     @Column(name = "number")
     private String number;
 
@@ -54,14 +52,12 @@ public class DiseaseClassDetailEntity extends BaseEntity {
     /**
      * 疾病小类名称
      */
-    @Basic
     @Column(name = "disease_detail_name")
     private String diseaseDetailName;
 
     /**
      * 背景图
      */
-    @Basic
     @Column(name = "bg_images")
     private Integer bgImagesId;
 

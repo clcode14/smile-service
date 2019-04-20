@@ -45,12 +45,20 @@ public class UserCharityFaultRecordEntity extends BaseEntity {
     private String content;
 
     /**
-     * 行善日期
+     * 行善日期 开始时间
      */
-    @Column(name = "charity_time")
+    @Column(name = "charity_time_start")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime charityTime;
+    private LocalDateTime charityTimeStart;
+
+    /**
+     * 行善日期 结束时间
+     */
+    @Column(name = "charity_time_end")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime charityTimeEnd;
 
     /**
      * 行善类型ID

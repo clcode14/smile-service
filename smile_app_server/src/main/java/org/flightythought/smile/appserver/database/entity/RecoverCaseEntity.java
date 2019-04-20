@@ -38,6 +38,18 @@ public class RecoverCaseEntity extends BaseEntity {
     @Column(name = "solution_id")
     private Integer solutionId;
 
+    /**
+     * 封面图片ID
+     */
+    @Column(name = "cover_image")
+    private Integer coverImageId;
+
+    /**
+     * 封面图
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
 
     /**
      * 标题
@@ -61,13 +73,22 @@ public class RecoverCaseEntity extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime caseEndTime;
 
+    /**
+     * 用户ID
+     */
     @Column(name = "user_id")
     private Long userId;
 
+    /**
+     * 关联的用户
+     */
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
 
+    /**
+     * 阅读数
+     */
     @Column(name = "read_num")
     private Long readNum;
 }

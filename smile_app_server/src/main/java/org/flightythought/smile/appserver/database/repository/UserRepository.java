@@ -4,6 +4,8 @@ import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -18,4 +20,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     UserEntity findByMobile(String mobile);
 
     UserEntity findByUsername(String username);
+
+    List<UserEntity> findByIdIn(List<Long> userIds);
 }

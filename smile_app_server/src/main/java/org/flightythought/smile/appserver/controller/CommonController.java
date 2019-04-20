@@ -72,4 +72,6 @@ public class CommonController {
             return ResponseBean.error("获取失败", e.getMessage());
         }
     }
+
+
 }

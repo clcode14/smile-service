@@ -1,6 +1,6 @@
 package org.flightythought.smile.appserver.database.repository;
 
-import org.flightythought.smile.appserver.database.entity.HealthClassEntity;
+import org.flightythought.smile.appserver.database.entity.HealthEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +13,6 @@ import org.springframework.stereotype.Repository;
  * @Description: TODO
  */
 @Repository
-public interface HealthClassRepository extends JpaRepository<HealthClassEntity, Long> {
-    HealthClassEntity findByHealthId(Integer healthId);
+public interface HealthClassRepository extends JpaRepository<HealthEntity, Long> {
+    HealthEntity findByHealthId(Integer healthId);
 }

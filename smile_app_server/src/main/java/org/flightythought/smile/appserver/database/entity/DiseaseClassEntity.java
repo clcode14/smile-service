@@ -27,7 +27,7 @@ public class DiseaseClassEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "disease_id")
-    private int diseaseId;
+    private Integer diseaseId;
 
     /**
      * 编码

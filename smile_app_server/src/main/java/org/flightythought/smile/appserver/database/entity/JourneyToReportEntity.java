@@ -40,4 +40,10 @@ public class JourneyToReportEntity {
      */
     @Column(name = "report_id")
     private Integer reportId;
+
+    /**
+     * 是否是开启旅程的体检报告
+     */
+    @Column(name = "start_flag")
+    private Boolean startFlag;
 }

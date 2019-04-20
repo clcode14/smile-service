@@ -2,20 +2,18 @@ package org.flightythought.smile.appserver.service.impl;
 
 import org.flightythought.smile.appserver.bean.SolutionPage;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.SolutionEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.SolutionRepository;
 import org.flightythought.smile.appserver.database.repository.UserFollowSolutionRepository;
+import org.flightythought.smile.appserver.dto.HealthOrDiseaseByIdQueryDTO;
 import org.flightythought.smile.appserver.dto.SolutionQueryDTO;
 import org.flightythought.smile.appserver.service.SolutionService;
-import org.hibernate.Hibernate;
-import org.hibernate.query.Query;
 import org.hibernate.query.internal.NativeQueryImpl;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.IntegerType;
-import org.hibernate.type.LocalDateTimeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +93,9 @@ public class SolutionServiceImpl implements SolutionService {
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("没有查询到对应的解决方案");
+        }
         // 是否存在分页查询
         Integer pageNumber = solutionQueryDTO.getPageNumber();
         Integer pageSize = solutionQueryDTO.getPageSize();
@@ -144,5 +144,77 @@ public class SolutionServiceImpl implements SolutionService {
         // 解决方案内容
         solutionPage.setContent(solutionEntity.getContent());
         return solutionPage;
+    }
+
+    @Override
+    public Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseByIdQueryDTO querySolutionDTO) throws FlightyThoughtException {
+        Page<SolutionEntity> solutionEntities = getSolutions(querySolutionDTO);
+        List<SolutionSimple> result = new ArrayList<>();
+        String domainPort = platformUtils.getDomainPort();
+        solutionEntities.forEach(solutionEntity -> {
+            SolutionSimple solutionSimple = new SolutionSimple();
+            // 解决方案对应的图片URL
+            List<ImagesEntity> imagesEntities = solutionEntity.getImages();
+            if (imagesEntities != null && imagesEntities.size() > 0) {
+                List<String> imageUrls = new ArrayList<>();
+                imagesEntities.forEach(imagesEntity -> {
+                    String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    imageUrls.add(url);
+                });
+                solutionSimple.setImageUrls(imageUrls);
+            }
+            // 解决方案标题
+            solutionSimple.setTitle(solutionEntity.getTitle());
+            // 康复人数
+            solutionSimple.setRecoverNumber(solutionEntity.getRecoverNumber());
+            // 解决方案ID
+            solutionSimple.setSolutionId(solutionEntity.getId());
+            result.add(solutionSimple);
+        });
+        return new PageImpl<>(result, solutionEntities.getPageable(), solutionEntities.getTotalElements());
+    }
+
+    @Override
+    public Page<SolutionEntity> getSolutions(HealthOrDiseaseByIdQueryDTO querySolutionDTO) throws FlightyThoughtException {
+        // 组装SQL语句
+        String totalSql = "SELECT COUNT(*) AS total FROM (";
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.`id` AS solutionId FROM `vw_disease_health_solution` a WHERE 1 = 1");
+        List<Integer> diseaseDetailIds = querySolutionDTO.getDiseaseDetailIds();
+        if (diseaseDetailIds != null && diseaseDetailIds.size() > 0) {
+            sql.append(" AND a.`disease_detail_id` IN (");
+            diseaseDetailIds.forEach(integer -> sql.append(integer).append(","));
+            sql.deleteCharAt(sql.length() - 1);
+            sql.append(")");
+        }
+        List<Integer> healthIds = querySolutionDTO.getHealthIds();
+        if (healthIds != null && healthIds.size() > 0) {
+            sql.append(" OR a.`health_id` IN (");
+            healthIds.forEach(integer -> sql.append(integer).append(","));
+            sql.deleteCharAt(sql.length() - 1);
+            sql.append(")");
+        }
+        totalSql += sql.toString() + ") T";
+        // 获取Total总数
+        Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("没有查询到对应的解决方案");
+        }
+        // 是否存在分页查询
+        Integer pageNumber = querySolutionDTO.getPageNumber();
+        Integer pageSize = querySolutionDTO.getPageSize();
+        Pageable pageable;
+        if (pageNumber != null && pageNumber > 0 && pageSize != null && pageSize > 0) {
+            sql.append(" LIMIT ").append((pageNumber - 1) * pageSize).append(",").append(pageSize);
+            pageable = PageRequest.of(pageNumber - 1, pageSize);
+        } else {
+            pageable = PageRequest.of(0, total);
+        }
+        // 查询结果
+        List<Integer> solutionIds = entityManager.createNativeQuery(sql.toString())
+                .unwrap(NativeQueryImpl.class)
+                .addScalar("solutionId", IntegerType.INSTANCE)
+                .list();
+        List<SolutionEntity> solutionEntities = solutionRepository.findByIdIn(solutionIds);
+        return new PageImpl<>(solutionEntities, pageable, total);
     }
 }

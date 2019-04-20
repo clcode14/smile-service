@@ -71,7 +71,6 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         return null;
     }
 
-    @Override
     public List<Map<String, String>> getDiseaseTypes() {
         List<DiseaseReasonTypeEntity> diseaseReasonTypeEntities = diseaseReasonTypeRepository.findAll();
         List<Map<String, String>> result = new ArrayList<>();

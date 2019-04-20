@@ -1,5 +1,6 @@
 package org.flightythought.smile.appserver.service;
 
+import org.flightythought.smile.appserver.bean.DiseaseClass;
 import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
@@ -14,7 +15,15 @@ public interface DiseaseService {
      *
      * @return 疾病小类集合
      */
-    List<DiseaseClassDetailEntity> getCommonDiseases();
+    List<DiseaseClassDetailSimple> getCommonDiseases();
+
+    /**
+     * 获取疾病小类简单对象集合
+     *
+     * @param diseaseClassDetailEntities
+     * @return
+     */
+    List<DiseaseClassDetailSimple> getDiseaseClassDetailSimple(List<DiseaseClassDetailEntity> diseaseClassDetailEntities);
 
     /**
      * 保存用户选中的常见疾病
@@ -26,10 +35,12 @@ public interface DiseaseService {
     /**
      * 获取全部疾病
      */
-    List<DiseaseClassEntity> getAllThousandDisease();
+    List<DiseaseClass> getAllThousandDisease();
 
     /**
      * 获取疾病小类内容展示
      */
     DiseaseClassDetailSimple getThousandDiseaseDetail(Integer diseaseDetailId) throws FlightyThoughtException;
+
+    List<DiseaseClass> getDiseaseClass(List<DiseaseClassEntity> diseaseClassEntities);
 }

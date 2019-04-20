@@ -34,6 +34,12 @@ public class CharityFaultTypeEntity extends BaseEntity {
     @Column(name = "type")
     private Integer type;
 
+    /**
+     * 积分
+     */
+    @Column(name = "integral")
+    private Integer integral;
+
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinColumn(name = "cf_type_id")
     private List<CharityFaultTypeContentEntity> charityFaultTypeContentEntities;

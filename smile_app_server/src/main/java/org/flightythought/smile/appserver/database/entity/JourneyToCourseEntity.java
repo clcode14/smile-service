@@ -10,17 +10,17 @@ import javax.persistence.*;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName HealthClassDetailToSolutionEntity
- * @CreateTime 2019/4/9 17:55
+ * @ClassName JourneyToCourseEntity
+ * @CreateTime 2019/4/14 0:57
  * @Description: TODO
  */
 @Entity
-@Table(name = "tb_health_class_detail_to_solution")
+@Table(name = "tb_journey_to_course")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class HealthClassDetailToSolutionEntity {
+public class JourneyToCourseEntity {
     /**
-     * 自增主键
+     * 自增主键ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -29,14 +29,14 @@ public class HealthClassDetailToSolutionEntity {
     private Integer id;
 
     /**
-     * 养生小类ID
+     * 养生旅程ID
      */
-    @Column(name = "health_detail_id")
-    private Integer healthDetailId;
+    @Column(name = "journey_id")
+    private Integer journeyId;
 
     /**
-     * 解决方案ID
+     * 课程ID
      */
-    @Column(name = "solution_id")
-    private Integer solutionId;
+    @Column(name = "course_id")
+    private Integer courseId;
 }
