@@ -36,7 +36,14 @@ public class JourneyNormEntity extends BaseEntity {
     private Integer normTypeId;
 
     /**
-     * 养生旅程ID
+     * 体检指标类型
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "norm_type_id", insertable = false, updatable = false)
+    private HealthNormTypeEntity healthNormType;
+
+    /**
+     * 养生旅程
      */
     @Column(name = "journey_id")
     private Integer journeyId;

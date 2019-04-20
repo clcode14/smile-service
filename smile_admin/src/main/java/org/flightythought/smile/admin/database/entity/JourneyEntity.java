@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -39,6 +40,18 @@ public class JourneyEntity extends BaseEntity {
     private String journeyName;
 
     /**
+     * 审核状态
+     */
+    @Column(name = "audit")
+    private Boolean audit;
+
+    /**
+     * 是否评为康复案例
+     */
+    @Column(name = "recover_case")
+    private Boolean recoverCase;
+
+    /**
      * 用户ID
      */
     @Column(name = "user_id")
@@ -59,6 +72,21 @@ public class JourneyEntity extends BaseEntity {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_disease", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "disease_detail_id", insertable = false, nullable = false, updatable = false)})
+    private List<DiseaseClassDetailEntity> diseaseClassDetails;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_solution", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "solution_id", insertable = false, nullable = false, updatable = false)})
+    private List<SolutionEntity> solutions;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_course", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "course_id", insertable = false, nullable = false, updatable = false)})
+    private List<CourseRegistrationEntity> courses;
 
     /**
      * 是否完成

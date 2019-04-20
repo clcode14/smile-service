@@ -4,6 +4,8 @@ import org.flightythought.smile.admin.database.entity.JourneyNormEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -14,4 +16,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface JourneyNormRepository extends JpaRepository<JourneyNormEntity, Long> {
+
+    List<JourneyNormEntity> findByJourneyId(Integer journeyId);
 }

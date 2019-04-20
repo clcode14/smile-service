@@ -54,7 +54,7 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     private Integer loginCount;
 
     @Column(name = "photo")
-    private String photo;
+    private Integer photo;
 
     @Column(name = "ip")
     @JsonIgnore

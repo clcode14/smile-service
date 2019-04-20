@@ -41,9 +41,6 @@ public class HealthWayEntity extends BaseEntity {
     @Column(name = "bg_image")
     private Integer bgImage;
 
-    /**
-     * 背景图片
-     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bg_image", insertable = false, updatable = false)
     private ImagesEntity images;

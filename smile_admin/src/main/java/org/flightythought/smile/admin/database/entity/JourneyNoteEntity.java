@@ -44,6 +44,10 @@ public class JourneyNoteEntity extends BaseEntity {
     @Column(name = "cover_image_id")
     private Integer coverImageId;
 
+    @OneToOne
+    @JoinColumn(name = "cover_image_id",insertable = false,updatable = false)
+    private ImagesEntity coverImage;
+
     /**
      * 日记内容
      */

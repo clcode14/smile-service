@@ -45,6 +45,9 @@ public class RecoverCaseEntity extends BaseEntity {
     @Column(name = "title")
     private String title;
 
+    @Column(name = "cover_image")
+    private Integer coverImage;
+
     /**
      * 案例开始时间
      */
