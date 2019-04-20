@@ -15,4 +15,7 @@ public interface SysParameterRepository extends JpaRepository<SysParameterEntity
 
     @Query("select m from SysParameterEntity m where m.parameterKey = 'domain_port_app'")
     SysParameterEntity getDomainPortParam();
+
+    @Query("select m from SysParameterEntity m where m.parameterKey = 'recent_course'")
+    SysParameterEntity getRecentCourseTime();
 }

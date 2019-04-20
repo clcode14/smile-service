@@ -8,61 +8,51 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class HealthJourneySimple {
+public class RecoverCaseSimple {
 
     /**
-     * 养生旅程Id
+     * 主键ID
+     */
+    private Integer recoverId;
+
+    /**
+     * 养生旅程ID
      */
     private Integer journeyId;
 
     /**
-     * 养生旅程名称
+     * 解决方案ID
      */
-    private String journeyName;
+    private Integer solutionId;
 
     /**
-     * 概述
+     * 康复案例标题
      */
-    private String summarize;
+    private String title;
 
     /**
-     * 用户ID
-     */
-    private Long userId;
-
-    /**
-     * 开始时间
+     * 案例开始时间
      */
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime startTime;
+    private LocalDateTime caseStartTime;
 
     /**
-     * 结束时间
+     * 案例结束时间
      */
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime endTime;
+    private LocalDateTime caseEndTime;
 
     /**
-     * 是否已经结束养生旅程
+     * 用户信息
      */
-    private Boolean finished;
+    private UserInfo userInfo;
 
     /**
      * 阅读数
      */
-    private Integer readNum;
-
-    /**
-     * 日记数量
-     */
-    private Integer noteNum;
-
-    /**
-     * 天数
-     */
-    private Long days;
+    private Long readNum;
 
     /**
      * 封面图

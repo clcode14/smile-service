@@ -36,4 +36,7 @@ public class HealthJourneyStartDTO {
     @ApiModelProperty(value = "选择的疾病小类ID集合")
     private List<Integer> diseaseClassDetailIds;
 
+    @ApiModelProperty(value = "封面图片ID")
+    private Integer coverImageId;
+
 }

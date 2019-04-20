@@ -68,6 +68,19 @@ public class JourneyEntity extends BaseEntity {
     private LocalDateTime endTime;
 
     /**
+     * 封面图片ID
+     */
+    @Column(name = "cover_image")
+    private Integer coverImageId;
+
+    /**
+     * 封面图片
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
+
+    /**
      * 日记数量
      */
     @Column(name = "note_num")

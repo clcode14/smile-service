@@ -125,10 +125,12 @@ public class JourneyHealthController {
     }
 
     @ApiOperation(value = "根据养生旅程ID获取养生旅程信息", notes = "根据养生旅程ID获取养生旅程信息，访问非自己的养生旅程会增加一次访问量")
-    @GetMapping("/healthJourney/{journeyId}")
-    public ResponseBean getJourneyByJourneyId(@PathVariable("journeyId") Integer journeyId) {
+    @PostMapping("/healthJourneyInfo")
+    public ResponseBean getJourneyByJourneyId(@RequestBody JourneyQueryDTO journeyQueryDTO) {
         try {
-            HealthJourney result = journeyHealthService.getHealthJourney(journeyId);
+            Integer journeyId = journeyQueryDTO.getJourneyId();
+            Integer recoverId = journeyQueryDTO.getRecoverId();
+            HealthJourney result = journeyHealthService.getHealthJourney(journeyId, recoverId);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取养生旅程信息失败", e);
@@ -184,9 +186,9 @@ public class JourneyHealthController {
         }
     }
 
-    @ApiOperation(value = "删除养生旅程", notes = "删除养生旅程，会删除该旅程关联的全部信息，同时会删除服务器上的上传文件")
-    @DeleteMapping("/deleteJourney/{journeyId}")
-    public ResponseBean deleteHealthJourney(@PathVariable(value = "journeyId") Integer journeyId) {
-        return null;
-    }
+//    @ApiOperation(value = "删除养生旅程", notes = "删除养生旅程，会删除该旅程关联的全部信息，同时会删除服务器上的上传文件")
+//    @DeleteMapping("/deleteJourney/{journeyId}")
+//    public ResponseBean deleteHealthJourney(@PathVariable(value = "journeyId") Integer journeyId) {
+//        return null;
+//    }
 }

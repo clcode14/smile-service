@@ -2,14 +2,19 @@ package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.CharityAndFault;
+import org.flightythought.smile.appserver.bean.CharityFaultStatistics;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.bean.UserCharityFaultRecord;
+import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.dto.CharityFaultRecordDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.CharityFaultService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +24,8 @@ public class CharityFaultController {
 
     @Autowired
     private CharityFaultService charityFaultService;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     private static final Logger LOG = LoggerFactory.getLogger(CharityFaultController.class);
 
@@ -48,6 +55,38 @@ public class CharityFaultController {
         } catch (Exception e) {
             LOG.error("新增行善或过失记录失败", e);
             return ResponseBean.error("新增失败", e.getMessage());
+        }
+    }
+
+    @GetMapping("/myStatistics")
+    @ApiOperation(value = "获取我的爱心养生统计", notes = "获取我的爱心养生统计（行善次数、计分、忏悔次数）")
+    public ResponseBean getMyStatistics() {
+        // 获取当前登陆用户的用户ID
+        try {
+            UserEntity userEntity = platformUtils.getCurrentLoginUser();
+            Long userId = userEntity.getId();
+            Page<CharityFaultStatistics> charityFaultStatisticsPage = charityFaultService.getCharityFaultInfoOrRanking(new PageFilterDTO(), userId);
+            if (charityFaultStatisticsPage.getTotalElements() > 0) {
+                CharityFaultStatistics result = charityFaultStatisticsPage.getContent().get(0);
+                return ResponseBean.ok("返回成功", result);
+            } else {
+                return ResponseBean.ok("返回成功", new CharityFaultStatistics());
+            }
+        } catch (Exception e) {
+            LOG.error("获取我的爱心养生统计失败", e);
+            return ResponseBean.error("获取我的爱心养生统计失败", e.getMessage());
+        }
+    }
+
+    @PostMapping("/ranking")
+    @ApiOperation(value = "养生分数排名", notes = "养生分数排名")
+    public ResponseBean getRanking(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<CharityFaultStatistics> charityFaultStatisticsPage = charityFaultService.getCharityFaultInfoOrRanking(pageFilterDTO, null);
+            return ResponseBean.ok("返回成功", charityFaultStatisticsPage);
+        } catch (Exception e) {
+            LOG.error("获取养生分数排名失败", e);
+            return ResponseBean.error("获取养生分数排名失败", e.getMessage());
         }
     }
 }

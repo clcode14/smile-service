@@ -7,6 +7,7 @@ import org.flightythought.smile.appserver.bean.CourseSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.bean.SelectItemOption;
 import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
+import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.flightythought.smile.appserver.dto.ApplyCourseDTO;
 import org.flightythought.smile.appserver.dto.CourseInfoQueryDTO;
 import org.flightythought.smile.appserver.dto.CourseQueryDTO;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/auth/course")
 @Api(tags = "相关课程控制层", description = "获取相关课程相关接口")
@@ -28,6 +31,8 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private SysParameterRepository sysParameterRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(CourseController.class);
 
@@ -88,6 +93,34 @@ public class CourseController {
         } catch (Exception e) {
             LOG.error("获取当前用户参加的课程失败", e);
             return ResponseBean.error("获取失败", e.getMessage());
+        }
+    }
+
+    @ApiModelProperty(value = "获取近期课程", notes = "获取近期课程")
+    @PostMapping("/recentCourse")
+    public ResponseBean getRecentCourse(@RequestBody PageFilterDTO pageFilterDTO) {
+        // 获取近期课程时间间隔
+        try {
+            Long days = Long.parseLong(sysParameterRepository.getRecentCourseTime().getParameterValue());
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime end = now.plusDays(days);
+            CourseInfoQueryDTO courseInfoQueryDTO = new CourseInfoQueryDTO();
+            // 开始时间
+            courseInfoQueryDTO.setStartTime(now);
+            // 结束时间
+            courseInfoQueryDTO.setEndTime(end);
+            // 分页
+            courseInfoQueryDTO.setPageNumber(pageFilterDTO.getPageNumber());
+            courseInfoQueryDTO.setPageSize(pageFilterDTO.getPageSize());
+            // 获取课程
+            Page<CourseSimple> result = courseService.getCoursesInfo(courseInfoQueryDTO);
+            return ResponseBean.ok("获取课程成功", result);
+        } catch (NumberFormatException e) {
+            LOG.error("获取近期课程失败，未填写近期课程时间区间", e);
+            return ResponseBean.error("获取课程失败", "请在后台管理系统中填写近期课程时间区间");
+        } catch (Exception e) {
+            LOG.error("获取课程失败", e);
+            return ResponseBean.error("获取课程失败", e.getMessage());
         }
     }
 }

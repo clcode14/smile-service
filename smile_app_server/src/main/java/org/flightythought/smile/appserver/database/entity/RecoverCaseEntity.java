@@ -38,6 +38,18 @@ public class RecoverCaseEntity extends BaseEntity {
     @Column(name = "solution_id")
     private Integer solutionId;
 
+    /**
+     * 封面图片ID
+     */
+    @Column(name = "cover_image")
+    private Integer coverImageId;
+
+    /**
+     * 封面图
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
 
     /**
      * 标题

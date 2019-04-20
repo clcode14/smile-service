@@ -26,7 +26,7 @@ public interface JourneyHealthService {
 
     Page<HealthJourneySimple> getHealthJourney(Long userId, PageFilterDTO pageFilterDTO);
 
-    HealthJourney getHealthJourney(Integer journeyId);
+    HealthJourney getHealthJourney(Integer journeyId, Integer recoverId);
 
     JourneyNoteEntity addJourneyNoteEntity(JourneyNoteDTO journeyNoteDTO) throws FlightyThoughtException;
 

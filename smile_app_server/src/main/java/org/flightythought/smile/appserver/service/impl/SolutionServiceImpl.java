@@ -9,7 +9,7 @@ import org.flightythought.smile.appserver.database.entity.SolutionEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.SolutionRepository;
 import org.flightythought.smile.appserver.database.repository.UserFollowSolutionRepository;
-import org.flightythought.smile.appserver.dto.HealthOrDiseaseQuerySolutionDTO;
+import org.flightythought.smile.appserver.dto.HealthOrDiseaseByIdQueryDTO;
 import org.flightythought.smile.appserver.dto.SolutionQueryDTO;
 import org.flightythought.smile.appserver.service.SolutionService;
 import org.hibernate.query.internal.NativeQueryImpl;
@@ -147,7 +147,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException {
+    public Page<SolutionSimple> getSolutionSimples(HealthOrDiseaseByIdQueryDTO querySolutionDTO) throws FlightyThoughtException {
         Page<SolutionEntity> solutionEntities = getSolutions(querySolutionDTO);
         List<SolutionSimple> result = new ArrayList<>();
         String domainPort = platformUtils.getDomainPort();
@@ -175,7 +175,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionEntity> getSolutions(HealthOrDiseaseQuerySolutionDTO querySolutionDTO) throws FlightyThoughtException {
+    public Page<SolutionEntity> getSolutions(HealthOrDiseaseByIdQueryDTO querySolutionDTO) throws FlightyThoughtException {
         // 组装SQL语句
         String totalSql = "SELECT COUNT(*) AS total FROM (";
         StringBuilder sql = new StringBuilder("SELECT DISTINCT a.`id` AS solutionId FROM `vw_disease_health_solution` a WHERE 1 = 1");

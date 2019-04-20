@@ -1,5 +1,7 @@
 package org.flightythought.smile.appserver.common.utils;
 
+import org.flightythought.smile.appserver.bean.ImageInfo;
+import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
@@ -44,4 +46,16 @@ public class PlatformUtils {
         return sysParameterRepository.getFilePathParam().getParameterValue();
     }
 
+    public ImageInfo getImageInfo(ImagesEntity imagesEntity) {
+        String domainPort = this.getDomainPort();
+        if (imagesEntity != null) {
+            ImageInfo imageInfo = new ImageInfo();
+            imageInfo.setUrl(getImageUrlByPath(imagesEntity.getPath(), domainPort));
+            imageInfo.setName(imagesEntity.getFileName());
+            imageInfo.setId(imagesEntity.getId());
+            imageInfo.setSize(imagesEntity.getSize());
+            return imageInfo;
+        }
+        return null;
+    }
 }

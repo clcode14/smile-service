@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.bean.SolutionPage;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
-import org.flightythought.smile.appserver.dto.HealthOrDiseaseQuerySolutionDTO;
+import org.flightythought.smile.appserver.dto.HealthOrDiseaseByIdQueryDTO;
 import org.flightythought.smile.appserver.dto.SolutionQueryDTO;
 import org.flightythought.smile.appserver.service.SolutionService;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class SolutionController {
 
     @ApiOperation(value = "获取解决方案2（适用于：结束养生模块调用）", notes = "根据养生ID或疾病小类ID，可选择分页查询获取解决方案，重复部分滤重返回")
     @PostMapping("/resultsByHD")
-    public ResponseBean getSolutions(@RequestBody HealthOrDiseaseQuerySolutionDTO querySolutionDTO) {
+    public ResponseBean getSolutions(@RequestBody HealthOrDiseaseByIdQueryDTO querySolutionDTO) {
         try {
             Page<SolutionSimple> result = solutionService.getSolutionSimples(querySolutionDTO);
             return ResponseBean.ok("获取解决方案成功", result);

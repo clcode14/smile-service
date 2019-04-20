@@ -337,12 +337,12 @@ public class CourseServiceImpl implements CourseService {
         // 开始时间
         if (courseInfoQueryDTO.getStartTime() != null) {
             String startTime = courseInfoQueryDTO.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            sql += " AND sr.`start_time` >= '" + startTime + "'";
+            sql += " AND cr.`start_time` >= '" + startTime + "'";
         }
         // 结束时间
         if (courseInfoQueryDTO.getEndTime() != null) {
             String endTime = courseInfoQueryDTO.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            sql += " AND sr.`start_time` <= '" + endTime + "'";
+            sql += " AND cr.`start_time` <= '" + endTime + "'";
         }
         // 课程ID
         if (courseInfoQueryDTO.getCourseId() != null) {

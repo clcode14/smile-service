@@ -22,6 +22,11 @@ public class CharityFaultTypeSimple {
     private Integer type;
 
     /**
+     * 类型积分
+     */
+    private Integer integral;
+
+    /**
      * 行善过失内容
      */
     private List<CharityFaultTypeContentSimple> contents;

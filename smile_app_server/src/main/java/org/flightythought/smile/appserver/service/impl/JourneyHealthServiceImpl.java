@@ -65,6 +65,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private HealthResultRepository healthResultRepository;
     @Autowired
     private UserFollowCourseRepository userFollowCourseRepository;
+    @Autowired
+    private RecoverCaseRepository recoverCaseRepository;
 
     @Value("${static-url}")
     private String staticUrl;
@@ -195,6 +197,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setNoteNum(0);
         // 阅读数
         journeyEntity.setReadNum(0);
+        // 封面图片ID
+        journeyEntity.setCoverImageId(healthJourneyStartDTO.getCoverImageId());
         // 保存养生旅程
         journeyEntity = journeyRepository.save(journeyEntity);
         // 获取体检指标
@@ -282,7 +286,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             journeyEntity.setUpdateUserName(userEntity.getId() + "");
             // 更新
             journeyEntity = journeyRepository.save(journeyEntity);
-            return getHealthJourney(journeyEntity.getJourneyId());
+            return getHealthJourney(journeyEntity.getJourneyId(), null);
         }
     }
 
@@ -331,7 +335,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
 
     @Override
     @Transactional
-    public HealthJourney getHealthJourney(Integer journeyId) {
+    public HealthJourney getHealthJourney(Integer journeyId, Integer recoverId) {
         // 获取养生旅程
         JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyId);
         String domainPort = platformUtils.getDomainPort();
@@ -339,6 +343,20 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             // 判断是否增加阅读数量
             UserEntity userEntity = platformUtils.getCurrentLoginUser();
             if (journeyEntity.getUserId().longValue() != userEntity.getId().longValue()) {
+                if (recoverId != null) {
+                    // 增加康复案例阅读量
+                   RecoverCaseEntity recoverCaseEntity = recoverCaseRepository.findByJourneyIdAndId(journeyId, recoverId);
+                   if (recoverCaseEntity != null) {
+                       Long readNum = recoverCaseEntity.getReadNum();
+                       if (readNum == null) {
+                           readNum = 1L;
+                       } else {
+                           readNum += 1;
+                       }
+                       recoverCaseEntity.setReadNum(readNum);
+                       recoverCaseRepository.save(recoverCaseEntity);
+                   }
+                }
                 Integer readNum = journeyEntity.getReadNum();
                 if (readNum == null) {
                     journeyEntity.setReadNum(1);
@@ -366,6 +384,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             healthJourney.setDays(ChronoUnit.DAYS.between(journeyEntity.getStartTime(), LocalDateTime.now()));
             // 日记数量
             healthJourney.setNoteNum(journeyEntity.getNoteNum());
+            // 封面图
+            healthJourney.setCoverImage(platformUtils.getImageInfo(journeyEntity.getCoverImage()));
             // 获取关联的疾病小类
             List<DiseaseClassDetailSimple> diseaseClassDetailSimples = new ArrayList<>();
             List<DiseaseClassDetailEntity> diseaseClassDetailEntities = journeyEntity.getDiseaseClassDetails();
@@ -758,7 +778,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             });
             journeyDiseaseRepository.saveAll(finalJourneyDiseaseEntities);
         }
-        return getHealthJourney(journeyEntity.getJourneyId());
+        return getHealthJourney(journeyEntity.getJourneyId(), null);
     }
 
     @Override
@@ -780,11 +800,13 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     }
 
     @Override
-@Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void deleteJourneyById(Integer journeyId) {
         // 获取养生旅程
         String filePath = platformUtils.getFilePath();
-        JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyId);
+        // 获取用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        JourneyEntity journeyEntity = journeyRepository.findByJourneyIdAndUserId(journeyId, userEntity.getId());
         if (journeyEntity != null) {
             // 获取养生旅程对应的体检报告
             List<MedicalReportEntity> medicalReportEntities = journeyEntity.getMedicalReports();
@@ -794,10 +816,33 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                     File file = new File(path);
                     if (file.exists()) {
                         boolean isDelete = file.delete();
-                        LOG.info("ID:{},体检报告已删除", medicalReportEntity.getId());
+                        if (isDelete) {
+                            LOG.info("ID:{},体检报告已删除", medicalReportEntity.getId());
+                        }
                     }
                 });
             }
+            // 获取养生旅程对应的日记
+            List<JourneyNoteEntity> journeyNoteEntities = journeyNoteRepository.findByJourneyId(journeyId);
+            if (journeyNoteEntities.size() > 0) {
+                journeyNoteEntities.forEach(journeyNoteEntity -> {
+                    // 删除封面图片
+                    ImagesEntity imagesEntity = journeyNoteEntity.getCoverImage();
+                    if (imagesEntity != null) {
+                        String path = filePath + imagesEntity.getPath();
+                        File file = new File(path);
+                        if (file.exists()) {
+                            boolean isDelete = file.delete();
+                            if (isDelete) {
+                                LOG.info("JourneyNoteId:{},ImageId:{},封面图片已删除", journeyNoteEntity.getId(), imagesEntity.getId());
+                            }
+                        }
+                    }
+                    // 日记配图删除
+                });
+            }
+        } else {
+            throw new FlightyThoughtException("非自身创建的养生旅程不能删除");
         }
     }
 }
