@@ -17,12 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth/course")
@@ -84,7 +82,7 @@ public class CourseController {
         }
     }
 
-    @ApiModelProperty(value = "获取当前用户参加的课程", notes = "获取当前用户所参见的课程")
+    @ApiOperation(value = "获取当前用户参加的课程", notes = "获取当前用户所参见的课程")
     @PostMapping("userCourses")
     public ResponseBean getUserApplyCourse(@RequestBody PageFilterDTO pageFilterDTO) {
         try {
@@ -96,7 +94,7 @@ public class CourseController {
         }
     }
 
-    @ApiModelProperty(value = "获取近期课程", notes = "获取近期课程")
+    @ApiOperation(value = "获取近期课程", notes = "获取近期课程")
     @PostMapping("/recentCourse")
     public ResponseBean getRecentCourse(@RequestBody PageFilterDTO pageFilterDTO) {
         // 获取近期课程时间间隔
@@ -121,6 +119,18 @@ public class CourseController {
         } catch (Exception e) {
             LOG.error("获取课程失败", e);
             return ResponseBean.error("获取课程失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "获取课程Banner图", notes = "获取课程Banner图")
+    @GetMapping("/banner")
+    public ResponseBean getCourseBanner() {
+        try {
+            List<CourseSimple> result = courseService.getCourseBanner();
+            return ResponseBean.ok("获取课程Banner图成功", result);
+        } catch (Exception e) {
+            LOG.error("获取课程Banner图失败", e);
+            return ResponseBean.error("获取课程Banner图失败", e.getMessage());
         }
     }
 }

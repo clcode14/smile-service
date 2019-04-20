@@ -10,10 +10,7 @@ import org.flightythought.smile.appserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth/user")
@@ -34,6 +31,18 @@ public class UserController {
         } catch (Exception e) {
             LOG.error("修改用户信息失败", e);
             return ResponseBean.error("操作失败", e.getMessage());
+        }
+    }
+
+    @GetMapping("/userInfo/{userId}")
+    @ApiOperation(value = "根据用户ID获取用户信息", notes = "根据用户ID获取用户信息")
+    public ResponseBean getUserInfo(@PathVariable("userId") Long userId) {
+        try {
+            UserInfo userInfo = userService.getUserInfo(userId);
+            return ResponseBean.ok("获取用户信息成功", userInfo);
+        } catch (Exception e) {
+            LOG.error("获取用户信息失败", e);
+            return ResponseBean.error("获取用户信息失败", e.getMessage());
         }
     }
 }

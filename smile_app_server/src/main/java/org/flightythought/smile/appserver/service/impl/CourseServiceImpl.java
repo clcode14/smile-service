@@ -10,6 +10,7 @@ import org.flightythought.smile.appserver.common.utils.AesUtils;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.config.properties.AppProperties;
 import org.flightythought.smile.appserver.database.entity.*;
+import org.flightythought.smile.appserver.database.repository.CourseBannerRepository;
 import org.flightythought.smile.appserver.database.repository.CourseRegistrationRepository;
 import org.flightythought.smile.appserver.database.repository.CourseTypeRepository;
 import org.flightythought.smile.appserver.database.repository.UserFollowCourseRepository;
@@ -49,6 +50,8 @@ public class CourseServiceImpl implements CourseService {
     private UserFollowCourseRepository userFollowCourseRepository;
     @Autowired
     private CourseTypeRepository courseTypeRepository;
+    @Autowired
+    private CourseBannerRepository courseBannerRepository;
 
     @Override
     @Transactional
@@ -267,6 +270,15 @@ public class CourseServiceImpl implements CourseService {
         selectItemOption.setValue("其他课程");
         result.add(selectItemOption);
         return new PageImpl<>(result, pageable, total + 1);
+    }
+
+    @Override
+    @Transactional
+    public List<CourseSimple> getCourseBanner() {
+        List<CourseBannerEntity> courseBannerEntities = courseBannerRepository.findByStatus(true);
+        List<CourseRegistrationEntity> courseRegistrationEntities = new ArrayList<>();
+        courseBannerEntities.forEach(courseBannerEntity -> courseRegistrationEntities.add(courseBannerEntity.getCourseRegistrationEntity()));
+        return this.getCourseSimple(courseRegistrationEntities);
     }
 
     @Override

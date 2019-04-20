@@ -76,4 +76,10 @@ public class UserServiceImpl implements UserService {
         }
         return null;
     }
+
+    @Override
+    public UserInfo getUserInfo(Long userId) {
+        UserEntity userEntity = userRepository.getOne(userId);
+        return getUserInfo(userEntity);
+    }
 }

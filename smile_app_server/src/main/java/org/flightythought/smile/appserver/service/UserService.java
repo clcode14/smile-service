@@ -18,4 +18,11 @@ public interface UserService {
      * @param userEntity 用户对象实体类
      */
     UserInfo getUserInfo(UserEntity userEntity);
+
+    /**
+     * 根据用户ID获取用户信息
+     *
+     * @param userId 用户ID
+     */
+    UserInfo getUserInfo(Long userId);
 }

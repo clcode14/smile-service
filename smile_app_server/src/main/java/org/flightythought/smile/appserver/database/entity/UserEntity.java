@@ -87,7 +87,7 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     private Integer photo;
 
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "photo", insertable = false, updatable = false)
     private ImagesEntity photoImage;
 

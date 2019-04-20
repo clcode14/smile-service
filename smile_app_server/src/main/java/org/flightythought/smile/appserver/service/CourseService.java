@@ -32,4 +32,6 @@ public interface CourseService {
     List<CourseSimple> getCourseSimple(List<CourseRegistrationEntity> courseRegistrationEntities);
 
     Page<SelectItemOption> getCourseType(PageFilterDTO pageFilterDTO);
+
+    List<CourseSimple> getCourseBanner();
 }

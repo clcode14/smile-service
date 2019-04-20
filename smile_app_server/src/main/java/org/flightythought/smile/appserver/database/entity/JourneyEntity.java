@@ -99,6 +99,12 @@ public class JourneyEntity extends BaseEntity {
     private Integer readNum;
 
     /**
+     * 是否审核
+     */
+    @Column(name = "audit")
+    private Boolean audit;
+
+    /**
      * 旅程体检指标
      */
     @OneToMany(fetch = FetchType.LAZY)

@@ -66,4 +66,10 @@ public class HealthWayEntity extends BaseEntity {
      */
     @Column(name = "music_url")
     private String musicUrl;
+
+    /**
+     * 养生方式类型
+     */
+    @Column(name = "type")
+    private Integer type;
 }
