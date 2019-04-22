@@ -8,6 +8,7 @@ import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.flightythought.smile.appserver.dto.*;
 import org.flightythought.smile.appserver.service.JourneyHealthService;
+import org.flightythought.smile.appserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private UserFollowCourseRepository userFollowCourseRepository;
     @Autowired
     private RecoverCaseRepository recoverCaseRepository;
+    @Autowired
+    private UserService userService;
 
     @Value("${static-url}")
     private String staticUrl;
@@ -291,7 +294,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     }
 
     @Override
-    public Page<HealthJourneySimple> getHealthJourney(Long userId, PageFilterDTO pageFilterDTO) {
+    public Page<HealthJourneySimple> getHealthJourney(Long userId, PageFilterDTO pageFilterDTO, Boolean finished) {
         List<JourneyEntity> journeyEntities;
         Integer pageSize = pageFilterDTO.getPageSize();
         Integer pageNumber = pageFilterDTO.getPageNumber();
@@ -302,12 +305,21 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             userId = userEntity.getId();
         }
         if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
-            journeyEntities = journeyRepository.findByUserId(userId);
+            if (finished != null) {
+                journeyEntities = journeyRepository.findByUserIdAndFinished(userId, finished);
+            } else {
+                journeyEntities = journeyRepository.findByUserId(userId);
+            }
             pageRequest = PageRequest.of(0, journeyEntities.size() + 1);
             total = (long) journeyEntities.size();
         } else {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
-            Page<JourneyEntity> journeyEntityPage = journeyRepository.findByUserId(userId, pageRequest);
+            Page<JourneyEntity> journeyEntityPage;
+            if (finished != null) {
+                journeyEntityPage = journeyRepository.findByUserIdAndFinished(userId, finished, pageRequest);
+            } else {
+                journeyEntityPage = journeyRepository.findByUserId(userId, pageRequest);
+            }
             journeyEntities = journeyEntityPage.getContent();
             total = journeyEntityPage.getTotalElements();
         }
@@ -345,17 +357,17 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             if (journeyEntity.getUserId().longValue() != userEntity.getId().longValue()) {
                 if (recoverId != null) {
                     // 增加康复案例阅读量
-                   RecoverCaseEntity recoverCaseEntity = recoverCaseRepository.findByJourneyIdAndId(journeyId, recoverId);
-                   if (recoverCaseEntity != null) {
-                       Long readNum = recoverCaseEntity.getReadNum();
-                       if (readNum == null) {
-                           readNum = 1L;
-                       } else {
-                           readNum += 1;
-                       }
-                       recoverCaseEntity.setReadNum(readNum);
-                       recoverCaseRepository.save(recoverCaseEntity);
-                   }
+                    RecoverCaseEntity recoverCaseEntity = recoverCaseRepository.findByJourneyIdAndId(journeyId, recoverId);
+                    if (recoverCaseEntity != null) {
+                        Long readNum = recoverCaseEntity.getReadNum();
+                        if (readNum == null) {
+                            readNum = 1L;
+                        } else {
+                            readNum += 1;
+                        }
+                        recoverCaseEntity.setReadNum(readNum);
+                        recoverCaseRepository.save(recoverCaseEntity);
+                    }
                 }
                 Integer readNum = journeyEntity.getReadNum();
                 if (readNum == null) {
@@ -385,7 +397,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             // 日记数量
             healthJourney.setNoteNum(journeyEntity.getNoteNum());
             // 封面图
-            healthJourney.setCoverImage(platformUtils.getImageInfo(journeyEntity.getCoverImage()));
+            healthJourney.setCoverImage(platformUtils.getImageInfo(journeyEntity.getCoverImage(), domainPort));
+            // 获取养生旅程用户信息
+            UserEntity user = journeyEntity.getUser();
+            if (user != null) {
+                healthJourney.setUser(userService.getUserInfo(user));
+            }
             // 获取关联的疾病小类
             List<DiseaseClassDetailSimple> diseaseClassDetailSimples = new ArrayList<>();
             List<DiseaseClassDetailEntity> diseaseClassDetailEntities = journeyEntity.getDiseaseClassDetails();
@@ -439,7 +456,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 medicalReportEntities.forEach(medicalReportEntity -> {
                     FileInfo fileInfo = new FileInfo();
                     // 资源URL
-                    String url = platformUtils.getImageUrlByPath(medicalReportEntity.getPath(), domainPort);
+                    String url = platformUtils.getStaticUrlByPath(medicalReportEntity.getPath(), domainPort);
                     fileInfo.setUrl(url);
                     // 文件名称
                     fileInfo.setName(medicalReportEntity.getFileName());
@@ -475,7 +492,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                     ImagesEntity imagesEntity = healthEntity.getBgImage();
                     if (imagesEntity != null) {
                         ImageInfo bgImage = new ImageInfo();
-                        bgImage.setUrl(platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort));
+                        bgImage.setUrl(platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort));
                         bgImage.setName(imagesEntity.getFileName());
                         bgImage.setSize(imagesEntity.getSize());
                         bgImage.setId(imagesEntity.getId());
@@ -595,7 +612,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 // 封面图片URL
                 ImagesEntity coverImage = journeyNoteEntity.getCoverImage();
                 if (coverImage != null) {
-                    String coverImageUrl = platformUtils.getImageUrlByPath(coverImage.getPath(), domainPort);
+                    String coverImageUrl = platformUtils.getStaticUrlByPath(coverImage.getPath(), domainPort);
                     journeyNote.setCoverImageUrl(coverImageUrl);
                 }
                 // 日记内容
@@ -616,7 +633,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                         imageInfo.setName(imagesEntity.getFileName());
                         imageInfo.setSize(imagesEntity.getSize());
                         imageInfo.setId(imagesEntity.getId());
-                        imageInfo.setUrl(platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort));
+                        imageInfo.setUrl(platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort));
                         imageInfos.add(imageInfo);
                     });
                     journeyNote.setImages(imageInfos);

@@ -53,7 +53,7 @@ public class HomeServiceImpl implements HomeService {
                 imageInfo.setId(imagesEntity.getId());
                 imageInfo.setSize(imagesEntity.getSize());
                 imageInfo.setName(imagesEntity.getFileName());
-                String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String url = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 imageInfo.setUrl(url);
                 homeBanner.setImage(imageInfo);
             }

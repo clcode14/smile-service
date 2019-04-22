@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.HomeBanner;
 import org.flightythought.smile.appserver.bean.ResponseBean;
+import org.flightythought.smile.appserver.database.repository.CustomRepository;
 import org.flightythought.smile.appserver.service.HomeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class HomeController {
 
     @Autowired
     private HomeService homeService;
+    @Autowired
+    private CustomRepository customRepository;
 
     @GetMapping("/banners")
     @ApiOperation(value = "获取主页Banner图", notes = "获取主页Banner图")
@@ -42,5 +45,11 @@ public class HomeController {
             LOG.error("获取主页Banner图失败", e);
             return ResponseBean.error("获取失败", e.getMessage());
         }
+    }
+
+    @GetMapping("/customerService")
+    @ApiOperation(value = "获取客服服务电话", notes = "获取客服电话")
+    public ResponseBean getCustomers() {
+        return ResponseBean.ok("获取成功", customRepository.findAll());
     }
 }

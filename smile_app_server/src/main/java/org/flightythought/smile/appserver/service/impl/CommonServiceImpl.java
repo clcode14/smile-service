@@ -3,14 +3,13 @@ package org.flightythought.smile.appserver.service.impl;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
+import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
-import org.flightythought.smile.appserver.database.entity.ImagesEntity;
-import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.DiseaseClassDetailRepository;
+import org.flightythought.smile.appserver.database.repository.FilesRepository;
 import org.flightythought.smile.appserver.database.repository.ImagesRepository;
 import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.flightythought.smile.appserver.dto.PageFilterDTO;
@@ -43,6 +42,8 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ImagesRepository imagesRepository;
+    @Autowired
+    private FilesRepository filesRepository;
     @Autowired
     private PlatformUtils platformUtils;
 
@@ -201,7 +202,6 @@ public class CommonServiceImpl implements CommonService {
                         IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
                         fileOutputStream.flush();
                         fileOutputStream.close();
-                        imagesEntity1 = imagesRepository.save(imagesEntity1);
                         imagesEntityArrayList.add(imagesEntity1);
                     } catch (IOException e) {
                         LOG.error("上传图片失败", e);
@@ -221,6 +221,100 @@ public class CommonServiceImpl implements CommonService {
             imageInfo.setUrl(imageUrl.replace("\\", "/"));
             result.add(imageInfo);
         });
+        return result;
+    }
+
+    @Override
+    public FileInfo uploadFile(MultipartFile multipartFile, String type, HttpSession session) throws FlightyThoughtException {
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        multipartFiles.add(multipartFile);
+        List<FileInfo> fileInfos = uploadFiles(multipartFiles, type, session);
+        if (fileInfos != null && fileInfos.size() > 0) {
+            return fileInfos.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<FileInfo> uploadFiles(List<MultipartFile> files, String type, HttpSession session) throws FlightyThoughtException {
+        String fileType = "";
+        if (type != null) {
+            switch (type) {
+                case "1": {
+                    fileType = "dynamic";
+                    break;
+                }
+                case "2": {
+                    fileType = "dynamic_detail";
+                    break;
+                }
+                default:
+                    fileType = "";
+            }
+        }
+        // 获取系统参数
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getFilePathParam();
+        // 获取当前登陆用户
+        UserEntity userEntity = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        SysParameterEntity domainPortEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = domainPortEntity.getParameterValue();
+        String imagePath, userPath;
+        if (sysParameterEntity == null) {
+            throw new FlightyThoughtException("请设置上传文件路径系统参数");
+        } else {
+            imagePath = sysParameterEntity.getParameterValue();
+            if (!"".equals(fileType)) {
+                userPath = File.separator + fileType + File.separator + userEntity.getId();
+            } else {
+                userPath = File.separator + userEntity.getId();
+            }
+            File file = new File(imagePath + userPath);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        }
+        List<FilesEntity> filesEntities = new ArrayList<>();
+        if (files == null || files.size() == 0) {
+            throw new FlightyThoughtException("请选择要上传的图片");
+        }
+        for (MultipartFile multipartFile : files) {
+            if (multipartFile != null) {
+                FilesEntity filesEntity = new FilesEntity();
+                // 上传者
+                filesEntity.setCreateUserName(userEntity.getId() + "");
+                // 图片大小
+                filesEntity.setSize(multipartFile.getSize());
+                // 文件类型
+                filesEntity.setFileType(multipartFile.getContentType());
+                // 上传封面图片到服务器
+                // 获取原始图片名称
+                String imageName = multipartFile.getOriginalFilename();
+                // 新建文件
+                if (imageName != null) {
+                    String path = userPath + File.separator + System.currentTimeMillis() + imageName.substring(imageName.lastIndexOf("."));
+                    // 图片名称
+                    filesEntity.setFileName(imageName);
+                    // 图片路径
+                    filesEntity.setPath(path);
+                    File coverPictureFile = new File(imagePath + path);
+                    try {
+                        // 创建文件输出流
+                        FileOutputStream fileOutputStream = new FileOutputStream(coverPictureFile);
+                        // 复制文件
+                        IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                        filesEntities.add(filesEntity);
+                    } catch (IOException e) {
+                        LOG.error("上传图片失败", e);
+                        throw new FlightyThoughtException("上传图片失败", e);
+                    }
+                }
+            }
+        }
+        filesEntities = filesRepository.saveAll(filesEntities);
+        List<FileInfo> result = new ArrayList<>();
+        filesEntities.forEach(filesEntity -> result.add(platformUtils.getFileInfo(filesEntity, domainPort)));
         return result;
     }
 
@@ -260,7 +354,7 @@ public class CommonServiceImpl implements CommonService {
                 // 背景图片URL
                 ImagesEntity bgImagesEntity = diseaseClassDetailEntity.getBgImage();
                 if (bgImagesEntity != null) {
-                    String bgImageUrl = platformUtils.getImageUrlByPath(bgImagesEntity.getPath(), domainPort);
+                    String bgImageUrl = platformUtils.getStaticUrlByPath(bgImagesEntity.getPath(), domainPort);
                     diseaseClassDetailSimple.setBgImageUrl(bgImageUrl);
                 }
                 // 内容介绍
@@ -268,7 +362,7 @@ public class CommonServiceImpl implements CommonService {
                 // 图标URL
                 ImagesEntity iconImageEntity = diseaseClassDetailEntity.getBgImage();
                 if (iconImageEntity != null) {
-                    String iconImageUrl = platformUtils.getImageUrlByPath(iconImageEntity.getPath(), domainPort);
+                    String iconImageUrl = platformUtils.getStaticUrlByPath(iconImageEntity.getPath(), domainPort);
                     diseaseClassDetailSimple.setIconUrl(iconImageUrl);
                 }
                 diseaseClassDetailSimples.add(diseaseClassDetailSimple);

@@ -33,7 +33,6 @@ import javax.persistence.EntityManager;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -71,14 +70,14 @@ public class CourseServiceImpl implements CourseService {
             List<String> courseImages = new ArrayList<>();
             List<ImagesEntity> imagesEntities = courseRegistrationEntity.getCourseImages();
             imagesEntities.forEach(imagesEntity -> {
-                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 courseImages.add(imageUrl);
             });
             courseSimple.setCourseImages(courseImages);
             // 封面图片
             ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
             if (imagesEntity != null) {
-                String coverImageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String coverImageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 courseSimple.setCoverImageUrl(coverImageUrl);
             }
             // 课程ID
@@ -219,14 +218,14 @@ public class CourseServiceImpl implements CourseService {
             // 封面图片
             ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
             if (imagesEntity != null) {
-                String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String url = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 courseSimple.setCoverImageUrl(url);
             }
             // 课程图片
             List<String> courseImages = new ArrayList<>();
             List<ImagesEntity> imagesEntities = courseRegistrationEntity.getCourseImages();
             imagesEntities.forEach(imagesEntity1 -> {
-                String url = platformUtils.getImageUrlByPath(imagesEntity1.getPath(), domainPort);
+                String url = platformUtils.getStaticUrlByPath(imagesEntity1.getPath(), domainPort);
                 courseImages.add(url);
             });
             courseSimple.setCourseImages(courseImages);

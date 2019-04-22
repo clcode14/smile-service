@@ -73,6 +73,7 @@ public class HealthWayServiceImpl implements HealthWayService {
     public Page<HealthWaySimple> getHealthWays(HealthWayQueryDTO healthWayQueryDTO) {
         Page<HealthWayEntity> healthWayEntities = getHealthWayEntities(healthWayQueryDTO);
         List<HealthWaySimple> healthWaySimples = new ArrayList<>();
+        String domainPort = platformUtils.getDomainPort();
         healthWayEntities.forEach(healthWayEntity -> {
             HealthWaySimple healthWaySimple = new HealthWaySimple();
             // 养生方式ID
@@ -82,7 +83,7 @@ public class HealthWayServiceImpl implements HealthWayService {
             // 背景图
             ImagesEntity imagesEntity = healthWayEntity.getBgImage();
             if (imagesEntity != null) {
-                healthWaySimple.setBgImage(platformUtils.getImageInfo(imagesEntity));
+                healthWaySimple.setBgImage(platformUtils.getImageInfo(imagesEntity, domainPort));
             }
             // 编码
             healthWaySimple.setNumber(healthWayEntity.getNumber());

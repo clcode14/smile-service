@@ -20,7 +20,11 @@ import java.util.List;
 public interface JourneyRepository extends JpaRepository<JourneyEntity, Long> {
     List<JourneyEntity> findByUserId(Long userId);
 
+    List<JourneyEntity> findByUserIdAndFinished(Long userId, Boolean finished);
+
     Page<JourneyEntity> findByUserId(Long userId, Pageable pageable);
+
+    Page<JourneyEntity> findByUserIdAndFinished(Long userId, Boolean finished, Pageable pageable);
 
     JourneyEntity findByJourneyId(Integer journeyId);
 

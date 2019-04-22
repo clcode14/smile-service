@@ -177,7 +177,7 @@ public class CharityFaultServiceImpl implements CharityFaultService {
             if (imagesEntities != null) {
                 imagesEntities.forEach(imagesEntity -> {
                     ImageInfo imageInfo = new ImageInfo();
-                    String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String url = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     imageInfo.setId(imagesEntity.getId());
                     imageInfo.setName(imagesEntity.getFileName());
                     imageInfo.setSize(imagesEntity.getSize());

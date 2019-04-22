@@ -2,6 +2,7 @@ package org.flightythought.smile.appserver.controller;
 
 import io.swagger.annotations.*;
 import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
+import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.ImageInfo;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
@@ -57,6 +58,36 @@ public class CommonController {
         } catch (FlightyThoughtException e) {
             LOG.error("上传图片失败", e);
             return ResponseBean.error("上传图片失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "上传文件（图片或视频、动态模块专用）", notes = "文件上传（图片或视频、动态模块专用）关于model，创建动态上传文件model：1，创建动态明细上传文件model:2")
+    @PostMapping("/uploadFile")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "上传文件所属模块，用来确定保存在服务器那个文件夹下")
+    })
+    public ResponseBean uploadFile(@ApiParam(value = "上传的文件") MultipartFile file, String model, @ApiIgnore HttpSession session) {
+        try {
+            FileInfo result = commonService.uploadFile(file, model, session);
+            return ResponseBean.ok("上传文件成功", result);
+        } catch (Exception e) {
+            LOG.error("上传文件失败", e);
+            return ResponseBean.error("上传文件失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "上传文件（图片或视频、动态模块专用）", notes = "多文件上传（图片或视频、动态模块专用）")
+    @PostMapping("/uploadFiles")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "model", value = "上传文件所属模块，用来确定保存在服务器那个文件夹下")
+    })
+    public ResponseBean uploadFiles(@ApiParam(value = "上传的文件") List<MultipartFile> files, String model, @ApiIgnore HttpSession session) {
+        try {
+            List<FileInfo> result = commonService.uploadFiles(files, model, session);
+            return ResponseBean.ok("上传文件成功", result);
+        } catch (Exception e) {
+            LOG.error("上传文件失败", e);
+            return ResponseBean.error("上传文件失败", e.getMessage());
         }
     }
 

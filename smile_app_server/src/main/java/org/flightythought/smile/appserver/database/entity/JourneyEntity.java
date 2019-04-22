@@ -51,6 +51,10 @@ public class JourneyEntity extends BaseEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
+
     /**
      * 开始时间
      */

@@ -49,7 +49,7 @@ public class SolutionServiceImpl implements SolutionService {
             List<String> imageUrls = new ArrayList<>();
             List<ImagesEntity> imagesEntities = solutionEntity.getImages();
             imagesEntities.forEach(imagesEntity -> {
-                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 imageUrls.add(imageUrl);
             });
             // 配图
@@ -132,7 +132,7 @@ public class SolutionServiceImpl implements SolutionService {
         List<ImagesEntity> imagesEntities = solutionEntity.getImages();
         String domainPort = platformUtils.getDomainPort();
         imagesEntities.forEach(imagesEntity -> {
-            String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+            String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
             imageUrls.add(imageUrl);
         });
         // 设置配图
@@ -158,7 +158,7 @@ public class SolutionServiceImpl implements SolutionService {
             if (imagesEntities != null && imagesEntities.size() > 0) {
                 List<String> imageUrls = new ArrayList<>();
                 imagesEntities.forEach(imagesEntity -> {
-                    String url = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String url = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     imageUrls.add(url);
                 });
                 solutionSimple.setImageUrls(imageUrls);

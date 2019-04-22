@@ -68,4 +68,9 @@ public class HealthJourneySimple {
      * 封面图
      */
     private ImageInfo coverImage;
+
+    /**
+     * 用户信息
+     */
+    private UserInfo user;
 }

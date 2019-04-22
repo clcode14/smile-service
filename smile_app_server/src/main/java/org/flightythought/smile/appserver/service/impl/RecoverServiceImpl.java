@@ -45,6 +45,7 @@ public class RecoverServiceImpl implements RecoverService {
     @Transactional
     public Page<RecoverCaseSimple> getRecoverCase(HealthOrDiseaseByIdQueryDTO healthOrDiseaseByIdQueryDTO) {
         Page<RecoverCaseEntity> recoverCaseEntities = getRecoverCaseEntities(healthOrDiseaseByIdQueryDTO);
+        String domainPort = platformUtils.getDomainPort();
         List<RecoverCaseSimple> result = new ArrayList<>();
         recoverCaseEntities.forEach(recoverCaseEntity -> {
             RecoverCaseSimple recoverCaseSimple = new RecoverCaseSimple();
@@ -61,7 +62,7 @@ public class RecoverServiceImpl implements RecoverService {
             // 案例结束时间
             recoverCaseSimple.setCaseEndTime(recoverCaseEntity.getCaseEndTime());
             // 封面图
-            recoverCaseSimple.setCoverImage(platformUtils.getImageInfo(recoverCaseEntity.getCoverImage()));
+            recoverCaseSimple.setCoverImage(platformUtils.getImageInfo(recoverCaseEntity.getCoverImage(), domainPort));
             // 用户信息
             UserEntity userEntity = recoverCaseEntity.getUser();
             if (userEntity != null && userEntity.getId() != null) {

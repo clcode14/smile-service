@@ -98,9 +98,12 @@ public class JourneyHealthController {
 
     @ApiOperation(value = "获取当前用户的养生旅程", notes = "获取当前用户的养生旅程")
     @PostMapping("/healthJourney")
-    public ResponseBean getHealthJourney(@RequestBody PageFilterDTO pageFilterDTO) {
+    public ResponseBean getHealthJourney(@RequestBody MyJourneyQueryDTO myJourneyQueryDTO) {
         try {
-            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(null, pageFilterDTO);
+            PageFilterDTO pageFilterDTO = new PageFilterDTO();
+            pageFilterDTO.setPageNumber(myJourneyQueryDTO.getPageNumber());
+            pageFilterDTO.setPageSize(myJourneyQueryDTO.getPageSize());
+            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(null, pageFilterDTO, myJourneyQueryDTO.getFinished());
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取当前用户养生旅程失败", e);
@@ -116,7 +119,7 @@ public class JourneyHealthController {
             PageFilterDTO pageFilterDTO = new PageFilterDTO();
             pageFilterDTO.setPageNumber(healthJourneyQueryDTO.getPageNumber());
             pageFilterDTO.setPageSize(healthJourneyQueryDTO.getPageSize());
-            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(userId, pageFilterDTO);
+            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(userId, pageFilterDTO, null);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取失败", e);

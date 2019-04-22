@@ -1,6 +1,5 @@
 package org.flightythought.smile.appserver.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.appserver.bean.DiseaseReason;
 import org.flightythought.smile.appserver.bean.SolutionSimple;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
@@ -116,7 +115,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                 List<ImagesEntity> solutionImagesEntities = solutionEntity.getImages();
                 List<String> imageUrls = new ArrayList<>();
                 solutionImagesEntities.forEach(imagesEntity -> {
-                    String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     imageUrls.add(imageUrl);
                 });
                 // 解决方案配图

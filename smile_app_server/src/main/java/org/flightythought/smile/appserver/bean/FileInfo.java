@@ -36,4 +36,9 @@ public class FileInfo {
      * 类型
      */
     private Integer type;
+
+    /**
+     * 文件类型
+     */
+    private String fileType;
 }

@@ -1,8 +1,9 @@
 package org.flightythought.smile.appserver.common.utils;
 
+import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.ImageInfo;
+import org.flightythought.smile.appserver.database.entity.FilesEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
-import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class PlatformUtils {
     @Autowired
     private SysParameterRepository sysParameterRepository;
 
-    public String getImageUrlByPath(String path, String domainPort) {
+    public String getStaticUrlByPath(String path, String domainPort) {
         String url = domainPort + contentPath + staticUrl + path;
         url = url.replace("\\", "/");
         return url;
@@ -46,15 +47,32 @@ public class PlatformUtils {
         return sysParameterRepository.getFilePathParam().getParameterValue();
     }
 
-    public ImageInfo getImageInfo(ImagesEntity imagesEntity) {
-        String domainPort = this.getDomainPort();
+    public ImageInfo getImageInfo(ImagesEntity imagesEntity, String domainPort) {
         if (imagesEntity != null) {
             ImageInfo imageInfo = new ImageInfo();
-            imageInfo.setUrl(getImageUrlByPath(imagesEntity.getPath(), domainPort));
+            imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));
             imageInfo.setName(imagesEntity.getFileName());
             imageInfo.setId(imagesEntity.getId());
             imageInfo.setSize(imagesEntity.getSize());
             return imageInfo;
+        }
+        return null;
+    }
+
+    public FileInfo getFileInfo(FilesEntity filesEntity, String domainPort) {
+        if (filesEntity != null) {
+            FileInfo fileInfo = new FileInfo();
+            // 文件ID
+            fileInfo.setId(filesEntity.getId());
+            // 文件名称
+            fileInfo.setName(filesEntity.getFileName());
+            // 资源URL
+            fileInfo.setUrl(getStaticUrlByPath(filesEntity.getPath(), domainPort));
+            // 文件大小
+            fileInfo.setSize(filesEntity.getSize());
+            // 文件类型
+            fileInfo.setFileType(filesEntity.getFileType());
+            return fileInfo;
         }
         return null;
     }
