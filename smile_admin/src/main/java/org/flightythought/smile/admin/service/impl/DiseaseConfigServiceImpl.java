@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Copyright 2018 欧瑞思丹 All rights reserved.
@@ -43,6 +44,7 @@ public class DiseaseConfigServiceImpl implements DiseaseConfigService {
     }
 
     @Override
+    @Transactional
     public void deleteDiseaseClass(Integer id) {
         DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(id);
         if (diseaseClassEntity != null) {

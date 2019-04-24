@@ -68,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .and().formLogin()
-                //.loginPage("/login_p")
+                .loginPage("/login_p")
                 .loginProcessingUrl("/login")
                 .usernameParameter("username").passwordParameter("password")
                 .failureHandler(failureHandler)

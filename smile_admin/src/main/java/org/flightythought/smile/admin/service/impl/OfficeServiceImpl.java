@@ -1,7 +1,10 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.flightythought.smile.admin.bean.ImageInfo;
+import org.flightythought.smile.admin.bean.OfficeInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
+import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.OfficeImageRepository;
 import org.flightythought.smile.admin.database.repository.OfficeRepository;
@@ -10,13 +13,12 @@ import org.flightythought.smile.admin.dto.OfficeDTO;
 import org.flightythought.smile.admin.service.OfficeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +32,9 @@ public class OfficeServiceImpl implements OfficeService {
     private OfficeImageRepository officeImageRepository;
     @Autowired
     private SysParameterRepository sysParameterRepository;
+    @Autowired
+    private PlatformUtils platformUtils;
+
     @Value("${image-url}")
     private String imageRequest;
     @Value("${server.servlet.context-path}")
@@ -67,12 +72,9 @@ public class OfficeServiceImpl implements OfficeService {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
         //查找机构对应的图片
         List<OfficeImageEntity> imageEntities = officeImageRepository.findByOfficeId(officeDTO.getOfficeId());
-        imageEntities.forEach(officeImageEntity -> {
-            //删除
-            officeImageRepository.deleteById(officeImageEntity.getId());
-        });
+        officeImageRepository.deleteAll(imageEntities);
 
-        OfficeEntity officeEntity = new OfficeEntity();
+        OfficeEntity officeEntity = officeRepository.getOne(officeDTO.getOfficeId());
         officeEntity.setOfficeId(officeDTO.getOfficeId());
         officeEntity.setName(officeDTO.getName());
         officeEntity.setContactName(officeDTO.getContactName());
@@ -101,7 +103,7 @@ public class OfficeServiceImpl implements OfficeService {
     }
 
     @Override
-    public Page<OfficeEntity> findAllOffice(Map<String, String> params, HttpSession session) {
+    public Page<OfficeInfo> findAllOffice(Map<String, String> params, HttpSession session) {
         String pageNumber = params.get("pageNumber");
         String pageSize = params.get("pageSize");
         String name = params.get("name");
@@ -122,24 +124,78 @@ public class OfficeServiceImpl implements OfficeService {
             pageSize = "10";
         }
         PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
-        return officeRepository.findAll(Example.of(officeEntity), pageRequest);
+        Page<OfficeEntity> officeEntities = officeRepository.findAll(Example.of(officeEntity), pageRequest);
+        return getOfficeInfo(officeEntities);
     }
 
     @Override
-    public OfficeEntity findOffice(Long officeId, HttpSession session) {
+    public OfficeInfo findOffice(Long officeId, HttpSession session) {
         SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
         String domainPort = sysParameterEntity.getParameterValue();
         return officeRepository.findById(officeId)
                 .map(officeEntity -> {
-                    List<ImagesEntity> imagesEntities = officeEntity.getOfficeImages()
+                    List<ImageInfo> imageInfos = officeEntity.getOfficeImages()
                             .stream()
-                            .map(imagesEntity -> {
-                                String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
-                                imagesEntity.setPath(imageUrl.replace("\\", "/"));
-                                return imagesEntity;
-                            }).collect(Collectors.toList());
-                    officeEntity.setOfficeImages(imagesEntities);
-                    return officeEntity;
+                            .map(imagesEntity -> platformUtils.getImageInfo(imagesEntity, domainPort)).collect(Collectors.toList());
+                    OfficeInfo officeInfo = new OfficeInfo();
+                    // 主键ID
+                    officeInfo.setOfficeId(officeEntity.getOfficeId());
+                    // 机构名称
+                    officeInfo.setName(officeEntity.getName());
+                    // 机构编号
+                    officeInfo.setNumber(officeEntity.getNumber());
+                    // 机构联系人
+                    officeInfo.setContactName(officeEntity.getContactName());
+                    // 手机
+                    officeInfo.setPhone(officeEntity.getPhone());
+                    // 机构图片
+                    officeInfo.setOfficeImages(imageInfos);
+                    // 机构地址
+                    officeInfo.setAddress(officeEntity.getAddress());
+                    // 机构描述
+                    officeInfo.setDescription(officeEntity.getDescription());
+                    return officeInfo;
                 }).orElse(null);
+    }
+
+    @Override
+    public Page<OfficeInfo> getOfficeInfo(Page<OfficeEntity> officeEntities) {
+        if (officeEntities != null && officeEntities.getContent().size() > 0) {
+            List<OfficeEntity> officeEntityList = officeEntities.getContent();
+            long total = officeEntities.getTotalElements();
+            Pageable pageable = officeEntities.getPageable();
+            String domain = platformUtils.getDomainPort();
+            List<OfficeInfo> officeInfos = new ArrayList<>();
+            officeEntityList.forEach(officeEntity -> {
+                OfficeInfo officeInfo = new OfficeInfo();
+                // 主键ID
+                officeInfo.setOfficeId(officeEntity.getOfficeId());
+                // 机构名称
+                officeInfo.setName(officeEntity.getName());
+                // 机构编号
+                officeInfo.setNumber(officeEntity.getNumber());
+                // 机构联系人
+                officeInfo.setContactName(officeEntity.getContactName());
+                // 手机
+                officeInfo.setPhone(officeEntity.getPhone());
+                // 机构图片
+                List<ImagesEntity> imagesEntities = officeEntity.getOfficeImages();
+                if (imagesEntities != null) {
+                    List<ImageInfo> imageInfos = new ArrayList<>();
+                    imagesEntities.forEach(imagesEntity -> {
+                        ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domain);
+                        imageInfos.add(imageInfo);
+                    });
+                    officeInfo.setOfficeImages(imageInfos);
+                }
+                // 地址
+                officeInfo.setAddress(officeEntity.getAddress());
+                // 描述
+                officeInfo.setDescription(officeEntity.getDescription());
+                officeInfos.add(officeInfo);
+            });
+            return new PageImpl<>(officeInfos, pageable, total);
+        }
+        return null;
     }
 }

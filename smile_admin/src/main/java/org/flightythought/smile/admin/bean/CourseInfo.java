@@ -65,4 +65,9 @@ public class CourseInfo {
      * 课程描述
      */
     private String description;
+
+    /**
+     * 课程类型
+     */
+    private CourseTypeInfo courseType;
 }

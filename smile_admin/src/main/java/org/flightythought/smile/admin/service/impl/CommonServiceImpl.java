@@ -52,6 +52,14 @@ public class CommonServiceImpl implements CommonService {
                     imageFileType = "solution";
                     break;
                 }
+                case "3": {
+                    imageFileType = "disease";
+                    break;
+                }
+                case "4": {
+                    imageFileType = "office";
+                    break;
+                }
                 default:
                     imageFileType = "";
             }
@@ -130,6 +138,14 @@ public class CommonServiceImpl implements CommonService {
                 }
                 case "2": {
                     imageFileType = "solution";
+                    break;
+                }
+                case "3": {
+                    imageFileType = "disease";
+                    break;
+                }
+                case "4": {
+                    imageFileType = "office";
                     break;
                 }
                 default:

@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.service;
 
 import org.flightythought.smile.admin.bean.CourseInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.admin.dto.CourseRegistrationDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
@@ -43,4 +44,10 @@ public interface CourseRegistrationService {
      * @param courseId
      */
     void deleteCourseRegistration(Integer courseId);
+
+    /**
+     * 获取课程类型
+     * @return
+     */
+    List<SelectItemOption> getCourseType();
 }

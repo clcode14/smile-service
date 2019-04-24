@@ -46,7 +46,7 @@ public class DiseaseClassEntity extends BaseEntity {
     /**
      * 疾病小类
      */
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
-    @JoinColumn(name = "disease_id")
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "disease_id", insertable = false, updatable = false)
     private List<DiseaseClassDetailEntity> diseaseClassDetails;
 }

@@ -26,24 +26,24 @@ public class DiseaseClassDetailEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "disease_detail_id")
-    private int diseaseDetailId;
+    private Integer diseaseDetailId;
 
     /**
      * 疾病大类ID
      */
-    @Basic
     @Column(name = "disease_id")
-    private int diseaseId;
+    private Integer diseaseId;
 
     /**
      * 编码
      */
-    @Basic
     @Column(name = "number")
     private String number;
 
     /**
-     * 疾病小类类型 0：普通疾病 1：常见疾病
+     * 疾病小类类型
+     * 0：普通疾病
+     * 1：常见疾病
      */
     @Basic
     @Column(name = "type")
@@ -52,8 +52,39 @@ public class DiseaseClassDetailEntity extends BaseEntity {
     /**
      * 疾病小类名称
      */
-    @Basic
     @Column(name = "disease_detail_name")
     private String diseaseDetailName;
+
+    /**
+     * 背景图
+     */
+    @Column(name = "bg_images")
+    private Integer bgImagesId;
+
+    /**
+     * 背景图
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bg_images", updatable = false, insertable = false)
+    private ImagesEntity bgImage;
+
+    /**
+     * 内容
+     */
+    @Column(name = "content", columnDefinition = "text")
+    private String content;
+
+    /**
+     * 图标
+     */
+    @Column(name = "icon")
+    private Integer iconId;
+
+    /**
+     * 图标
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "icon", updatable = false, insertable = false)
+    private ImagesEntity icon;
 
 }

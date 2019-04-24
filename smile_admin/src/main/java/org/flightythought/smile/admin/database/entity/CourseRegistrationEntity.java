@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.flightythought.smile.admin.framework.serializer.JsonLocalDateTimeSerializer;
@@ -31,7 +33,7 @@ public class CourseRegistrationEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "course_id")
-    private int courseId;
+    private Integer courseId;
 
     /**
      * 标题
@@ -45,7 +47,8 @@ public class CourseRegistrationEntity extends BaseEntity {
      */
     @Basic
     @Column(name = "start_time")
-    @JsonSerialize(using = JsonLocalDateTimeSerializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
 
     /**
@@ -61,6 +64,10 @@ public class CourseRegistrationEntity extends BaseEntity {
     @Basic
     @Column(name = "members")
     private int members;
+
+    @Basic
+    @Column(name = "apply_count")
+    private Integer applyCount;
 
     /**
      * 地址
@@ -94,4 +101,17 @@ public class CourseRegistrationEntity extends BaseEntity {
     @JoinTable(name = "tb_course_image", joinColumns = {@JoinColumn(name = "course_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
     private List<ImagesEntity> courseImages;
+
+    /**
+     * 课程类型ID
+     */
+    @Column(name = "type_id")
+    private Integer typeId;
+
+    /**
+     * 课程类型
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id", insertable = false, updatable = false)
+    private CourseTypeEntity courseTypeEntity;
 }

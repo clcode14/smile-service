@@ -3,6 +3,7 @@ package org.flightythought.smile.admin.controller;
 import io.swagger.annotations.*;
 import org.flightythought.smile.admin.bean.CourseInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.admin.dto.CourseRegistrationDTO;
 import org.flightythought.smile.admin.service.CourseRegistrationService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -32,8 +34,20 @@ public class CourseRegistrationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CourseRegistrationController.class);
 
+    @ApiOperation(value = "获取课程类型下拉选", notes = "获取课程类型下拉选")
+    @GetMapping("/courseType")
+    public ResponseBean getCourseType() {
+        try {
+            List<SelectItemOption> result = courseRegistrationService.getCourseType();
+            return ResponseBean.ok("返回课程类型成功", result);
+        } catch (Exception e) {
+            LOGGER.error("获取课程类型失败", e);
+            return ResponseBean.error("返回课程类型失败", e.getMessage());
+        }
+    }
+
     @PostMapping("/add")
-    @ApiOperation(value = "新增或修改课程", notes = "新增或修改课程，新增不需要courseId，修改需传递courseId", position = 1)
+    @ApiOperation(value = "新增课程", notes = "新增课程", position = 1)
     public ResponseBean addCourseRegistration(@RequestBody CourseRegistrationDTO courseRegistrationDTO, @ApiIgnore HttpSession session) {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
@@ -48,7 +62,7 @@ public class CourseRegistrationController {
     }
 
     @PutMapping("/modify")
-    @ApiOperation(value = "修改课程")
+    @ApiOperation(value = "修改课程", notes = "修改课程")
     public ResponseBean modifyCourseRegistration(@RequestBody CourseRegistrationDTO courseRegistrationDTO, @ApiIgnore HttpSession session) {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);

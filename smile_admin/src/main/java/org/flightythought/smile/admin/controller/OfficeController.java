@@ -3,6 +3,7 @@ package org.flightythought.smile.admin.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.flightythought.smile.admin.bean.OfficeInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
 import org.flightythought.smile.admin.dto.OfficeDTO;
@@ -32,7 +33,7 @@ public class OfficeController {
     public ResponseBean findAllOffice(Map<String, String> params,
                                       @ApiIgnore HttpSession session) {
         try {
-            Page<OfficeEntity> office = officeService.findAllOffice(params, session);
+            Page<OfficeInfo> office = officeService.findAllOffice(params, session);
             return ResponseBean.ok("查询成功", office);
         } catch (Exception e) {
             LOG.error("查询机构列表失败", e);
@@ -44,7 +45,7 @@ public class OfficeController {
     @ApiOperation(value = "机构列表", notes = "机构列表", position = 1)
     public ResponseBean findOffice(@PathVariable Long officeId, @ApiIgnore HttpSession session) {
         try {
-            OfficeEntity officeInfo = officeService.findOffice(officeId, session);
+            OfficeInfo officeInfo = officeService.findOffice(officeId, session);
             return ResponseBean.ok("查询成功", officeInfo);
         } catch (Exception e) {
             LOG.error("查询机构列表失败", e);

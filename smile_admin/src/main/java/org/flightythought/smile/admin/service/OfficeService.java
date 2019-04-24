@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service;
 
+import org.flightythought.smile.admin.bean.OfficeInfo;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
 import org.flightythought.smile.admin.dto.OfficeDTO;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,9 @@ public interface OfficeService {
 
     void deleteById(Long officeId, HttpSession session);
 
-    Page<OfficeEntity> findAllOffice(Map<String,String> params, HttpSession session);
+    Page<OfficeInfo> findAllOffice(Map<String,String> params, HttpSession session);
 
-    OfficeEntity findOffice(Long officeId, HttpSession session);
+    OfficeInfo findOffice(Long officeId, HttpSession session);
+
+    Page<OfficeInfo> getOfficeInfo(Page<OfficeEntity> officeEntities);
 }

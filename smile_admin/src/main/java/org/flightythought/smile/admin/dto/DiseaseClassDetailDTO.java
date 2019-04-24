@@ -27,4 +27,16 @@ public class DiseaseClassDetailDTO {
 
     @ApiModelProperty(value = "疾病小类名称")
     private String diseaseDetailName;
+
+    @ApiModelProperty(value = "疾病小类类型 0：普通疾病1，常见疾病")
+    private String type;
+
+    @ApiModelProperty(value = "疾病小类背景图ID")
+    private ImageDTO bgImages;
+
+    @ApiModelProperty(value = "疾病小类描述")
+    private String content;
+
+    @ApiModelProperty(value = "疾病小类图标ID")
+    private ImageDTO icon;
 }

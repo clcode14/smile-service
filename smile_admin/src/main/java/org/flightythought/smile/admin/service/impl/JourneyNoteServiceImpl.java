@@ -1,12 +1,9 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.flightythought.smile.admin.bean.JourneyNormInfo;
 import org.flightythought.smile.admin.bean.JourneyNoteInfo;
-import org.flightythought.smile.admin.bean.NormTypeInfo;
 import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
-import org.flightythought.smile.admin.database.entity.JourneyNormEntity;
 import org.flightythought.smile.admin.database.entity.JourneyNoteEntity;
 import org.flightythought.smile.admin.database.repository.JourneyNormRepository;
 import org.flightythought.smile.admin.database.repository.JourneyNoteRepository;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +46,7 @@ public class JourneyNoteServiceImpl implements JourneyNoteService {
                     String domainPort = platformUtils.getDomainPort();
 
                     ImagesEntity imagesEntity = journeyNote.getCoverImage();
-                    String imageUrlByPath = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String imageUrlByPath = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     journeyNoteInfo.setCoverImageUrl(imageUrlByPath);
                     journeyNoteInfo.setNoteDate(journeyNote.getNoteDate());
 

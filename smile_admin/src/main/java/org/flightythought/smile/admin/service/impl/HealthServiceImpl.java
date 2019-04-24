@@ -74,7 +74,7 @@ public class HealthServiceImpl implements HealthService {
             // 背景图片URL
             ImagesEntity imagesEntity = healthClassEntity.getBgImage();
             if (imagesEntity != null) {
-                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 ImageInfo bgImage = new ImageInfo();
                 bgImage.setId(imagesEntity.getId());
                 bgImage.setName(imagesEntity.getFileName());
@@ -109,7 +109,7 @@ public class HealthServiceImpl implements HealthService {
                 imageInfo.setId(imagesEntity.getId());
                 imageInfo.setSize(imagesEntity.getSize());
                 imageInfo.setName(imagesEntity.getFileName());
-                String imageUrl = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                 imageInfo.setUrl(imageUrl);
                 healthClassInfo.setBgImage(imageInfo);
             }

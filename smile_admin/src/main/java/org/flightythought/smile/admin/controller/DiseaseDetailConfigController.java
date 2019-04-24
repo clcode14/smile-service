@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.flightythought.smile.admin.bean.DiseaseClassDetailInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.DiseaseClassDetailEntity;
@@ -64,9 +65,8 @@ public class DiseaseDetailConfigController {
             @ApiImplicitParam(name = "pageSize", value = "每页显示的个数")
     })
     public ResponseBean getDiseaseDetail(int diseaseId, int pageNumber, int pageSize) {
-        Page<DiseaseClassDetailEntity> result = null;
         try {
-            result = diseaseDetailConfigService.getDiseaseDetails(diseaseId, pageNumber, pageSize);
+            Page<DiseaseClassDetailInfo> result  = diseaseDetailConfigService.getDiseaseDetails(diseaseId, pageNumber, pageSize);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取疾病类目明细失败", e.getMessage());

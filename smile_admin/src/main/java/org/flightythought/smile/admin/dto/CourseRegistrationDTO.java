@@ -45,4 +45,7 @@ public class CourseRegistrationDTO {
 
     @ApiModelProperty(value = "展示图片")
     private List<ImageDTO> courseImages;
+
+    @ApiModelProperty(value = "课程类型ID")
+    private Integer typeId;
 }

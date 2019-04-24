@@ -4,6 +4,8 @@ import org.flightythought.smile.admin.database.entity.DiseaseClassEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Copyright 2018 欧瑞思丹 All rights reserved.
  *
@@ -13,4 +15,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DiseaseClassRepository extends JpaRepository<DiseaseClassEntity, Long> {
     DiseaseClassEntity findByDiseaseId(Integer id);
+
+    List<DiseaseClassEntity> findByDiseaseIdIn(List<Integer> diseaseIds);
 }

@@ -1,11 +1,14 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.flightythought.smile.admin.bean.CourseInfo;
+import org.flightythought.smile.admin.bean.CourseTypeInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.CourseImageRepository;
 import org.flightythought.smile.admin.database.repository.CourseRegistrationRepository;
+import org.flightythought.smile.admin.database.repository.CourseTypeRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.CourseRegistrationDTO;
 import org.flightythought.smile.admin.dto.ImageDTO;
@@ -34,6 +37,8 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private CourseRegistrationRepository courseRegistrationRepository;
     @Autowired
     private CourseImageRepository courseImageRepository;
+    @Autowired
+    private CourseTypeRepository courseTypeRepository;
 
     @Value("${image-url}")
     private String imageRequest;
@@ -41,6 +46,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private String contentPath;
 
     @Override
+    @Transactional
     public CourseRegistrationEntity addCourseRegistration(CourseRegistrationDTO courseRegistrationDTO, HttpSession session) {
         CourseRegistrationEntity courseRegistrationEntity = null;
         Integer courseId = courseRegistrationDTO.getCourseId();
@@ -71,6 +77,8 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         courseRegistrationEntity.setDescription(courseRegistrationDTO.getDescription());
         // 价格
         courseRegistrationEntity.setPrice(courseRegistrationDTO.getPrice());
+        // 课程类型ID
+        courseRegistrationEntity.setTypeId(courseRegistrationDTO.getTypeId());
         ImageDTO coverImage = courseRegistrationDTO.getCoverImage();
         if (coverImage != null) {
             // 封面图片
@@ -148,10 +156,19 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             }
             courseInfo.setCourseImages(courseImages);
 
+            // 课程类型
+            CourseTypeEntity courseTypeEntity = courseRegistrationEntity.getCourseTypeEntity();
+            if (courseTypeEntity != null) {
+                CourseTypeInfo courseTypeInfo = new CourseTypeInfo();
+                // 类型名称
+                courseTypeInfo.setCourseTypeName(courseTypeEntity.getCourseTypeName());
+                // 类型ID
+                courseTypeInfo.setTypeId(courseTypeEntity.getId());
+                courseInfo.setCourseType(courseTypeInfo);
+            }
             courseInfos.add(courseInfo);
         });
-        PageImpl<CourseInfo> result = new PageImpl<>(courseInfos, pageable, courseRegistrationEntities.getTotalElements());
-        return result;
+        return new PageImpl<>(courseInfos, pageable, courseRegistrationEntities.getTotalElements());
     }
 
     @Override
@@ -208,6 +225,16 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         }
         courseInfo.setCourseImages(courseImages);
 
+        // 课程类型
+        CourseTypeEntity courseTypeEntity = courseRegistrationEntity.getCourseTypeEntity();
+        if (courseTypeEntity != null) {
+            CourseTypeInfo courseTypeInfo = new CourseTypeInfo();
+            // 类型名称
+            courseTypeInfo.setCourseTypeName(courseTypeEntity.getCourseTypeName());
+            // 类型ID
+            courseTypeInfo.setTypeId(courseTypeEntity.getId());
+            courseInfo.setCourseType(courseTypeInfo);
+        }
         return courseInfo;
     }
 
@@ -215,5 +242,18 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     @Transactional
     public void deleteCourseRegistration(Integer courseId) {
         courseRegistrationRepository.deleteById(courseId);
+    }
+
+    @Override
+    public List<SelectItemOption> getCourseType() {
+        List<CourseTypeEntity> courseTypeEntities = courseTypeRepository.findAll();
+        List<SelectItemOption> result = new ArrayList<>();
+        courseTypeEntities.forEach(courseTypeEntity -> {
+            SelectItemOption selectItemOption = new SelectItemOption();
+            selectItemOption.setKey(courseTypeEntity.getId() + "");
+            selectItemOption.setValue(courseTypeEntity.getCourseTypeName());
+            result.add(selectItemOption);
+        });
+        return result;
     }
 }

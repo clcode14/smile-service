@@ -33,7 +33,7 @@ public class BannerServiceImpl implements HomeBannerService {
                 .map(homeBannerEntity -> {
                     String domainPort = platformUtils.getDomainPort();
                     ImagesEntity imagesEntity = homeBannerEntity.getImagesEntity();
-                    String imageUrlByPath = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String imageUrlByPath = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     imagesEntity.setPath(imageUrlByPath);
                     homeBannerEntity.setImagesEntity(imagesEntity);
                     return homeBannerEntity;
@@ -47,7 +47,7 @@ public class BannerServiceImpl implements HomeBannerService {
                 .ifPresent(homeBanner -> {
                     String domainPort = platformUtils.getDomainPort();
                     ImagesEntity imagesEntity = homeBanner.getImagesEntity();
-                    String imageUrlByPath = platformUtils.getImageUrlByPath(imagesEntity.getPath(), domainPort);
+                    String imageUrlByPath = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
                     imagesEntity.setPath(imageUrlByPath);
                     homeBanner.setImagesEntity(imagesEntity);
                     homeBannerEntity.set(homeBanner);
