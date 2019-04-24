@@ -79,7 +79,7 @@ public class SolutionServiceImpl implements SolutionService {
         SolutionEntity solutionEntity;
         if (isUpdate) {
             // 修改解决方案
-            solutionEntity = solutionRepository.findById(solutionId);
+            solutionEntity = solutionRepository.findById(solutionId).get();
             // 修改者
             solutionEntity.setUpdateUserName(sysUserEntity.getLoginName());
             // 删除相关课程和相关配图
@@ -118,7 +118,7 @@ public class SolutionServiceImpl implements SolutionService {
 
             //获取相关机构
             List<SolutionOfficeEntity> solutionOfficeEntities = Lists.newArrayList();
-            List<Integer> officeIds = solutionDTO.getOfficeIds();
+            List<Long> officeIds = solutionDTO.getOfficeIds();
             officeIds.forEach(officeId -> {
                 SolutionOfficeEntity solutionOfficeEntity = new SolutionOfficeEntity();
                 solutionOfficeEntity.setOfficeId(officeId);
@@ -138,7 +138,7 @@ public class SolutionServiceImpl implements SolutionService {
             });
             solutionImageRepository.saveAll(solutionImageEntities);
 
-            return solutionRepository.findById(solutionEntity.getId());
+            return solutionRepository.findById(solutionEntity.getId()).get();
         }
         return null;
     }
@@ -150,7 +150,7 @@ public class SolutionServiceImpl implements SolutionService {
         Integer solutionId = solutionDTO.getId();
         SolutionEntity solutionEntity;
         // 修改解决方案
-        solutionEntity = solutionRepository.findById(solutionId);
+        solutionEntity = solutionRepository.findById(solutionId).get();
         // 修改者
         solutionEntity.setUpdateUserName(sysUserEntity.getLoginName());
         // 删除相关课程和相关配图
@@ -184,7 +184,7 @@ public class SolutionServiceImpl implements SolutionService {
 
             //获取相关机构
             List<SolutionOfficeEntity> solutionOfficeEntities = Lists.newArrayList();
-            List<Integer> officeIds = solutionDTO.getOfficeIds();
+            List<Long> officeIds = solutionDTO.getOfficeIds();
             officeIds.forEach(officeId -> {
                 SolutionOfficeEntity solutionOfficeEntity = new SolutionOfficeEntity();
                 solutionOfficeEntity.setOfficeId(officeId);
@@ -204,7 +204,7 @@ public class SolutionServiceImpl implements SolutionService {
             });
             solutionImageRepository.saveAll(solutionImageEntities);
 
-            return solutionRepository.findById(solutionEntity.getId());
+            return solutionRepository.findById(solutionEntity.getId()).get();
         }
         return null;
     }
@@ -283,7 +283,7 @@ public class SolutionServiceImpl implements SolutionService {
     public SolutionEntity findSolution(Integer id, HttpSession session) {
         SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
         String domainPort = sysParameterEntity.getParameterValue();
-        return Optional.ofNullable(solutionRepository.findById(id))
+        return solutionRepository.findById(id)
                 .map(solutionEntity -> {
                     List<ImagesEntity> images = solutionEntity.getImages();
                     List<ImagesEntity> newImages = images.stream()

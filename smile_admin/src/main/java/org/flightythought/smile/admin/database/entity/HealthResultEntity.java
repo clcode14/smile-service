@@ -10,15 +10,15 @@ import javax.persistence.*;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName SolutionCourseEntity
- * @CreateTime 2019/4/1 21:42
+ * @ClassName HealthEntity
+ * @CreateTime 2019/4/9 17:43
  * @Description: TODO
  */
-@Table(name = "tb_solution_office")
 @Entity
+@Table(name = "tb_health_result")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SolutionOfficeEntity {
+public class HealthResultEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -26,9 +26,15 @@ public class SolutionOfficeEntity {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "solution_id")
-    private Integer solutionId;
+    /**
+     * 编码
+     */
+    @Column(name = "number")
+    private String number;
+    /**
+     * 名称
+     */
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "office_id")
-    private Long officeId;
 }

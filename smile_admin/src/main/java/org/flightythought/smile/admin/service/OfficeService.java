@@ -13,9 +13,9 @@ public interface OfficeService {
 
     OfficeEntity modify(OfficeDTO officeDTO, HttpSession session);
 
-    void deleteById(Integer officeId, HttpSession session);
+    void deleteById(Long officeId, HttpSession session);
 
     Page<OfficeEntity> findAllOffice(Map<String,String> params, HttpSession session);
 
-    OfficeEntity findOffice(Integer officeId, HttpSession session);
+    OfficeEntity findOffice(Long officeId, HttpSession session);
 }

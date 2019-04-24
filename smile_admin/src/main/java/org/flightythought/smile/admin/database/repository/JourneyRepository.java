@@ -1,6 +1,6 @@
 package org.flightythought.smile.admin.database.repository;
 
-import org.flightythought.smile.admin.database.entity.SolutionEntity;
+import org.flightythought.smile.admin.database.entity.JourneyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,14 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName SolutionRepository
- * @CreateTime 2019/3/27 22:00
- * @Description: 解决方案持久层
+ * @ClassName JourneyRepository
+ * @CreateTime 2019/4/10 2:43
+ * @Description: TODO
  */
 @Repository
-public interface SolutionRepository extends JpaRepository<SolutionEntity, Integer> {
+public interface JourneyRepository extends JpaRepository<JourneyEntity, Integer> {
     @Transactional
-    @Query("update SolutionEntity s set s.recoverNumber=s.recoverNumber-1 where s.id=?1")
+    @Query("update JourneyEntity j set j.audit=true where j.journeyId=?1")
     @Modifying
-    void updateRecoverNum(Integer solutionId);
+    void updateCheckStatus(Integer journeyId);
 }

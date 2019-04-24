@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tb_health_norm_type")
@@ -23,4 +24,20 @@ public class HealthNormTypeEntity extends BaseEntity {
 
     @Column(name = "norm_name")
     private String normName;
+
+    @Column(name = "unit")
+    private String unit;
+
+    @Column(name = "max")
+    private Double max;
+
+    @Column(name = "min")
+    private Double min;
+
+    @Column(name = "step")
+    private Double step;
+
+    @Column(name = "input_type")
+    private Integer inputType;
+
 }

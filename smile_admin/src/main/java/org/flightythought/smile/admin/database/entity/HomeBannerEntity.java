@@ -6,19 +6,11 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
-/**
- * Copyright 2019 Flighty-Thought All rights reserved.
- *
- * @Author: LiLei
- * @ClassName SolutionCourseEntity
- * @CreateTime 2019/4/1 21:42
- * @Description: TODO
- */
-@Table(name = "tb_solution_office")
 @Entity
+@Table(name = "tb_home_banner")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SolutionOfficeEntity {
+public class HomeBannerEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -26,9 +18,17 @@ public class SolutionOfficeEntity {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "solution_id")
-    private Integer solutionId;
+    private String title;
 
-    @Column(name = "office_id")
-    private Long officeId;
+    private Integer sort;
+
+    private String link;
+
+    @Column(name = "image_id")
+    private Integer imageId;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "image_id", insertable = false, updatable = false)
+    public ImagesEntity imagesEntity;
+
 }

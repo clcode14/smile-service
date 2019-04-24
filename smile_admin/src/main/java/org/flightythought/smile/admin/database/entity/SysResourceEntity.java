@@ -72,8 +72,8 @@ public class SysResourceEntity extends BaseEntity {
      * 状态
      */
     @Basic
-    @Column(name = "state")
-    private int state;
+    @Column(name = "status")
+    private int status;
 
     /**
      * 资源类型
