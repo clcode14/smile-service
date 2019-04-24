@@ -40,6 +40,13 @@ public class DynamicDetailsEntity extends BaseEntity {
     private Long userId;
 
     /**
+     * 用户
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
+
+    /**
      * 转发个数
      */
     @Column(name = "forward_num")

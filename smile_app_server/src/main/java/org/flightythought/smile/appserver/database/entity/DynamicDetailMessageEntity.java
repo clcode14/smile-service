@@ -53,22 +53,22 @@ public class DynamicDetailMessageEntity extends BaseEntity {
     private Long toUserId;
 
     /**
-     * 接收者是否阅读
+     * 点赞个数
      */
-    @Column(name = "read")
-    private Boolean read;
+    @Column(name = "like_num")
+    private Integer likeNum;
 
     /**
-     * 父级信息
+     * 接收者是否阅读
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", updatable = false, insertable = false)
-    private DynamicDetailMessageEntity parentMessage;
+    @Column(name = "is_read")
+    private Boolean read;
 
     /**
      * 下级信息
      */
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "parentMessage")
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
     private List<DynamicDetailMessageEntity> childMessage;
 
     /**

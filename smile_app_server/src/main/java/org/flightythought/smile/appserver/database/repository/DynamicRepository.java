@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DynamicRepository extends JpaRepository<DynamicEntity, Long> {
+    DynamicEntity findByDynamicId(Integer dynamicId);
 }
