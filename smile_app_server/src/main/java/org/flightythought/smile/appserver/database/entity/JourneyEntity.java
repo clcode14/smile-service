@@ -132,6 +132,14 @@ public class JourneyEntity extends BaseEntity {
     private List<HealthEntity> healthClassDetails;
 
     /**
+     * 旅程关联的方式结果
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_health", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "health_result_id", nullable = false, updatable = false)})
+    private List<HealthResultEntity> healthResults;
+
+    /**
      * 体检报告
      */
     @ManyToMany(fetch = FetchType.LAZY)

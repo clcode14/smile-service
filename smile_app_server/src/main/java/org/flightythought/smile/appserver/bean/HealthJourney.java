@@ -18,6 +18,11 @@ public class HealthJourney extends HealthJourneySimple {
     private List<HealthClass> healthClasses;
 
     /**
+     * 养生结果
+     */
+    private List<HealthResultSimple> healthResult;
+
+    /**
      * 旅程体检指标
      */
     private List<JourneyNorm> journeyNorm;

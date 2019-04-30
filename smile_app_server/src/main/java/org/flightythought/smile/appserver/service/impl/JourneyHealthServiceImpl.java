@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class JourneyHealthServiceImpl implements JourneyHealthService {
@@ -202,6 +203,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setReadNum(0);
         // 封面图片ID
         journeyEntity.setCoverImageId(healthJourneyStartDTO.getCoverImageId());
+        // 是否审核
+        journeyEntity.setAudit(false);
         // 保存养生旅程
         journeyEntity = journeyRepository.save(journeyEntity);
         // 获取体检指标
@@ -500,11 +503,23 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                     }
                     // 内容介绍
                     healthClass.setContent(healthEntity.getContent());
-                    // 养生对应的解决方案。。。
+                    // 养生对应的解决方案
                     healthClasses.add(healthClass);
                 });
             }
             healthJourney.setHealthClasses(healthClasses);
+            // 旅程对应养生成果
+            List<HealthResultEntity> healthResultEntities = journeyEntity.getHealthResults();
+            if (healthResultEntities != null && healthResultEntities.size() > 0) {
+                List<HealthResultSimple> healthResultSimples = healthResultEntities.stream().map(healthResultEntity -> {
+                    HealthResultSimple healthResultSimple = new HealthResultSimple();
+                    healthResultSimple.setId(healthResultEntity.getId());
+                    healthResultSimple.setName(healthResultEntity.getName());
+                    healthResultSimple.setNumber(healthResultEntity.getNumber());
+                    return healthResultSimple;
+                }).collect(Collectors.toList());
+                healthJourney.setHealthResult(healthResultSimples);
+            }
             return healthJourney;
         }
         return null;
