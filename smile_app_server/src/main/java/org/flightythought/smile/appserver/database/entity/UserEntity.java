@@ -61,6 +61,18 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     private String nickName;
 
     /**
+     * AuthId
+     */
+    @Column(name = "auth_id")
+    private String authId;
+
+    /**
+     * 第三方登陆类型
+     */
+    @Column(name = "third_type")
+    private String thirdType;
+
+    /**
      * 身份证
      */
     @Column(name = "id_card")

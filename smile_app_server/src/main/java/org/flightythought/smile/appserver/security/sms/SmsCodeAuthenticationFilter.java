@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Copyright 2017 Flighty-Thought All rights reserved.
+ * Copyright 2019 Flighty-Thought All rights reserved.
  * <p>
  * 短信登录的鉴权过滤器，模仿 UsernamePasswordAuthenticationFilter实现
  *
@@ -29,11 +29,6 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
      */
     public static final String SPRING_SECURITY_FORM_MOBILE_KEY = "phone";
 
-    /**
-     * 是否仅 POST 方式
-     */
-    private boolean postOnly = true;
-
     public SmsCodeAuthenticationFilter() {
         // 短信登录的请求 post 方式的 /sms/login
         super(new AntPathRequestMatcher("/sms/login", "POST"));
@@ -48,8 +43,11 @@ public class SmsCodeAuthenticationFilter extends AbstractAuthenticationProcessin
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        if (postOnly && !request.getMethod().equals("POST")) {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        /**
+         * 是否仅 POST 方式
+         */
+        if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
         String phone = request.getParameter(SPRING_SECURITY_FORM_MOBILE_KEY);

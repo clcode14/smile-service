@@ -9,11 +9,17 @@ import org.flightythought.smile.appserver.database.entity.DynamicEntity;
 import org.flightythought.smile.appserver.dto.AddDynamicDTO;
 import org.flightythought.smile.appserver.dto.AddDynamicDetailDTO;
 import org.flightythought.smile.appserver.dto.DynamicDetailMessageDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface DynamicService {
     DynamicSimple addDynamic(AddDynamicDTO addDynamicDTO);
+
+    Page<DynamicSimple> getMyDynamic(PageFilterDTO pageFilterDTO);
+
+    Page<DynamicEntity> getDynamics(PageFilterDTO pageFilterDTO, Long userId, Boolean hidden);
 
     DynamicSimple getDynamicSimple(DynamicEntity dynamicEntity);
 

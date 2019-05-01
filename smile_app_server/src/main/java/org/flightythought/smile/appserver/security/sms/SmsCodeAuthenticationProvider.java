@@ -7,6 +7,7 @@ import org.flightythought.smile.appserver.common.redis.RedisUtil;
 import org.flightythought.smile.appserver.common.utils.AesUtils;
 import org.flightythought.smile.appserver.common.utils.IpUtil;
 import org.flightythought.smile.appserver.common.utils.JwtTokenUtil;
+import org.flightythought.smile.appserver.common.utils.MD5Util;
 import org.flightythought.smile.appserver.config.properties.AppProperties;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.UserRepository;
@@ -63,8 +64,11 @@ public class SmsCodeAuthenticationProvider implements AuthenticationProvider {
             userEntity = new UserEntity();
             // 电话
             userEntity.setMobile(phone);
-            // 用户名(默认手机号)
-            userEntity.setUsername(phone);
+            // 用户名(默认手机号MD5加密)
+            userEntity.setUsername(MD5Util.md5(phone));
+            // 昵称（手机用户+5位随机数）
+            int code = (int) Math.ceil(Math.random() * 90000 + 10000);
+            userEntity.setNickName("手机用户" + code);
             // 登录时间
             userEntity.setLoginTime(LocalDateTime.now());
             // 登录次数

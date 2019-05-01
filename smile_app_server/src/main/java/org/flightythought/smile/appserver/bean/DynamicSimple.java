@@ -2,6 +2,8 @@ package org.flightythought.smile.appserver.bean;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DynamicSimple {
 
@@ -39,4 +41,9 @@ public class DynamicSimple {
      * 是否隐藏
      */
     private Boolean hidden;
+
+    /**
+     * 文件集合
+     */
+    private List<FileInfo> files;
 }

@@ -6,6 +6,7 @@ import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.bean.UserInfo;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.dto.UserHeightWeightBirthdayDTO;
+import org.flightythought.smile.appserver.dto.UserInfoDTO;
 import org.flightythought.smile.appserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,4 +46,11 @@ public class UserController {
             return ResponseBean.error("获取用户信息失败", e.getMessage());
         }
     }
+
+    @PostMapping("/userDetailInfoModify")
+    @ApiOperation(value = "修改当前登陆用户信息", notes = "修改当前登陆用户信息，请谨慎传参，参数会被替换（头像不会被替换）")
+    public ResponseBean updateUserInfoDetails(@RequestBody UserInfoDTO userInfoDTO) {
+        return null;
+    }
+
 }

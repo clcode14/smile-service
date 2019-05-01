@@ -1,11 +1,13 @@
 package org.flightythought.smile.appserver.config;
 
 import org.flightythought.smile.appserver.filter.JwtAuthenticationTokenFilter;
-import org.flightythought.smile.appserver.security.*;
+import org.flightythought.smile.appserver.security.MyAuthenticationEntryPoint;
+import org.flightythought.smile.appserver.security.MyPasswordEncoder;
 import org.flightythought.smile.appserver.security.handler.CustomerAuthenticationFailureHandler;
 import org.flightythought.smile.appserver.security.handler.CustomerAuthenticationSuccessHandler;
 import org.flightythought.smile.appserver.security.handler.MyLogoutSuccessHandler;
 import org.flightythought.smile.appserver.security.sms.SmsCodeAuthenticationSecurityConfig;
+import org.flightythought.smile.appserver.security.third.ThirdAuthenticationSecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -33,6 +35,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private SmsCodeAuthenticationSecurityConfig smsCodeAuthenticationSecurityConfig;
     @Autowired
+    private ThirdAuthenticationSecurityConfig thirdAuthenticationSecurityConfig;
+    @Autowired
     private MyAuthenticationEntryPoint myAuthenticationEntryPoint;
     @Autowired
     private MyLogoutSuccessHandler logoutSuccessHandler;
@@ -49,7 +53,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.httpBasic().authenticationEntryPoint(myAuthenticationEntryPoint).and()
-                .apply(smsCodeAuthenticationSecurityConfig).and().authorizeRequests()
+                .apply(smsCodeAuthenticationSecurityConfig).and()
+                .apply(thirdAuthenticationSecurityConfig).and()
+                .authorizeRequests()
                 // 如果有允许匿名的url，填在下面
                 .antMatchers("/sms/**").permitAll()
                 .anyRequest().authenticated()

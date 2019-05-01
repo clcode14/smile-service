@@ -35,12 +35,10 @@ import java.util.HashMap;
 public class CustomerAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private RedisUtil redisUtil;
     private static final Logger LOG = LoggerFactory.getLogger(CustomerAuthenticationSuccessHandler.class);
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         UserEntity userEntity = (UserEntity) authentication.getPrincipal();
         LOG.info("用户：{}，登录成功", userEntity.getUsername());
         ResponseBean responseBean = ResponseBean.ok("登录成功", userEntity);

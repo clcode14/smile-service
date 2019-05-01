@@ -10,10 +10,12 @@ import org.flightythought.smile.appserver.database.entity.DynamicDetailMessageEn
 import org.flightythought.smile.appserver.dto.AddDynamicDTO;
 import org.flightythought.smile.appserver.dto.AddDynamicDetailDTO;
 import org.flightythought.smile.appserver.dto.DynamicDetailMessageDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.DynamicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +39,18 @@ public class DynamicController {
         } catch (Exception e) {
             LOG.error("新增动态失败", e);
             return ResponseBean.error("新增动态失败", e.getMessage());
+        }
+    }
+
+    @PostMapping("/myDynamic")
+    @ApiOperation(value = "获取我的动态", notes = "获取我的动态")
+    public ResponseBean getMyDynamic(PageFilterDTO pageFilterDTO) {
+        try {
+            Page<DynamicSimple> result = dynamicService.getMyDynamic(pageFilterDTO);
+            return ResponseBean.ok("获取我的动态成功", result);
+        } catch (Exception e) {
+            LOG.error("获取我的动态失败", e);
+            return ResponseBean.error("获取我的动态失败", e.getMessage());
         }
     }
 

@@ -1,29 +1,38 @@
 package org.flightythought.smile.appserver.service.impl;
 
-import org.flightythought.smile.appserver.bean.DynamicDetailMessageSimple;
-import org.flightythought.smile.appserver.bean.DynamicDetailSimple;
-import org.flightythought.smile.appserver.bean.DynamicSimple;
-import org.flightythought.smile.appserver.bean.UserInfo;
+import org.flightythought.smile.appserver.bean.*;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.flightythought.smile.appserver.dto.AddDynamicDTO;
 import org.flightythought.smile.appserver.dto.AddDynamicDetailDTO;
 import org.flightythought.smile.appserver.dto.DynamicDetailMessageDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.DynamicService;
 import org.flightythought.smile.appserver.service.UserService;
+import org.hibernate.query.internal.NativeQueryImpl;
+import org.hibernate.type.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DynamicServiceImpl implements DynamicService {
 
     @Autowired
     private PlatformUtils platformUtils;
+    @Autowired
+    private EntityManager entityManager;
     @Autowired
     private DynamicRepository dynamicRepository;
     @Autowired
@@ -80,6 +89,67 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
+    public Page<DynamicSimple> getMyDynamic(PageFilterDTO pageFilterDTO) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        Long userId = userEntity.getId();
+        Page<DynamicEntity> dynamicEntities = getDynamics(pageFilterDTO, userId, null);
+        if (dynamicEntities != null) {
+            long total = dynamicEntities.getTotalElements();
+            Pageable pageable = dynamicEntities.getPageable();
+            List<DynamicSimple> dynamicSimples = dynamicEntities.getContent().stream().map(this::getDynamicSimple).collect(Collectors.toList());
+            return new PageImpl<>(dynamicSimples, pageable, total);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Page<DynamicEntity> getDynamics(PageFilterDTO pageFilterDTO, Long userId, Boolean hidden) {
+        // 组装SQL语句
+        String totalSql = "SELECT COUNT(*) as total FROM (";
+        String sql = "SELECT\n" +
+                "  d.`dynamic_id`\n" +
+                "FROM\n" +
+                "  `tb_dynamic` d\n" +
+                "WHERE 1 = 1 ";
+        if (userId != null) {
+            sql += " AND d.`user_id` = " + userId;
+        }
+        if (hidden != null) {
+            if (hidden) {
+                // 获取隐藏的动态
+                sql += " AND d.`hidden` = 1";
+            } else {
+                sql += " AND d.`hidden` = 0";
+            }
+        }
+        totalSql += sql + ") T";
+        // 获取ToTal总数
+        Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
+        if (total == 0) {
+            throw new FlightyThoughtException("未查询到动态");
+        }
+        // 是否存在分页查询
+        Integer pageNumber = pageFilterDTO.getPageNumber();
+        Integer pageSize = pageFilterDTO.getPageSize();
+        Pageable pageable;
+        if (pageNumber != null && pageNumber > 0 && pageSize != null && pageSize > 0) {
+            sql += " LIMIT " + (pageNumber - 1) * pageSize + "," + pageSize;
+            pageable = PageRequest.of(pageNumber - 1, pageSize);
+        } else {
+            pageable = PageRequest.of(0, total);
+        }
+        // 查询结果
+        List<Integer> dynamicIds = entityManager.createNativeQuery(sql)
+                .unwrap(NativeQueryImpl.class)
+                .addScalar("dynamic_id", IntegerType.INSTANCE)
+                .list();
+        List<DynamicEntity> dynamicEntities = dynamicRepository.findByDynamicIdIn(dynamicIds);
+        return new PageImpl<>(dynamicEntities, pageable, total);
+    }
+
+    @Override
     public DynamicSimple getDynamicSimple(DynamicEntity dynamicEntity) {
         if (dynamicEntity != null) {
             DynamicSimple dynamicSimple = new DynamicSimple();
@@ -99,6 +169,14 @@ public class DynamicServiceImpl implements DynamicService {
             dynamicSimple.setReadNum(dynamicEntity.getReadNum());
             // 是否隐藏
             dynamicSimple.setHidden(dynamicEntity.getHidden());
+            // 文件
+            List<FilesEntity> filesEntities = dynamicEntity.getFiles();
+            List<FileInfo> fileInfos = new ArrayList<>();
+            if (filesEntities != null && filesEntities.size() > 0) {
+                String domainPort = platformUtils.getDomainPort();
+                filesEntities.forEach(filesEntity -> fileInfos.add(platformUtils.getFileInfo(filesEntity, domainPort)));
+            }
+            dynamicSimple.setFiles(fileInfos);
             return dynamicSimple;
         }
         return null;
