@@ -63,4 +63,9 @@ public class UserInfo {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
+
+    /**
+     * 性别
+     */
+    private Integer sex;
 }

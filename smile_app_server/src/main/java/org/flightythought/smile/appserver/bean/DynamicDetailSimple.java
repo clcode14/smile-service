@@ -1,6 +1,12 @@
 package org.flightythought.smile.appserver.bean;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -57,4 +63,21 @@ public class DynamicDetailSimple {
      * 是否公开
      */
     private Boolean hidden;
+
+    /**
+     * 动态明细文件
+     */
+    private List<FileInfo> files;
+
+    /**
+     * 创建时间
+     */
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime createTime;
+
+    /**
+     * 自己是否点赞标志位
+     */
+    private boolean like;
 }

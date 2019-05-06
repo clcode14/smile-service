@@ -3,6 +3,7 @@ package org.flightythought.smile.appserver.service;
 import org.flightythought.smile.appserver.bean.UserInfo;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.dto.UserHeightWeightBirthdayDTO;
+import org.flightythought.smile.appserver.dto.UserInfoDTO;
 
 public interface UserService {
     /**
@@ -25,4 +26,11 @@ public interface UserService {
      * @param userId 用户ID
      */
     UserInfo getUserInfo(Long userId);
+
+    /**
+     * 修改用户信息
+     * @param userInfo
+     * @return
+     */
+    UserInfo updateUserInfoDetails(UserInfoDTO userInfoDTO);
 }

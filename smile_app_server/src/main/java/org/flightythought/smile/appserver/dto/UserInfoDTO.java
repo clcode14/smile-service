@@ -21,9 +21,6 @@ import java.time.LocalDate;
 @Data
 public class UserInfoDTO {
 
-    @ApiModelProperty(value = "手机号")
-    private String mobile;
-
     @ApiModelProperty(value = "用户昵称")
     private String nickName;
 
@@ -40,4 +37,7 @@ public class UserInfoDTO {
 
     @ApiModelProperty(value = "体重")
     private Double weight;
+
+    @ApiModelProperty(value = "性别：0：男，1：女")
+    private Integer sex;
 }

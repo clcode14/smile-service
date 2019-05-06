@@ -50,7 +50,13 @@ public class UserController {
     @PostMapping("/userDetailInfoModify")
     @ApiOperation(value = "修改当前登陆用户信息", notes = "修改当前登陆用户信息，请谨慎传参，参数会被替换（头像不会被替换）")
     public ResponseBean updateUserInfoDetails(@RequestBody UserInfoDTO userInfoDTO) {
-        return null;
+        try {
+            UserInfo result = userService.updateUserInfoDetails(userInfoDTO);
+            return ResponseBean.ok("修改当前登陆用户信息成功", result);
+        } catch (Exception e) {
+            LOG.error("修改当前登陆用户信息失败", e);
+            return ResponseBean.error("修改当前登陆用户信息失败", e.getMessage());
+        }
     }
 
 }

@@ -1,7 +1,11 @@
 package org.flightythought.smile.appserver.bean;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -46,4 +50,11 @@ public class DynamicSimple {
      * 文件集合
      */
     private List<FileInfo> files;
+
+    /**
+     * 创建时间
+     */
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime createTime;
 }

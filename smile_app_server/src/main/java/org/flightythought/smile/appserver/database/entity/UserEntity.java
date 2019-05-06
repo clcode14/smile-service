@@ -136,6 +136,12 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 
+    /**
+     * 性别 0：男 1：女
+     */
+    @Column(name = "sex")
+    private Integer sex;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

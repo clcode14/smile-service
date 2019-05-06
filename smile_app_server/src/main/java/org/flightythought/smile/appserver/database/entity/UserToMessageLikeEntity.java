@@ -6,11 +6,19 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
+/**
+ * Copyright 2019 Oriental Standard All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName null.java
+ * @CreateTime 2019/5/1 15:28
+ * @Description: TODO
+ */
 @Entity
-@Table(name = "tb_user_to_dynamic_detail_like")
+@Table(name = "tb_user_to_message_like")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UserToDynamicDetailLikeEntity {
+public class UserToMessageLikeEntity {
 
     /**
      * 自增主键
@@ -28,9 +36,8 @@ public class UserToDynamicDetailLikeEntity {
     private Long userId;
 
     /**
-     * 动态明细ID
+     * 消息ID
      */
-    @Column(name = "dynamic_detail_id")
-    private Integer dynamicDetailId;
-
+    @Column(name = "message_id")
+    private Integer messageId;
 }

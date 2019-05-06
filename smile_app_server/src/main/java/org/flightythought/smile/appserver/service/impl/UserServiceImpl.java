@@ -6,6 +6,7 @@ import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.database.repository.UserRepository;
 import org.flightythought.smile.appserver.dto.UserHeightWeightBirthdayDTO;
+import org.flightythought.smile.appserver.dto.UserInfoDTO;
 import org.flightythought.smile.appserver.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,8 @@ public class UserServiceImpl implements UserService {
             userInfo.setWeight(userEntity.getBodyWeight());
             // 生日
             userInfo.setBirthday(userEntity.getBirthday());
+            // 性别
+            userInfo.setSex(userEntity.getSex());
             return userInfo;
         }
         return null;
@@ -80,6 +83,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserInfo getUserInfo(Long userId) {
         UserEntity userEntity = userRepository.getOne(userId);
+        return getUserInfo(userEntity);
+    }
+
+    @Override
+    public UserInfo updateUserInfoDetails(UserInfoDTO userInfoDTO) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        // 查询用户信息
+        userEntity = userRepository.getOne(userEntity.getId());
+        // 修改用户信息
+        // 用户昵称
+        userEntity.setNickName(userInfoDTO.getNickName());
+        // 头像ID
+        userEntity.setPhoto(userInfoDTO.getPhotoId());
+        // 生日
+        userEntity.setBirthday(userInfoDTO.getBirthday());
+        // 身高
+        userEntity.setHeight(userInfoDTO.getHeight());
+        // 体重
+        userEntity.setBodyWeight(userInfoDTO.getWeight());
+        // 性别
+        userEntity.setSex(userInfoDTO.getSex());
+        userEntity = userRepository.save(userEntity);
         return getUserInfo(userEntity);
     }
 }
