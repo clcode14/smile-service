@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Table(name = "tb_recover_case")
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class RecoverCaseEntity extends BaseEntity {

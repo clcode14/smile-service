@@ -14,7 +14,7 @@ spring:
   # 资源映射地址，图片存放的真实路径
   resources:
     static-locations: file:D://cache/smile/
-# MySQL 配置
+  # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://47.102.126.36:3306/smile?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
@@ -37,3 +37,14 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+ali-oss:
+  #  查看你的bucketname的endpoint地址，如：http://oss-cn-shenzhen.aliyuncs.com
+  endpoint: http://oss-cn-shanghai.aliyuncs.com
+  #  你的bucketName
+  bucketName: flighty-thought-oss-demo
+  #  你的accessKeyId
+  accessKeyId: LTAICSkNdBY7Z0KK
+  #  你的accessKeySecret
+  accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
+

@@ -15,4 +15,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HealthRepository extends JpaRepository<HealthEntity, Long> {
     HealthEntity findByHealthId(Integer healthId);
+
+    void deleteByHealthId(Integer healthId);
 }

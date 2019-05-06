@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.flightythought.smile.admin.bean.DiseaseClass;
 import org.flightythought.smile.admin.bean.DiseaseClassDetailInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.common.GlobalConstant;
@@ -14,6 +15,7 @@ import org.flightythought.smile.admin.dto.DiseaseClassDetailDTO;
 import org.flightythought.smile.admin.service.DiseaseDetailConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -47,9 +49,8 @@ public class DiseaseDetailConfigController {
     @GetMapping("/majorClass")
     @ApiOperation(value = "获取疾病类目", notes = "获取疾病类目", position = 1)
     public ResponseBean getDiseaseClass() {
-        List<DiseaseClassEntity> diseaseClassEntities;
         try {
-            diseaseClassEntities = diseaseDetailConfigService.getDiseaseClass();
+            List<DiseaseClass> diseaseClassEntities = diseaseDetailConfigService.getDiseaseClass();
             return ResponseBean.ok("返回成功", diseaseClassEntities);
         } catch (Exception e) {
             LOG.error("获取疾病类目失败", e.getMessage());
@@ -79,8 +80,8 @@ public class DiseaseDetailConfigController {
     public ResponseBean saveDiseaseDetail(@RequestBody DiseaseClassDetailDTO diseaseClassDetailDTO, @ApiIgnore HttpSession session) {
         try {
             SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-            DiseaseClassDetailEntity result = diseaseDetailConfigService.saveDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
-            return ResponseBean.ok("新增成功", result);
+            diseaseDetailConfigService.saveDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
+            return ResponseBean.ok("新增成功");
         } catch (Exception e) {
             LOG.error("新增疾病小类失败", e.getMessage());
             return ResponseBean.error("新增失败", e.getMessage());
@@ -90,11 +91,10 @@ public class DiseaseDetailConfigController {
     @PutMapping("/updateDiseaseDetail")
     @ApiOperation(value = "修改疾病小类", notes = "修改疾病小类", position = 4)
     public ResponseBean updateDiseaseDetail(@RequestBody DiseaseClassDetailDTO diseaseClassDetailDTO, @ApiIgnore HttpSession session) {
-        DiseaseClassDetailEntity result;
         try {
             SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-            result = diseaseDetailConfigService.updateDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
-            return ResponseBean.ok("修改成功", result);
+            diseaseDetailConfigService.updateDiseaseClassDetail(sysUserEntity, diseaseClassDetailDTO);
+            return ResponseBean.ok("修改成功");
         } catch (Exception e) {
             LOG.error("修改疾病小类失败", e);
             return ResponseBean.error("修改失败", e.getMessage());

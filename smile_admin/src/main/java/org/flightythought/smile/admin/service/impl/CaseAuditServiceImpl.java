@@ -68,7 +68,9 @@ public class CaseAuditServiceImpl implements CaseAuditService {
                 .stream()
                 .map(journeyEntity -> {
                     CaseAuditInfo caseAuditInfo = new CaseAuditInfo();
+                    // 旅程ID
                     caseAuditInfo.setJourneyId(journeyEntity.getJourneyId());
+                    // 旅程名称
                     caseAuditInfo.setJourneyName(journeyEntity.getJourneyName());
                     userRepository.findById(journeyEntity.getUserId())
                             .ifPresent(userEntity -> {

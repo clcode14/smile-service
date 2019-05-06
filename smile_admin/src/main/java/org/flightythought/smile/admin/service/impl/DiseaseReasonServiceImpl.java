@@ -2,12 +2,10 @@ package org.flightythought.smile.admin.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.DiseaseReasonInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.*;
-import org.flightythought.smile.admin.database.repository.DiseaseClassDetailRepository;
-import org.flightythought.smile.admin.database.repository.DiseaseClassRepository;
-import org.flightythought.smile.admin.database.repository.DiseaseReasonRepository;
-import org.flightythought.smile.admin.database.repository.DiseaseReasonToSolutionRepository;
+import org.flightythought.smile.admin.database.repository.*;
 import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.DiseaseReasonService;
@@ -45,6 +43,20 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     private DiseaseReasonRepository diseaseReasonRepository;
     @Autowired
     private DiseaseReasonToSolutionRepository diseaseReasonToSolutionRepository;
+    @Autowired
+    private DiseaseReasonTypeRepository diseaseReasonTypeRepository;
+
+    @Override
+    public List<SelectItemOption> getDiseaseReasonType() {
+        List<DiseaseReasonTypeEntity> diseaseReasonTypeEntities = diseaseReasonTypeRepository.findAll();
+        List<SelectItemOption> result = diseaseReasonTypeEntities.stream().map(diseaseReasonTypeEntity -> {
+            SelectItemOption selectItemOption = new SelectItemOption();
+            selectItemOption.setValue(diseaseReasonTypeEntity.getTypeName());
+            selectItemOption.setKey(diseaseReasonTypeEntity.getTypeId() + "");
+            return selectItemOption;
+        }).collect(Collectors.toList());
+        return result;
+    }
 
     @Override
     @Transactional
@@ -76,6 +88,8 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         diseaseReasonEntity.setTitle(diseaseReasonDTO.getTitle());
         // 内容
         diseaseReasonEntity.setContent(diseaseReasonDTO.getContent());
+        // 阅读数
+        diseaseReasonEntity.setReadNum(0);
         // 类型
         diseaseReasonEntity.setType(diseaseReasonDTO.getType());
         // 保存疾病原因
@@ -125,6 +139,8 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         // 保存疾病原因
         diseaseReasonRepository.save(diseaseReasonEntity);
         // 保存关联的解决方案
+        // 先删除关联的解决方案
+        diseaseReasonToSolutionRepository.deleteAllByDiseaseReasonId(diseaseReasonId);
         List<Integer> solutionIds = diseaseReasonDTO.getSolutionIds();
         if (solutionIds != null && solutionIds.size() > 0) {
             List<DiseaseReasonToSolutionEntity> diseaseReasonToSolutionEntities = new ArrayList<>();
@@ -168,18 +184,35 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                     //获取疾病大类名和疾病详情名称
                     DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(diseaseReason.getDiseaseId());
                     DiseaseClassDetailEntity diseaseClassDetail = diseaseClassDetailRepository.findByDiseaseDetailId(diseaseReason.getDiseaseDetailId());
-
+                    // 主键ID
                     diseaseReasonInfo.setId(diseaseReason.getId());
+                    // 疾病大类名称
                     diseaseReasonInfo.setDiseaseName(diseaseClassEntity.getDiseaseName());
+                    // 疾病小类名称
                     diseaseReasonInfo.setDiseaseDetailName(diseaseClassDetail.getDiseaseDetailName());
-                    List<String> solutions = diseaseReason.getSolutions()
+                    // 相关解决方案
+                    List<SelectItemOption> solutions = diseaseReason.getSolutions()
                             .stream()
-                            .map(solutionEntity -> solutionEntity.getTitle())
+                            .map(solutionEntity -> {
+                                SelectItemOption selectItemOption = new SelectItemOption();
+                                selectItemOption.setKey(solutionEntity.getId() + "");
+                                selectItemOption.setValue(solutionEntity.getTitle());
+                                return selectItemOption;
+                            })
                             .collect(Collectors.toList());
                     diseaseReasonInfo.setSolutionNames(solutions);
+                    // 疾病原因描述内容
                     diseaseReasonInfo.setContent(diseaseReason.getContent());
+                    // 编号
                     diseaseReasonInfo.setNumber(diseaseReason.getNumber());
+                    // 标题
                     diseaseReasonInfo.setTitle(diseaseReason.getTitle());
+                    // 类型
+                    SelectItemOption type = new SelectItemOption();
+                    DiseaseReasonTypeEntity diseaseReasonTypeEntity = diseaseReason.getReasonType();
+                    type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
+                    type.setValue(diseaseReasonTypeEntity.getTypeName());
+                    diseaseReasonInfo.setType(type);
                     return diseaseReasonInfo;
                 }).collect(Collectors.toList());
         PageImpl<DiseaseReasonInfo> result = new PageImpl<>(diseaseReasonInfos, pageRequest, page.getTotalElements());
@@ -194,26 +227,42 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                     DiseaseReasonInfo diseaseReasonInfo = new DiseaseReasonInfo();
                     DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(diseaseReasonEntity.getDiseaseId());
                     DiseaseClassDetailEntity diseaseClassDetail = diseaseClassDetailRepository.findByDiseaseDetailId(diseaseReasonEntity.getDiseaseDetailId());
-
+                    // 主键ID
                     diseaseReasonInfo.setId(diseaseReasonEntity.getId());
+                    // 疾病大类名称
                     diseaseReasonInfo.setDiseaseName(diseaseClassEntity.getDiseaseName());
+                    // 疾病小类名称
                     diseaseReasonInfo.setDiseaseDetailName(diseaseClassDetail.getDiseaseDetailName());
-                    List<String> solutions = diseaseReasonEntity.getSolutions()
+                    // 相关解决方案
+                    List<SelectItemOption> solutions = diseaseReasonEntity.getSolutions()
                             .stream()
-                            .map(solutionEntity -> String.valueOf(solutionEntity.getId()))
+                            .map(solutionEntity -> {
+                                SelectItemOption selectItemOption = new SelectItemOption();
+                                selectItemOption.setValue(solutionEntity.getTitle());
+                                selectItemOption.setKey(solutionEntity.getId() + "");
+                                return selectItemOption;
+                            })
                             .collect(Collectors.toList());
                     diseaseReasonInfo.setSolutionNames(solutions);
+                    // 疾病原因内容描述
                     diseaseReasonInfo.setContent(diseaseReasonEntity.getContent());
+                    // 编号
                     diseaseReasonInfo.setNumber(diseaseReasonEntity.getNumber());
+                    // 标题
                     diseaseReasonInfo.setTitle(diseaseReasonEntity.getTitle());
-
+                    // 类型
+                    SelectItemOption type = new SelectItemOption();
+                    DiseaseReasonTypeEntity diseaseReasonTypeEntity = diseaseReasonEntity.getReasonType();
+                    type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
+                    type.setValue(diseaseReasonTypeEntity.getTypeName());
+                    diseaseReasonInfo.setType(type);
                     return diseaseReasonInfo;
                 }).orElse(null);
     }
 
     @Override
     @Transactional
-    public void deleteDiseaseReason(Long id, HttpSession session) {
+    public void deleteDiseaseReason(Integer id, HttpSession session) {
         diseaseReasonRepository.deleteById(id);
     }
 }

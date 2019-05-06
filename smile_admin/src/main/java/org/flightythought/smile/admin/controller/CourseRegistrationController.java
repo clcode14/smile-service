@@ -52,7 +52,7 @@ public class CourseRegistrationController {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
             if (courseRegistrationEntity != null) {
-                return ResponseBean.ok("添加成功", courseRegistrationEntity);
+                return ResponseBean.ok("添加成功");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -67,7 +67,7 @@ public class CourseRegistrationController {
         try {
             CourseRegistrationEntity courseRegistrationEntity = courseRegistrationService.addCourseRegistration(courseRegistrationDTO, session);
             if (courseRegistrationEntity != null) {
-                return ResponseBean.ok("修改成功", courseRegistrationEntity);
+                return ResponseBean.ok("修改成功");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -76,7 +76,7 @@ public class CourseRegistrationController {
         return ResponseBean.error(null);
     }
 
-    @GetMapping("list")
+    @GetMapping("/list")
     @ApiOperation(value = "获取课程", notes = "获取课程", position = 2)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNumber", value = "当前页数从1开始"),
@@ -88,14 +88,14 @@ public class CourseRegistrationController {
         return ResponseBean.ok("返回成功", courseRegistrationEntities);
     }
 
-    @GetMapping("detail/{courseId}")
+    @GetMapping("/detail/{courseId}")
     @ApiOperation(value = "获取课程详情", notes = "获取课程", position = 2)
     public ResponseBean getCourseRegistrationDetail(@PathVariable @ApiParam("课程id") Integer courseId) {
         CourseInfo courseRegistrationEntities = courseRegistrationService.getCourseRegistrationDetail(courseId);
         return ResponseBean.ok("返回成功", courseRegistrationEntities);
     }
 
-    @DeleteMapping("delete/{courseId}")
+    @DeleteMapping("/delete/{courseId}")
     @ApiOperation(value = "删除课程", notes = "获取课程", position = 2)
     public ResponseBean deleteCourseRegistrationDetail(@PathVariable @ApiParam("课程id") Integer courseId) {
         courseRegistrationService.deleteCourseRegistration(courseId);

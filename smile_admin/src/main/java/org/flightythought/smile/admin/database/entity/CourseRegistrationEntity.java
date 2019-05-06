@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
@@ -22,6 +23,7 @@ import java.util.List;
  * @Description: 课程报名实体类
  */
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_course_registration")
 @Data
 @EqualsAndHashCode(callSuper = false)

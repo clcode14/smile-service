@@ -11,26 +11,35 @@ import javax.persistence.*;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName SolutionCourseEntity
- * @CreateTime 2019/4/1 21:42
+ * @ClassName CourseBannerEntity
+ * @CreateTime 2019/5/2 22:47
  * @Description: TODO
  */
-@Table(name = "tb_solution_course")
 @Entity
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
+@Table(name = "tb_course_banner")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SolutionCourseEntity {
-
+public class CourseBannerEntity extends BaseEntity {
+    /**
+     * 自增主键ID
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "solution_id")
-    private Integer solutionId;
+    /**
+     * 状态
+     */
+    @Column(name = "status")
+    private Boolean status;
 
+
+    /**
+     * 课程ID
+     */
     @Column(name = "course_id")
     private Integer courseId;
 }

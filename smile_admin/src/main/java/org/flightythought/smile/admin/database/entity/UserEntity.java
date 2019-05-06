@@ -2,6 +2,7 @@ package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import io.swagger.annotations.ApiModel;
@@ -17,6 +18,7 @@ import java.util.Collection;
 
 @Data
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_user")
 @ApiModel(value = "UserEntity", description = "user实体")
 public class UserEntity extends BaseEntity implements Serializable, UserDetails {

@@ -2,6 +2,8 @@ package org.flightythought.smile.admin.bean;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -37,4 +39,9 @@ public class HealthClassInfo {
      * 内容介绍
      */
     private String content;
+
+    /**
+     * 关联的解决方案
+     */
+    private List<SolutionInfo> solutions;
 }

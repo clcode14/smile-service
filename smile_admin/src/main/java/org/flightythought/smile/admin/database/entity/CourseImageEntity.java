@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
@@ -15,6 +16,7 @@ import javax.persistence.*;
  * @Description: 课程图片实体类
  */
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_course_image")
 @Data
 @EqualsAndHashCode(callSuper = false)

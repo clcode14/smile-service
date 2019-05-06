@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import io.swagger.models.auth.In;
 import org.flightythought.smile.admin.bean.DiseaseReasonInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.database.entity.DiseaseReasonEntity;
 import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
 import org.flightythought.smile.admin.service.DiseaseReasonService;
@@ -15,11 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/diseaseReason")
-@Api(value = "疾病配置", tags = "疾病原因")
+@Api(tags = "疾病原因配置", description = "疾病原因配置")
 public class DiseaseReasonController {
 
     @Autowired
@@ -27,8 +29,20 @@ public class DiseaseReasonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(DiseaseReasonController.class);
 
+    @GetMapping("/types")
+    @ApiOperation(value = "获取疾病原因类型", notes = "获取疾病原因类型")
+    public ResponseBean getDiseaseReasonType() {
+        try {
+            List<SelectItemOption> result = diseaseReasonService.getDiseaseReasonType();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取疾病原因类型失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
     @GetMapping("/list")
-    @ApiOperation(value = "疾病原因列表")
+    @ApiOperation(value = "疾病原因列表", notes = "疾病原因列表查询")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNumber", value = "页数从1开始"),
             @ApiImplicitParam(name = "pageSize", value = "每页显示个数"),
@@ -36,7 +50,7 @@ public class DiseaseReasonController {
             @ApiImplicitParam(name = "diseaseDetailId", value = "疾病小类id")
 
     })
-    public ResponseBean findAllDiseaseReason(@ApiParam Map<String, String> params, @ApiIgnore HttpSession session) {
+    public ResponseBean findAllDiseaseReason(@RequestParam(required = false) Map<String, String> params, @ApiIgnore HttpSession session) {
         try {
             Page<DiseaseReasonInfo> diseaseReasonEntity = diseaseReasonService.findAllDiseaseReason(params, session);
             return ResponseBean.ok("操作成功", diseaseReasonEntity);
@@ -47,8 +61,8 @@ public class DiseaseReasonController {
     }
 
     @GetMapping("{id}")
-    @ApiOperation(value = "查询单个疾病原因")
-    public ResponseBean findDiseaseReason(@ApiParam(name = "id") @PathVariable Integer id, @ApiIgnore HttpSession session) {
+    @ApiOperation(value = "查询单个疾病原因", notes = "查询单个疾病原因")
+    public ResponseBean findDiseaseReason(@ApiParam(name = "疾病原因ID") @PathVariable Integer id, @ApiIgnore HttpSession session) {
         try {
             DiseaseReasonInfo diseaseReasonInfo = diseaseReasonService.findDiseaseReasonById(id, session);
             return ResponseBean.ok("操作成功", diseaseReasonInfo);
@@ -59,7 +73,7 @@ public class DiseaseReasonController {
     }
 
     @PostMapping("/add")
-    @ApiOperation(value = "新增疾病原因")
+    @ApiOperation(value = "新增疾病原因", notes = "新增疾病原因")
     public ResponseBean saveDiseaseReason(@RequestBody @ApiParam(name = "疾病原因实体") DiseaseReasonDTO diseaseReasonDTO, @ApiIgnore HttpSession session) {
         try {
             DiseaseReasonEntity diseaseReasonEntity = diseaseReasonService.saveDiseaseReason(diseaseReasonDTO, session);
@@ -71,11 +85,11 @@ public class DiseaseReasonController {
     }
 
     @PutMapping("/modify")
-    @ApiOperation(value = "修改疾病原因")
+    @ApiOperation(value = "修改疾病原因", notes = "修改疾病原因")
     public ResponseBean modifyDiseaseReason(@RequestBody DiseaseReasonDTO diseaseReasonDTO, @ApiIgnore HttpSession session) {
         try {
-            DiseaseReasonEntity diseaseReasonEntity = diseaseReasonService.modifyDiseaseReason(diseaseReasonDTO, session);
-            return ResponseBean.ok("操作成功", diseaseReasonEntity);
+            diseaseReasonService.modifyDiseaseReason(diseaseReasonDTO, session);
+            return ResponseBean.ok("操作成功");
         } catch (Exception e) {
             LOG.error("操作失败", e);
             return ResponseBean.error("操作失败", e.getMessage());
@@ -83,8 +97,8 @@ public class DiseaseReasonController {
     }
 
     @DeleteMapping("{id}")
-    @ApiOperation(value = "删除单个疾病原因")
-    public ResponseBean deleteDiseaseReason(@ApiParam(name = "id") @PathVariable Long id, @ApiIgnore HttpSession session) {
+    @ApiOperation(value = "删除单个疾病原因", notes = "删除疾病原因")
+    public ResponseBean deleteDiseaseReason(@ApiParam(name = "疾病原因ID") @PathVariable Integer id, @ApiIgnore HttpSession session) {
         try {
             diseaseReasonService.deleteDiseaseReason(id, session);
             return ResponseBean.ok("操作成功");

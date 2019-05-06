@@ -39,6 +39,8 @@ public interface SolutionService {
 
     Page<SolutionInfo> findAllSolution(Map<String,String> params, HttpSession session);
 
+    SolutionInfo getSolutionInfo(SolutionEntity solution);
+
     SolutionEntity findSolution(Integer id, HttpSession session);
 
     List<SelectItemOption> getOfficeItems();

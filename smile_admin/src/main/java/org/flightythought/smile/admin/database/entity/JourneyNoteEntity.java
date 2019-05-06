@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
  * @Description: TODO
  */
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_journey_note")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -45,7 +47,7 @@ public class JourneyNoteEntity extends BaseEntity {
     private Integer coverImageId;
 
     @OneToOne
-    @JoinColumn(name = "cover_image_id",insertable = false,updatable = false)
+    @JoinColumn(name = "cover_image_id", insertable = false, updatable = false)
     private ImagesEntity coverImage;
 
     /**

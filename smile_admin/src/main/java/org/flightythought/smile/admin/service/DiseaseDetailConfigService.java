@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service;
 
+        import org.flightythought.smile.admin.bean.DiseaseClass;
         import org.flightythought.smile.admin.bean.DiseaseClassDetailInfo;
         import org.flightythought.smile.admin.database.entity.DiseaseClassDetailEntity;
         import org.flightythought.smile.admin.database.entity.DiseaseClassEntity;
@@ -10,7 +11,7 @@ package org.flightythought.smile.admin.service;
         import java.util.List;
 
 public interface DiseaseDetailConfigService {
-    List<DiseaseClassEntity> getDiseaseClass();
+    List<DiseaseClass> getDiseaseClass();
 
     Page<DiseaseClassDetailInfo> getDiseaseDetails(int diseaseId, int pageNumber, int pageSize);
 

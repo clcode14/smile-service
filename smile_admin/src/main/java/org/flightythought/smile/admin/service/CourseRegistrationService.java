@@ -15,11 +15,6 @@ public interface CourseRegistrationService {
 
     /**
      * 新增课程
-     *
-     * @param courseRegistrationEntity 课程报名实体类
-     * @param coverPicture             封面图
-     * @param images                   展示图
-     * @return 新增课程实体类
      */
     CourseRegistrationEntity addCourseRegistration(CourseRegistrationDTO courseRegistrationDTO, HttpSession session);
 
@@ -34,19 +29,30 @@ public interface CourseRegistrationService {
 
     /**
      * 查看课程详情
+     *
      * @param courseId
      * @return
      */
     CourseInfo getCourseRegistrationDetail(Integer courseId);
 
     /**
+     * 获取课程信息
+     *
+     * @param courseRegistrationEntity
+     * @return
+     */
+    CourseInfo getCourseInfo(CourseRegistrationEntity courseRegistrationEntity);
+
+    /**
      * 删除课程
+     *
      * @param courseId
      */
     void deleteCourseRegistration(Integer courseId);
 
     /**
      * 获取课程类型
+     *
      * @return
      */
     List<SelectItemOption> getCourseType();

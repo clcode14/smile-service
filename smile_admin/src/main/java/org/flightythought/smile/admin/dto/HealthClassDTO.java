@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @ApiModel(value = "养生大类 DTO", description = "养生大类 DTO")
 public class HealthClassDTO {
@@ -22,4 +24,7 @@ public class HealthClassDTO {
 
     @ApiModelProperty(value = "内容介紹")
     private String content;
+
+    @ApiModelProperty(value = "解决方案ID集合")
+    private List<Integer> solutionIds;
 }

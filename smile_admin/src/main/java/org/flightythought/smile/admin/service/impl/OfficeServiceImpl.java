@@ -35,11 +35,6 @@ public class OfficeServiceImpl implements OfficeService {
     @Autowired
     private PlatformUtils platformUtils;
 
-    @Value("${image-url}")
-    private String imageRequest;
-    @Value("${server.servlet.context-path}")
-    private String contentPath;
-
     @Transactional
     @Override
     public OfficeEntity save(OfficeDTO officeDTO, HttpSession session) {

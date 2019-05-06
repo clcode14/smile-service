@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.flightythought.smile.admin.database.entity.BaseEntity;
@@ -18,13 +19,14 @@ import java.util.List;
  * @Description: TODO
  */
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_health")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class HealthEntity extends BaseEntity {
 
     /**
-     * 养生大类ID
+     * 养生ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -50,6 +52,9 @@ public class HealthEntity extends BaseEntity {
     @Column(name = "bg_image")
     private Integer bgImageId;
 
+    /**
+     * 背景图
+     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bg_image", insertable = false, updatable = false)
     private ImagesEntity bgImage;
@@ -59,5 +64,13 @@ public class HealthEntity extends BaseEntity {
      */
     @Column(name = "content", columnDefinition = "text")
     private String content;
+
+    /**
+     * 养生关联的解决方案
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_health_to_solution", joinColumns = {@JoinColumn(name = "health_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)})
+    private List<SolutionEntity> solutions;
 
 }

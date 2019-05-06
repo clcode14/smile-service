@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_images")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -38,4 +40,16 @@ public class ImagesEntity extends BaseEntity {
      */
     @Column(name = "path")
     private String path;
+
+    /**
+     * OSS URL
+     */
+    @Column(name = "oss_url")
+    private String ossUrl;
+
+    /**
+     * OSS KEY
+     */
+    @Column(name = "oss_key")
+    private String ossKey;
 }

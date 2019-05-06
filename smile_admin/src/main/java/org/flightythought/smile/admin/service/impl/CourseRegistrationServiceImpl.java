@@ -5,6 +5,7 @@ import org.flightythought.smile.admin.bean.CourseTypeInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.common.GlobalConstant;
+import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.CourseImageRepository;
 import org.flightythought.smile.admin.database.repository.CourseRegistrationRepository;
@@ -39,11 +40,8 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private CourseImageRepository courseImageRepository;
     @Autowired
     private CourseTypeRepository courseTypeRepository;
-
-    @Value("${image-url}")
-    private String imageRequest;
-    @Value("${server.servlet.context-path}")
-    private String contentPath;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     @Override
     @Transactional
@@ -130,13 +128,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
             List<ImageInfo> coverImages = new ArrayList<>();
             if (imagesEntity != null) {
-                coverImage = new ImageInfo();
-                String imageName = imagesEntity.getFileName();
-                String url = domainPort + contentPath + imageRequest + imagesEntity.getPath();
-                coverImage.setUrl(url.replace("\\", "/"));
-                coverImage.setName(imageName);
-                coverImage.setId(coverImage.getId());
-                coverImage.setSize(coverImage.getSize());
+                coverImage = platformUtils.getImageInfo(imagesEntity, domainPort);
                 coverImages.add(coverImage);
             }
             courseInfo.setCoverImage(coverImages);
@@ -145,12 +137,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             List<ImageInfo> courseImages = new ArrayList<>();
             if (courseImageEntities != null && courseImageEntities.size() > 0) {
                 courseImageEntities.forEach(courseImageEntity -> {
-                    ImageInfo imageInfo = new ImageInfo();
-                    imageInfo.setName(courseImageEntity.getFileName());
-                    imageInfo.setId(courseImageEntity.getId());
-                    imageInfo.setSize(courseImageEntity.getSize());
-                    String imageUrl = domainPort + contentPath + imageRequest + courseImageEntity.getPath();
-                    imageInfo.setUrl(imageUrl.replace("\\", "/"));
+                    ImageInfo imageInfo = platformUtils.getImageInfo(courseImageEntity, domainPort);
                     courseImages.add(imageInfo);
                 });
             }
@@ -175,9 +162,11 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     @Transactional
     public CourseInfo getCourseRegistrationDetail(Integer courseId) {
         CourseRegistrationEntity courseRegistrationEntity = courseRegistrationRepository.findByCourseId(courseId);
+        return getCourseInfo(courseRegistrationEntity);
+    }
 
-        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
-        String domainPort = sysParameterEntity.getParameterValue();
+    public CourseInfo getCourseInfo(CourseRegistrationEntity courseRegistrationEntity) {
+        String domainPort = platformUtils.getDomainPort();
 
         CourseInfo courseInfo = new CourseInfo();
         // 课程ID
@@ -195,17 +184,11 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         // 详情描述
         courseInfo.setDescription(courseRegistrationEntity.getDescription());
         // 封面图
-        ImageInfo coverImage = null;
+        ImageInfo coverImage;
         ImagesEntity imagesEntity = courseRegistrationEntity.getCoverImage();
         List<ImageInfo> coverImages = new ArrayList<>();
         if (imagesEntity != null) {
-            coverImage = new ImageInfo();
-            String imageName = imagesEntity.getFileName();
-            String url = domainPort + contentPath + imageRequest + imagesEntity.getPath();
-            coverImage.setUrl(url.replace("\\", "/"));
-            coverImage.setName(imageName);
-            coverImage.setId(coverImage.getId());
-            coverImage.setSize(coverImage.getSize());
+            coverImage = platformUtils.getImageInfo(imagesEntity, domainPort);
             coverImages.add(coverImage);
         }
         courseInfo.setCoverImage(coverImages);
@@ -214,17 +197,11 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         List<ImageInfo> courseImages = new ArrayList<>();
         if (courseImageEntities != null && courseImageEntities.size() > 0) {
             courseImageEntities.forEach(courseImageEntity -> {
-                ImageInfo imageInfo = new ImageInfo();
-                imageInfo.setName(courseImageEntity.getFileName());
-                imageInfo.setId(courseImageEntity.getId());
-                imageInfo.setSize(courseImageEntity.getSize());
-                String imageUrl = domainPort + contentPath + imageRequest + courseImageEntity.getPath();
-                imageInfo.setUrl(imageUrl.replace("\\", "/"));
+                ImageInfo imageInfo = platformUtils.getImageInfo(courseImageEntity, domainPort);
                 courseImages.add(imageInfo);
             });
         }
         courseInfo.setCourseImages(courseImages);
-
         // 课程类型
         CourseTypeEntity courseTypeEntity = courseRegistrationEntity.getCourseTypeEntity();
         if (courseTypeEntity != null) {

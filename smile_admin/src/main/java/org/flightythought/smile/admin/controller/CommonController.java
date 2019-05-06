@@ -19,6 +19,14 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
+/**
+ * Copyright 2019 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName CommonController.java
+ * @CreateTime 2019/5/6 14:45
+ * @Description: TODO
+ */
 @RestController
 @RequestMapping("/common")
 @Api(tags = "公共接口控制层", description = "平台公共接口")
@@ -28,7 +36,7 @@ public class CommonController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
 
-    @ApiOperation(value = "上传图片", notes = "上传图片接口", position = 0)
+    @ApiOperation(value = "上传图片", notes = "上传图片接口")
     @PostMapping("/uploadImage")
     public ResponseBean uploadImage(@ApiParam(value = "上传的图片") MultipartFile image, @ApiParam(value = "上传图片所属模块") String model, @ApiIgnore HttpSession session) {
         try {
@@ -40,7 +48,7 @@ public class CommonController {
         }
     }
 
-    @ApiOperation(value = "上传图片", notes = "上传图片接口", position = 1)
+    @ApiOperation(value = "上传图片", notes = "上传图片接口")
     @PostMapping("/uploadImages")
     public ResponseBean uploadImages(@ApiParam(value = "上传的图片") List<MultipartFile> images, @ApiParam(value = "上传图片所属模块") String model, @ApiIgnore HttpSession session) {
         try {

@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service.impl;
 
+import org.flightythought.smile.admin.bean.DiseaseClass;
 import org.flightythought.smile.admin.bean.DiseaseClassDetailInfo;
 import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.DiseaseClassDetailEntity;
@@ -10,6 +11,7 @@ import org.flightythought.smile.admin.database.repository.DiseaseClassDetailRepo
 import org.flightythought.smile.admin.database.repository.DiseaseClassRepository;
 import org.flightythought.smile.admin.dto.DiseaseClassDetailDTO;
 import org.flightythought.smile.admin.service.DiseaseDetailConfigService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +38,14 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
     private PlatformUtils platformUtils;
 
     @Override
-    public List<DiseaseClassEntity> getDiseaseClass() {
-        return diseaseClassRepository.findAll();
+    public List<DiseaseClass> getDiseaseClass() {
+        List<DiseaseClassEntity> diseaseClassEntities = diseaseClassRepository.findAll();
+        List<DiseaseClass> result = diseaseClassEntities.stream().map(diseaseClassEntity -> {
+            DiseaseClass diseaseClass = new DiseaseClass();
+            BeanUtils.copyProperties(diseaseClassEntity, diseaseClass);
+            return diseaseClass;
+        }).collect(Collectors.toList());
+        return result;
     }
 
     @Override
@@ -56,8 +65,7 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
             String domainPort = platformUtils.getDomainPort();
             List<Integer> diseaseIds = diseaseClassDetailEntityList.stream().map(DiseaseClassDetailEntity::getDiseaseId).collect(Collectors.toList());
             List<DiseaseClassEntity> diseaseClassEntities = diseaseClassRepository.findByDiseaseIdIn(diseaseIds);
-            Map<Integer, DiseaseClassEntity> diseaseClassEntityMap = new HashMap<>();
-            diseaseClassEntities.stream().map(diseaseClassEntity -> diseaseClassEntityMap.put(diseaseClassEntity.getDiseaseId(), diseaseClassEntity));
+            Map<Integer, DiseaseClassEntity> diseaseClassEntityMap = diseaseClassEntities.stream().collect(Collectors.toMap(DiseaseClassEntity::getDiseaseId, Function.identity()));
             // 获取疾病大类
             diseaseClassDetailEntityList.forEach(diseaseClassDetailEntity -> {
                 DiseaseClassDetailInfo diseaseClassDetailInfo = new DiseaseClassDetailInfo();
@@ -112,10 +120,6 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
         diseaseClassDetailEntity.setNumber(diseaseClassDetailDTO.getNumber());
         // 疾病大类ID
         diseaseClassDetailEntity.setDiseaseId(diseaseClassDetailDTO.getDiseaseId());
-        // 创建者
-        diseaseClassDetailEntity.setCreateUserName(sysUserEntity.getLoginName());
-        // 创建时间
-        diseaseClassDetailEntity.setCreateTime(LocalDateTime.now());
         // 疾病小类类型
         diseaseClassDetailEntity.setType(diseaseClassDetailDTO.getType());
         // 背景图片
@@ -126,6 +130,16 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
         if (diseaseClassDetailDTO.getIcon() != null) {
             diseaseClassDetailEntity.setIconId(diseaseClassDetailDTO.getIcon().getImageId());
         }
+        // 疾病小类描述
+        diseaseClassDetailEntity.setContent(diseaseClassDetailDTO.getContent());
+        // 创建者
+        diseaseClassDetailEntity.setCreateUserName(sysUserEntity.getLoginName());
+        // 创建时间
+        diseaseClassDetailEntity.setCreateTime(LocalDateTime.now());
+
+        DiseaseClassDetailInfo result = new DiseaseClassDetailInfo();
+        BeanUtils.copyProperties(diseaseClassDetailEntity, result);
+
         return diseaseClassDetailRepository.save(diseaseClassDetailEntity);
     }
 
@@ -153,7 +167,11 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
         if (diseaseClassDetailDTO.getIcon() != null) {
             diseaseClassDetailEntity.setIconId(diseaseClassDetailDTO.getIcon().getImageId());
         }
+        // 疾病小类描述
+        diseaseClassDetailEntity.setContent(diseaseClassDetailDTO.getContent());
+        // 修改者
         diseaseClassDetailEntity.setUpdateUserName(sysUserEntity.getLoginName());
+        // 修改时间
         diseaseClassDetailEntity.setUpdateTime(LocalDateTime.now());
         return diseaseClassDetailRepository.save(diseaseClassDetailEntity);
     }

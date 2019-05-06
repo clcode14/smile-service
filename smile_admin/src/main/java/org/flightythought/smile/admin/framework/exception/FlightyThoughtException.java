@@ -1,6 +1,6 @@
 package org.flightythought.smile.admin.framework.exception;
 
-public class FlightyThoughtException extends Exception {
+public class FlightyThoughtException extends RuntimeException {
 
     public FlightyThoughtException() {
         super();

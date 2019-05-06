@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.flightythought.smile.admin.database.entity.BaseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
  * @Description: TODO
  */
 @Entity
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_health_to_solution")
 @Data
 @EqualsAndHashCode(callSuper = false)

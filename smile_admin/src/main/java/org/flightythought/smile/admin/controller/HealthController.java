@@ -1,11 +1,16 @@
 package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.HealthClassInfo;
+import org.flightythought.smile.admin.bean.HealthWay;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.HealthEntity;
+import org.flightythought.smile.admin.database.entity.HealthWayEntity;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
+import org.flightythought.smile.admin.dto.HealthWayDTO;
 import org.flightythought.smile.admin.service.HealthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import sun.rmi.runtime.Log;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
@@ -26,7 +32,7 @@ import java.util.Map;
  * @Description: TODO
  */
 @RestController
-@RequestMapping("health")
+@RequestMapping("/health")
 @Api(tags = "健康养生控制层", description = "健康养生相关接口")
 public class HealthController {
 
@@ -35,7 +41,11 @@ public class HealthController {
     private static final Logger LOG = LoggerFactory.getLogger(HealthController.class);
 
     @GetMapping("/list")
-    @ApiOperation(value = "获取养生大类", notes = "获取养生大类，分页查询，不传递参数为获取全部")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNumber", value = "页数从1开始"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示个数")
+    })
+    @ApiOperation(value = "获取养生", notes = "获取养生，分页查询")
     public ResponseBean findHealthClass(Map<String, String> params) {
         try {
             Page<HealthClassInfo> result = healthService.findHealthClass(params);
@@ -46,7 +56,7 @@ public class HealthController {
         }
     }
 
-    @GetMapping("{healthClassId}")
+    @GetMapping("/{healthClassId}")
     @ApiOperation(value = "获取养生大类明细", notes = "根据养生大类ID获取养生大类明细")
     public ResponseBean getHealthClass(@PathVariable("healthClassId") Integer healthClassId) {
         try {
@@ -59,10 +69,10 @@ public class HealthController {
     }
 
     @PostMapping("/create")
-    @ApiOperation(value = "养生大类添加", notes = "养生大类添加")
-    public ResponseBean createHealthClass(@RequestBody HealthClassDTO healthClassDTO,@ApiIgnore HttpSession session) {
+    @ApiOperation(value = "添加养生", notes = "添加养生")
+    public ResponseBean createHealthClass(@RequestBody HealthClassDTO healthClassDTO, @ApiIgnore HttpSession session) {
         try {
-            HealthEntity result = healthService.saveHealthClass(healthClassDTO,session);
+            HealthEntity result = healthService.saveHealthClass(healthClassDTO, session);
             return ResponseBean.ok("添加成功", result);
         } catch (Exception e) {
             LOG.error("养生大类添加失败", e);
@@ -71,11 +81,11 @@ public class HealthController {
     }
 
     @PutMapping("/modify")
-    @ApiOperation(value = "养生大类修改", notes = "养生大类修改")
-    public ResponseBean modifyHealthClass(@RequestBody HealthClassDTO healthClassDTO,@ApiIgnore HttpSession session) {
+    @ApiOperation(value = "修改养生", notes = "修改养生")
+    public ResponseBean modifyHealthClass(@RequestBody HealthClassDTO healthClassDTO, @ApiIgnore HttpSession session) {
         try {
-            HealthEntity result = healthService.modifyHealthClass(healthClassDTO,session);
-            return ResponseBean.ok("修改成功", result);
+            healthService.modifyHealthClass(healthClassDTO, session);
+            return ResponseBean.ok("修改成功");
         } catch (Exception e) {
             LOG.error("养生大类修改失败", e);
             return ResponseBean.error("修改失败", e.getMessage());
@@ -83,10 +93,10 @@ public class HealthController {
     }
 
     @DeleteMapping("{healthId}")
-    @ApiOperation(value = "养生大类删除", notes = "养生大类删除")
-    public ResponseBean deleteHealthClass(@PathVariable Long healthId,@ApiIgnore HttpSession session) {
+    @ApiOperation(value = "删除养生", notes = "删除养生")
+    public ResponseBean deleteHealthClass(@PathVariable Integer healthId, @ApiIgnore HttpSession session) {
         try {
-            healthService.deleteHealthClass(healthId,session);
+            healthService.deleteHealthClass(healthId, session);
             return ResponseBean.ok("删除成功");
         } catch (Exception e) {
             LOG.error("养生大类删除失败", e);
@@ -94,4 +104,55 @@ public class HealthController {
         }
     }
 
+    @PostMapping("/healthWay")
+    @ApiOperation(value = "新增养生方式", notes = "新增养生方式")
+    public ResponseBean addHealthWay(@RequestBody HealthWayDTO healthWayDTO) {
+        try {
+            HealthWayEntity result = healthService.addHealthWay(healthWayDTO);
+            return ResponseBean.ok("新增成功", result);
+        } catch (Exception e) {
+            LOG.error("新增养生方式失败", e);
+            return ResponseBean.error("新增养生方式失败", e.getMessage());
+        }
+    }
+
+    @GetMapping("/healthWay")
+    @ApiOperation(value = "获取查询养生方式", notes = "获取查询养生方式")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNumber", value = "页数从1开始"),
+            @ApiImplicitParam(name = "pageSize", value = "每页显示个数")
+    })
+    public ResponseBean getHealthWay(@RequestParam(required = false) Map<String, String> params) {
+        try {
+            Page<HealthWay> result = healthService.getHealthWays(params);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("返回失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @PutMapping("/healthWay")
+    @ApiOperation(value = "修改养生方式", notes = "修改养生方式")
+    public ResponseBean modifyHealthWay(@RequestBody HealthWayDTO healthWayDTO) {
+        try {
+            healthService.modifyHealthWay(healthWayDTO);
+            return ResponseBean.ok("操作成功");
+        } catch (Exception e) {
+            LOG.error("操作失败", e);
+            return ResponseBean.error("操作失败", e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/healthWay/{healthWayId}")
+    @ApiOperation(value = "删除养生方式", notes = "删除养伤方式")
+    public ResponseBean deleteHealthWay(@PathVariable Integer healthWayId) {
+        try {
+            healthService.deleteHealthWay(healthWayId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除养生方式失败", e);
+            return ResponseBean.error("删除养生方式失败", e.getMessage());
+        }
+    }
 }

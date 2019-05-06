@@ -6,6 +6,7 @@ import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
+import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.*;
 import org.flightythought.smile.admin.dto.ImageDTO;
@@ -53,10 +54,8 @@ public class SolutionServiceImpl implements SolutionService {
     private SolutionOfficeRepository solutionOfficeRepository;
     @Autowired
     private OfficeRepository officeRepository;
-    @Value("${image-url}")
-    private String imageRequest;
-    @Value("${server.servlet.context-path}")
-    private String contentPath;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     @Override
     public List<SelectItemOption> getCourseItems() {
@@ -258,14 +257,7 @@ public class SolutionServiceImpl implements SolutionService {
                     List<ImageInfo> imageInfos = solution.getImages()
                             .stream()
                             .map(imagesEntity -> {
-                                ImageInfo imageInfo = new ImageInfo();
-
-                                imageInfo.setName(imagesEntity.getFileName());
-                                imageInfo.setId(imagesEntity.getId());
-                                imageInfo.setSize(imagesEntity.getSize());
-                                String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
-                                imageInfo.setUrl(imageUrl.replace("\\", "/"));
-
+                                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                                 return imageInfo;
                             }).collect(Collectors.toList());
                     solutionInfo.setImages(imageInfos);
@@ -279,6 +271,37 @@ public class SolutionServiceImpl implements SolutionService {
         return result;
     }
 
+    public SolutionInfo getSolutionInfo(SolutionEntity solution) {
+        String domainPort = platformUtils.getDomainPort();
+        SolutionInfo solutionInfo = new SolutionInfo();
+        solutionInfo.setId(solution.getId());
+        solutionInfo.setNumber(solution.getNumber());
+        solutionInfo.setContent(solution.getContent());
+        solutionInfo.setTitle(solution.getTitle());
+        solutionInfo.setRecoverNumber(solution.getRecoverNumber());
+        List<String> solutionCourse = solution.getCourseRegistrations()
+                .stream()
+                .map(CourseRegistrationEntity::getTitle)
+                .collect(Collectors.toList());
+
+        List<String> solutionOffices = solution.getOffices()
+                .stream()
+                .map(OfficeEntity::getName)
+                .collect(Collectors.toList());
+
+        List<ImageInfo> imageInfos = solution.getImages()
+                .stream()
+                .map(imagesEntity -> {
+                    ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
+                    return imageInfo;
+                }).collect(Collectors.toList());
+        solutionInfo.setImages(imageInfos);
+        solutionInfo.setRefCourses(solutionCourse);
+        solutionInfo.setRefOffices(solutionOffices);
+
+        return solutionInfo;
+    }
+
     @Override
     public SolutionEntity findSolution(Integer id, HttpSession session) {
         SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
@@ -288,8 +311,8 @@ public class SolutionServiceImpl implements SolutionService {
                     List<ImagesEntity> images = solutionEntity.getImages();
                     List<ImagesEntity> newImages = images.stream()
                             .map(imagesEntity -> {
-                                String imageUrl = domainPort + contentPath + imageRequest + imagesEntity.getPath();
-                                imagesEntity.setPath(imageUrl.replace("\\", "/"));
+                                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
+                                imagesEntity.setPath(imageUrl);
                                 return imagesEntity;
                             }).collect(Collectors.toList());
                     solutionEntity.setImages(newImages);

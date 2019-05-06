@@ -15,4 +15,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DiseaseReasonRepository extends JpaRepository<DiseaseReasonEntity, Long> {
     DiseaseReasonEntity findById(Integer id);
+
+    void deleteById(Integer id);
 }

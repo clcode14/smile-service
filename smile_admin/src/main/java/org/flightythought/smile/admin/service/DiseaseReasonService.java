@@ -1,12 +1,14 @@
 package org.flightythought.smile.admin.service;
 
 import org.flightythought.smile.admin.bean.DiseaseReasonInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.database.entity.DiseaseReasonEntity;
 import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.data.domain.Page;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,6 +20,9 @@ import java.util.Map;
  * @Description: TODO
  */
 public interface DiseaseReasonService {
+
+    List<SelectItemOption> getDiseaseReasonType();
+
     DiseaseReasonEntity saveDiseaseReason(DiseaseReasonDTO diseaseReasonDTO, HttpSession session) throws FlightyThoughtException;
 
     DiseaseReasonEntity modifyDiseaseReason(DiseaseReasonDTO diseaseReasonDTO, HttpSession session) throws FlightyThoughtException;
@@ -26,5 +31,5 @@ public interface DiseaseReasonService {
 
     DiseaseReasonInfo findDiseaseReasonById(Integer id, HttpSession session);
 
-    void deleteDiseaseReason(Long id, HttpSession session);
+    void deleteDiseaseReason(Integer id, HttpSession session);
 }
