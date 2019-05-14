@@ -311,7 +311,8 @@ public class SolutionServiceImpl implements SolutionService {
                     List<ImagesEntity> images = solutionEntity.getImages();
                     List<ImagesEntity> newImages = images.stream()
                             .map(imagesEntity -> {
-                                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
+                                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
+                                String imageUrl = imageInfo.getUrl();
                                 imagesEntity.setPath(imageUrl);
                                 return imagesEntity;
                             }).collect(Collectors.toList());

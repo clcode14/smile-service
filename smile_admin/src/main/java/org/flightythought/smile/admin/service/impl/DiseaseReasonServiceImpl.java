@@ -261,7 +261,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDiseaseReason(Integer id, HttpSession session) {
         diseaseReasonRepository.deleteById(id);
     }

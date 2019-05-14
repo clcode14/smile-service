@@ -23,28 +23,20 @@ public interface DiseaseConfigService {
      * @param pageSize   每页显示数
      * @return Page<DiseaseClassEntity>
      */
-    Page<DiseaseClass> getDiseaseClass(DiseaseQueryDTO diseaseQueryDTO);
+    Page<DiseaseClass> getDiseaseClass(int pageNumber, int pageSize);
 
     /**
      * 新增疾病大类
-     *
-     * @param diseaseClassEntity 疾病大类对象
-     * @return DiseaseClassEntity
      */
     DiseaseClassEntity addDiseaseClass(DiseaseClassDTO diseaseClassDTO, HttpSession session);
 
     /**
      * 修改疾病大类
-     *
-     * @param diseaseClassEntity 疾病大类对象
-     * @return DiseaseClassEntity
      */
     DiseaseClassEntity updateDiseaseClass(DiseaseClassEntity diseaseClassEntity);
 
     /**
      * 删除疾病大类
-     *
-     * @param id 主键ID
      */
     void deleteDiseaseClass(Integer id);
 }

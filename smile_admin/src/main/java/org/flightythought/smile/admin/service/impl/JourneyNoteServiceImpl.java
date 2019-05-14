@@ -46,8 +46,10 @@ public class JourneyNoteServiceImpl implements JourneyNoteService {
                     String domainPort = platformUtils.getDomainPort();
 
                     ImagesEntity imagesEntity = journeyNote.getCoverImage();
-                    String imageUrlByPath = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                    journeyNoteInfo.setCoverImageUrl(imageUrlByPath);
+                    if (imagesEntity != null) {
+                        String imageUrlByPath = platformUtils.getImageInfo(imagesEntity, domainPort).getUrl();
+                        journeyNoteInfo.setCoverImageUrl(imageUrlByPath);
+                    }
                     journeyNoteInfo.setNoteDate(journeyNote.getNoteDate());
 
                     return journeyNoteInfo;

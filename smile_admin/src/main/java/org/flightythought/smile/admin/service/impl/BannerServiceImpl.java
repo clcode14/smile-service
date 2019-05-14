@@ -1,7 +1,6 @@
 package org.flightythought.smile.admin.service.impl;
 
 import org.flightythought.smile.admin.bean.CourseInfo;
-import org.flightythought.smile.admin.bean.CourseTypeInfo;
 import org.flightythought.smile.admin.bean.HomeBanner;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
@@ -11,6 +10,7 @@ import org.flightythought.smile.admin.database.repository.CourseBannerRepository
 import org.flightythought.smile.admin.database.repository.CourseRegistrationRepository;
 import org.flightythought.smile.admin.database.repository.HomeBannerRepository;
 import org.flightythought.smile.admin.dto.HomeBannerDTO;
+import org.flightythought.smile.admin.service.CommonService;
 import org.flightythought.smile.admin.service.CourseRegistrationService;
 import org.flightythought.smile.admin.service.HomeBannerService;
 import org.springframework.beans.BeanUtils;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,6 +39,8 @@ public class BannerServiceImpl implements HomeBannerService {
     private CourseRegistrationRepository courseRegistrationRepository;
     @Autowired
     private CourseRegistrationService courseRegistrationService;
+    @Autowired
+    private CommonService commonService;
 
     @Override
     public List<HomeBanner> findAll() {
@@ -66,7 +67,8 @@ public class BannerServiceImpl implements HomeBannerService {
                 .ifPresent(homeBanner -> {
                     String domainPort = platformUtils.getDomainPort();
                     ImagesEntity imagesEntity = homeBanner.getImagesEntity();
-                    String imageUrlByPath = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
+                    ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
+                    String imageUrlByPath = imageInfo.getUrl();
                     imagesEntity.setPath(imageUrlByPath);
                     homeBanner.setImagesEntity(imagesEntity);
                     homeBannerEntity.set(homeBanner);
@@ -77,7 +79,6 @@ public class BannerServiceImpl implements HomeBannerService {
     @Override
     public HomeBannerEntity create(HomeBannerDTO homebannerDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-
         HomeBannerEntity homeBannerEntity = new HomeBannerEntity();
         homeBannerEntity.setSort(homebannerDTO.getSort());
         homeBannerEntity.setLink(homebannerDTO.getLink());
@@ -90,12 +91,18 @@ public class BannerServiceImpl implements HomeBannerService {
     @Override
     public HomeBannerEntity modify(HomeBannerDTO homebannerDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-
-        HomeBannerEntity homeBannerEntity = new HomeBannerEntity();
+        HomeBannerEntity homeBannerEntity = homeBannerRepository.getOne(homebannerDTO.getId());
         homeBannerEntity.setSort(homebannerDTO.getSort());
         homeBannerEntity.setLink(homebannerDTO.getLink());
         homeBannerEntity.setTitle(homebannerDTO.getTitle());
-        homeBannerEntity.setImageId(homebannerDTO.getImageId());
+        if (!homebannerDTO.getImageId().equals(homeBannerEntity.getImageId())) {
+            Integer imageId = homeBannerEntity.getImageId();
+            if (imageId != null) {
+                // 删除原始图片
+                commonService.deleteImage(imageId);
+            }
+            homeBannerEntity.setImageId(homebannerDTO.getImageId());
+        }
         homeBannerEntity.setUpdateUserName(sysUserEntity.getUserName());
         homeBannerEntity.setId(homebannerDTO.getId());
         return homeBannerRepository.save(homeBannerEntity);
@@ -103,6 +110,13 @@ public class BannerServiceImpl implements HomeBannerService {
 
     @Override
     public void deleteById(Integer id) {
+        HomeBannerEntity homeBannerEntity = homeBannerRepository.getOne(id);
+        // 删除图片
+        Integer imageId = homeBannerEntity.getImageId();
+        if (imageId != null) {
+            // 删除原始图片
+            commonService.deleteImage(imageId);
+        }
         homeBannerRepository.deleteById(id);
     }
 

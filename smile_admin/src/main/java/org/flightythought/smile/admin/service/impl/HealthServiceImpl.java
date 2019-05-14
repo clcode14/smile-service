@@ -14,6 +14,8 @@ import org.flightythought.smile.admin.database.repository.HealthWayRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
 import org.flightythought.smile.admin.dto.HealthWayDTO;
+import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
+import org.flightythought.smile.admin.service.CommonService;
 import org.flightythought.smile.admin.service.HealthService;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.BeanUtils;
@@ -53,6 +55,8 @@ public class HealthServiceImpl implements HealthService {
     private HealthToSolutionRepository healthToSolutionRepository;
     @Autowired
     private HealthWayRepository healthWayRepository;
+    @Autowired
+    private CommonService commonService;
 
     @Override
     @Transactional
@@ -81,12 +85,7 @@ public class HealthServiceImpl implements HealthService {
             // 背景图片URL
             ImagesEntity imagesEntity = healthClassEntity.getBgImage();
             if (imagesEntity != null) {
-                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                ImageInfo bgImage = new ImageInfo();
-                bgImage.setId(imagesEntity.getId());
-                bgImage.setName(imagesEntity.getFileName());
-                bgImage.setSize(imagesEntity.getSize());
-                bgImage.setUrl(imageUrl);
+                ImageInfo bgImage = platformUtils.getImageInfo(imagesEntity, domainPort);
                 healthClassInfo.setBgImage(bgImage);
             }
             // 内容介绍
@@ -115,12 +114,7 @@ public class HealthServiceImpl implements HealthService {
             // 背景图片
             ImagesEntity imagesEntity = healthEntity.getBgImage();
             if (imagesEntity != null) {
-                ImageInfo imageInfo = new ImageInfo();
-                imageInfo.setId(imagesEntity.getId());
-                imageInfo.setSize(imagesEntity.getSize());
-                imageInfo.setName(imagesEntity.getFileName());
-                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                imageInfo.setUrl(imageUrl);
+                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                 healthClassInfo.setBgImage(imageInfo);
             }
             // 内容介绍
@@ -164,10 +158,19 @@ public class HealthServiceImpl implements HealthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public HealthEntity modifyHealthClass(HealthClassDTO healthClassDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
         HealthEntity healthEntity = healthRepository.findByHealthId(healthClassDTO.getHealthId());
+        if (healthEntity == null) {
+            throw new FlightyThoughtException("没有找到对应的养生");
+        }
+        if (!healthEntity.getBgImageId().equals(healthClassDTO.getBgImageId())) {
+            // 删除原先背景图片
+            if (healthEntity.getBgImageId() != null) {
+                commonService.deleteImage(healthEntity.getBgImageId());
+            }
+        }
         // 背景图片
         healthEntity.setBgImageId(healthClassDTO.getBgImageId());
         // 内容描述
@@ -195,9 +198,15 @@ public class HealthServiceImpl implements HealthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteHealthClass(Integer healthId, HttpSession session) {
-        healthRepository.deleteByHealthId(healthId);
+        HealthEntity healthEntity = healthRepository.findByHealthId(healthId);
+        if (healthEntity != null) {
+            if (healthEntity.getBgImageId() != null) {
+                commonService.deleteImage(healthEntity.getBgImageId());
+            }
+            healthRepository.deleteByHealthId(healthId);
+        }
     }
 
     @Override
@@ -257,6 +266,10 @@ public class HealthServiceImpl implements HealthService {
             SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
             // 养生方式名称
             healthWayEntity.setWayName(healthWayDTO.getWayName());
+            if (!healthWayEntity.getBgImage().equals(healthWayDTO.getBgImageId())) {
+                // 删除原来的背景图片
+                commonService.deleteImage(healthWayEntity.getBgImage());
+            }
             // 背景图片
             healthWayEntity.setBgImage(healthWayDTO.getBgImageId());
             // 编码
@@ -279,6 +292,10 @@ public class HealthServiceImpl implements HealthService {
     public void deleteHealthWay(Integer healthWayId) {
         HealthWayEntity healthWayEntity = healthWayRepository.findByHealthWayId(healthWayId);
         if (healthWayEntity != null) {
+            // 删除背景图片
+            if (healthWayEntity.getBgImage() != null) {
+                commonService.deleteImage(healthWayEntity.getBgImage());
+            }
             healthWayRepository.delete(healthWayEntity);
         }
     }

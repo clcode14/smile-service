@@ -10,6 +10,7 @@ import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.repository.DiseaseClassDetailRepository;
 import org.flightythought.smile.admin.database.repository.DiseaseClassRepository;
 import org.flightythought.smile.admin.dto.DiseaseClassDetailDTO;
+import org.flightythought.smile.admin.service.CommonService;
 import org.flightythought.smile.admin.service.DiseaseDetailConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
     private DiseaseClassDetailRepository diseaseClassDetailRepository;
     @Autowired
     private PlatformUtils platformUtils;
+    @Autowired
+    private CommonService commonService;
 
     @Override
     public List<DiseaseClass> getDiseaseClass() {
@@ -161,10 +164,22 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
         diseaseClassDetailEntity.setType(diseaseClassDetailDTO.getType());
         // 背景图片
         if (diseaseClassDetailDTO.getBgImages() != null) {
+            if (!diseaseClassDetailDTO.getBgImages().getImageId().equals(diseaseClassDetailEntity.getBgImagesId())) {
+                if (diseaseClassDetailEntity.getBgImagesId() != null) {
+                    // 删除原来背景图
+                    commonService.deleteImage(diseaseClassDetailEntity.getBgImagesId());
+                }
+            }
             diseaseClassDetailEntity.setBgImagesId(diseaseClassDetailDTO.getBgImages().getImageId());
         }
         // 疾病小类图标
         if (diseaseClassDetailDTO.getIcon() != null) {
+            if (!diseaseClassDetailDTO.getIcon().getImageId().equals(diseaseClassDetailEntity.getIconId())) {
+                if (diseaseClassDetailEntity.getIconId() != null) {
+                    // 删除原来的图标
+                    commonService.deleteImage(diseaseClassDetailEntity.getIconId());
+                }
+            }
             diseaseClassDetailEntity.setIconId(diseaseClassDetailDTO.getIcon().getImageId());
         }
         // 疾病小类描述
@@ -179,6 +194,16 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
     @Override
     public void deleteDiseaseDetail(Integer id) {
         DiseaseClassDetailEntity diseaseClassDetailEntity = diseaseClassDetailRepository.findByDiseaseDetailId(id);
-        diseaseClassDetailRepository.delete(diseaseClassDetailEntity);
+        if (diseaseClassDetailEntity != null) {
+            // 删除ICON图片
+            if (diseaseClassDetailEntity.getIconId() != null) {
+                commonService.deleteImage(diseaseClassDetailEntity.getIconId());
+            }
+            // 删除背景图片
+            if (diseaseClassDetailEntity.getBgImagesId() != null) {
+                commonService.deleteImage(diseaseClassDetailEntity.getBgImagesId());
+            }
+            diseaseClassDetailRepository.delete(diseaseClassDetailEntity);
+        }
     }
 }

@@ -4,10 +4,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
-import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
-import org.flightythought.smile.admin.database.entity.JourneyEntity;
-import org.flightythought.smile.admin.database.entity.RecoverCaseEntity;
-import org.flightythought.smile.admin.database.entity.SysUserEntity;
+import org.flightythought.smile.admin.database.entity.*;
 import org.flightythought.smile.admin.database.repository.*;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.CaseAuditService;
@@ -17,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
@@ -41,6 +39,7 @@ public class CaseAuditServiceImpl implements CaseAuditService {
     private RecoverCaseRepository recoverCaseRepository;
 
     @Override
+    @Transactional
     public Page<CaseAuditInfo> findAll(Map<String, String> params) {
         String pageNumber = params.get("pageNumber");
         String pageSize = params.get("pageSize");
@@ -60,7 +59,6 @@ public class CaseAuditServiceImpl implements CaseAuditService {
         if (StringUtils.isNotBlank(recoverCase)) {
             journey.setRecoverCase(Boolean.valueOf(recoverCase));
         }
-
         PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
         Page<JourneyEntity> page = journeyRepository.findAll(Example.of(journey), pageRequest);
         List<CaseAuditInfo> auditInfos = page
@@ -72,36 +70,34 @@ public class CaseAuditServiceImpl implements CaseAuditService {
                     caseAuditInfo.setJourneyId(journeyEntity.getJourneyId());
                     // 旅程名称
                     caseAuditInfo.setJourneyName(journeyEntity.getJourneyName());
-                    userRepository.findById(journeyEntity.getUserId())
-                            .ifPresent(userEntity -> {
-                                caseAuditInfo.setUserName(userEntity.getUsername());
-                                caseAuditInfo.setUserId(userEntity.getId());
-                            });
+                    // 创建用户
+                    UserEntity userEntity = journeyEntity.getUser();
+                    // 用户名
+                    caseAuditInfo.setUserName(userEntity.getUsername());
+                    // 用户ID
+                    caseAuditInfo.setUserId(userEntity.getId());
+                    // 用户昵称
+                    caseAuditInfo.setNickName(userEntity.getNickName());
                     //相关疾病
                     List<String> diseases = journeyEntity.getDiseaseClassDetails()
                             .stream()
-                            .map(diseaseClassDetailEntity -> diseaseClassDetailEntity.getDiseaseDetailName())
+                            .map(DiseaseClassDetailEntity::getDiseaseDetailName)
                             .collect(Collectors.toList());
                     caseAuditInfo.setDiseaseNames(diseases);
-                    //加入课程
+                    // 加入课程
                     List<String> courses = journeyEntity.getCourses()
                             .stream().map(CourseRegistrationEntity::getTitle)
                             .collect(Collectors.toList());
-                    caseAuditInfo.setJoinCourses(courses);
-                    //解决方案
+                    caseAuditInfo.setCourses(courses);
+                    // 解决方案
                     List<String> solutionNames = Lists.newArrayList();
-                    List<Integer> solutionIds = Lists.newArrayList();
                     journeyEntity.getDiseaseClassDetails()
                             .forEach(diseaseClassDetailEntity -> {
                                 solutionNames.add(diseaseClassDetailEntity.getDiseaseDetailName());
-                                solutionIds.add(diseaseClassDetailEntity.getDiseaseDetailId());
                             });
-                    caseAuditInfo.setSolutionNames(solutionNames);
-                    caseAuditInfo.setSolutionIds(solutionIds);
-
+                    caseAuditInfo.setSolutions(solutionNames);
                     return caseAuditInfo;
                 }).collect(Collectors.toList());
-
         PageImpl<CaseAuditInfo> result = new PageImpl<>(auditInfos, pageRequest, page.getTotalElements());
         return result;
     }
@@ -135,7 +131,7 @@ public class CaseAuditServiceImpl implements CaseAuditService {
                                 recoverCaseEntity.setTitle(journeyEntity.getJourneyName());
                                 recoverCaseEntity.setSolutionId(Integer.valueOf(solutionId));
                                 recoverCaseEntity.setJourneyId(Integer.valueOf(journeyId));
-                                recoverCaseEntity.setCoverImage(Integer.valueOf(coverImage));
+//                                recoverCaseEntity.setCoverImage(Integer.valueOf(coverImage));
                                 recoverCaseEntity.setCaseStartTime(journeyEntity.getStartTime());
                                 recoverCaseEntity.setCaseStartTime(journeyEntity.getEndTime());
                                 recoverCaseEntity.setUserId(journeyEntity.getUserId());
