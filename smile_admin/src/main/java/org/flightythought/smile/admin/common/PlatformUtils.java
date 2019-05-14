@@ -24,11 +24,13 @@ public class PlatformUtils {
     private String staticUrl;
     @Value("${server.servlet.context-path}")
     private String contentPath;
+    @Value("${oss-status}")
+    private Boolean ossStatus;
 
     @Autowired
     private SysParameterRepository sysParameterRepository;
 
-    public String getStaticUrlByPath(String path, String domainPort) {
+    private String getStaticUrlByPath(String path, String domainPort) {
         String url = domainPort + contentPath + staticUrl + path;
         url = url.replace("\\", "/");
         return url;
@@ -41,7 +43,7 @@ public class PlatformUtils {
     public ImageInfo getImageInfo(ImagesEntity imagesEntity, String domainPort) {
         if (imagesEntity != null) {
             ImageInfo imageInfo = new ImageInfo();
-            if (imagesEntity.getOssUrl() != null) {
+            if (ossStatus) {
                 imageInfo.setUrl(imagesEntity.getOssUrl());
             } else {
                 imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));

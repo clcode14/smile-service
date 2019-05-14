@@ -1,7 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
@@ -21,7 +20,6 @@ import java.util.List;
  * @Description: TODO
  */
 @Entity
-@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_journey")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -42,22 +40,20 @@ public class JourneyEntity extends BaseEntity {
     private String journeyName;
 
     /**
-     * 审核状态
+     * 养生旅程概述
      */
-    @Column(name = "audit")
-    private Boolean audit;
-
-    /**
-     * 是否评为康复案例
-     */
-    @Column(name = "recover_case")
-    private Boolean recoverCase;
+    @Column(name = "summarize")
+    private String summarize;
 
     /**
      * 用户ID
      */
     @Column(name = "user_id")
     private Long userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
 
     /**
      * 开始时间
@@ -75,24 +71,93 @@ public class JourneyEntity extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "tb_journey_disease", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "disease_detail_id", insertable = false, nullable = false, updatable = false)})
-    private List<DiseaseClassDetailEntity> diseaseClassDetails;
+    /**
+     * 封面图片ID
+     */
+    @Column(name = "cover_image")
+    private Integer coverImageId;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "tb_journey_to_solution", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "solution_id", insertable = false, nullable = false, updatable = false)})
-    private List<SolutionEntity> solutions;
+    /**
+     * 封面图片
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "tb_journey_to_course", joinColumns = {@JoinColumn(name = "journey_id", insertable = false, nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "course_id", insertable = false, nullable = false, updatable = false)})
-    private List<CourseRegistrationEntity> courses;
+    /**
+     * 日记数量
+     */
+    @Column(name = "note_num")
+    private Integer noteNum;
 
     /**
      * 是否完成
      */
     @Column(name = "finished")
     private Boolean finished;
+
+    /**
+     * 是否为康复案例
+     */
+    @Column(name = "recover_case")
+    private Boolean recoverCase;
+
+    /**
+     * 访问量
+     */
+    @Column(name = "read_num")
+    private Integer readNum;
+
+    /**
+     * 是否审核
+     */
+    @Column(name = "audit")
+    private Boolean audit;
+
+    /**
+     * 旅程体检指标
+     */
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "journey_id", insertable = false, updatable = false)
+    private List<JourneyNormEntity> journeyNorms;
+
+    /**
+     * 旅程关联的疾病小类
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_disease", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "disease_detail_id", nullable = false, updatable = false)})
+    private List<DiseaseClassDetailEntity> diseaseClassDetails;
+
+    /**
+     * 旅程关联的养生方式
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_health", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "health_id", nullable = false, updatable = false)})
+    private List<HealthEntity> healthClassDetails;
+
+    /**
+     * 旅程关联的方式结果
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_health", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "health_result_id", nullable = false, updatable = false)})
+    private List<HealthResultEntity> healthResults;
+
+    /**
+     * 体检报告
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_report", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "report_id", nullable = false, updatable = false)})
+    private List<MedicalReportEntity> medicalReports;
+
+    /**
+     * 管理课程
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_course", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "course_id", nullable = false, updatable = false)})
+    private List<CourseRegistrationEntity> courses;
 }

@@ -1,11 +1,13 @@
 package org.flightythought.smile.admin.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.DiseaseClass;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.DiseaseClassEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.repository.DiseaseClassRepository;
 import org.flightythought.smile.admin.dto.DiseaseClassDTO;
+import org.flightythought.smile.admin.dto.DiseaseQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.DiseaseConfigService;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,8 +35,19 @@ public class DiseaseConfigServiceImpl implements DiseaseConfigService {
     @Autowired
     private DiseaseClassRepository diseaseClassRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @Override
-    public Page<DiseaseClass> getDiseaseClass(int pageNumber, int pageSize) {
+    public Page<DiseaseClass> getDiseaseClass(DiseaseQueryDTO diseaseQueryDTO) {
+        // 拼接SQL
+        StringBuilder sql = new StringBuilder();
+        sql.append("FROM DiseaseClassEntity d WHERE 1 = 1");
+        // 编码
+        String number = diseaseQueryDTO.getNumber();
+        if (StringUtils.isNotBlank(number)) {
+            sql.append(" d.number LIKE :number'")
+        }
         if (pageNumber == 0 || pageSize == 0) {
             throw new FlightyThoughtException("pageNumber, pageSize参数传递错误");
         }
@@ -73,7 +87,7 @@ public class DiseaseConfigServiceImpl implements DiseaseConfigService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDiseaseClass(Integer id) {
         DiseaseClassEntity diseaseClassEntity = diseaseClassRepository.findByDiseaseId(id);
         if (diseaseClassEntity != null) {

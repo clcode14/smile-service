@@ -1,7 +1,6 @@
 package org.flightythought.smile.admin.database.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Table(name = "tb_recover_case")
 @Entity
-@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class RecoverCaseEntity extends BaseEntity {
@@ -40,15 +38,24 @@ public class RecoverCaseEntity extends BaseEntity {
     @Column(name = "solution_id")
     private Integer solutionId;
 
+    /**
+     * 封面图片ID
+     */
+    @Column(name = "cover_image")
+    private Integer coverImageId;
+
+    /**
+     * 封面图
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cover_image", insertable = false, updatable = false)
+    private ImagesEntity coverImage;
 
     /**
      * 标题
      */
     @Column(name = "title")
     private String title;
-
-    @Column(name = "cover_image")
-    private Integer coverImage;
 
     /**
      * 案例开始时间
@@ -66,13 +73,22 @@ public class RecoverCaseEntity extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime caseEndTime;
 
+    /**
+     * 用户ID
+     */
     @Column(name = "user_id")
     private Long userId;
 
+    /**
+     * 关联的用户
+     */
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private UserEntity user;
 
+    /**
+     * 阅读数
+     */
     @Column(name = "read_num")
     private Long readNum;
 }

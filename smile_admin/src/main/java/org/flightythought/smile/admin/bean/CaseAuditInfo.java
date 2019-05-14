@@ -7,22 +7,53 @@ import java.util.List;
 @Data
 public class CaseAuditInfo {
 
+    /**
+     * 养生旅程ID
+     */
     private Integer journeyId;
 
+    /**
+     * 用户名
+     */
     private String userName;
 
+    /**
+     * 用户昵称
+     */
+    private String nickName;
+
+    /**
+     * 用户ID
+     */
     private Long userId;
 
+    /**
+     * 旅程名称
+     */
     private String journeyName;
 
+    /**
+     * 养生成果
+     */
+    private List<String> healthResult;
+
+    /**
+     * 疾病
+     */
     private List<String> diseaseNames;
 
-    private List<String> joinCourses;
+    /**
+     * 课程
+     */
+    private List<String> courses;
 
-    private List<String> healthWays;
+    /**
+     * 养生
+     */
+    private List<String> healths;
 
-    private List<String> solutionNames;
-
-    private List<Integer> solutionIds;
-
+    /**
+     * 解决方案
+     */
+    private List<String> solutions;
 }

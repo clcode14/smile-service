@@ -1,6 +1,5 @@
 package org.flightythought.smile.admin.database.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
@@ -16,7 +15,6 @@ import javax.persistence.*;
  * @Description: TODO
  */
 @Entity
-@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @Table(name = "tb_journey_health")
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -36,9 +34,16 @@ public class JourneyHealthEntity {
     @Column(name = "journey_id")
     private Integer journeyId;
 
+    /**
+     * 养生方式ID
+     */
     @Column(name = "health_id")
     private Integer healthId;
 
+    /**
+     * 养生成果ID
+     */
     @Column(name = "health_result_id")
     private Integer healthResultId;
+
 }

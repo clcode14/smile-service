@@ -18,6 +18,7 @@ public class AdminApplicationTests {
     @Autowired
     private SolutionRepository solutionRepository;
 
+
     @Test
     @Transactional
     public void contextLoads() {

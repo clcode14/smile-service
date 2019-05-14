@@ -10,6 +10,7 @@ import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.DiseaseClassEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.dto.DiseaseClassDTO;
+import org.flightythought.smile.admin.dto.DiseaseQueryDTO;
 import org.flightythought.smile.admin.service.DiseaseConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import javax.servlet.http.HttpSession;
  */
 @RestController
 @RequestMapping("/disease")
-@Api(value = "疾病配置", tags = "疾病大类")
+@Api(tags = "疾病大类控制层", description = "疾病大类相关接口")
 public class DiseaseConfigController {
     private final DiseaseConfigService diseaseConfigService;
 
@@ -44,14 +45,9 @@ public class DiseaseConfigController {
 
     @GetMapping("/majorClass")
     @ApiOperation(value = "获取疾病大类", notes = "获取疾病大类", position = 1)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "pageNumber", value = "页数从1开始"),
-            @ApiImplicitParam(name = "pageSize", value = "每页显示个数")
-    })
-    public ResponseBean getDiseaseClass(int pageNumber, int pageSize) {
+    public ResponseBean getDiseaseClass(@RequestBody DiseaseQueryDTO diseaseQueryDTO) {
         try {
-
-            Page<DiseaseClass> diseaseClassEntities = diseaseConfigService.getDiseaseClass(pageNumber, pageSize);
+            Page<DiseaseClass> diseaseClassEntities = diseaseConfigService.getDiseaseClass(diseaseQueryDTO);
             return ResponseBean.ok("返回成功", diseaseClassEntities);
         } catch (Exception e) {
             LOG.error("获取疾病大类失败", e);

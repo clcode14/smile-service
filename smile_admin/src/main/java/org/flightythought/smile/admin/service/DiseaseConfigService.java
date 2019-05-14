@@ -3,6 +3,7 @@ package org.flightythought.smile.admin.service;
 import org.flightythought.smile.admin.bean.DiseaseClass;
 import org.flightythought.smile.admin.database.entity.DiseaseClassEntity;
 import org.flightythought.smile.admin.dto.DiseaseClassDTO;
+import org.flightythought.smile.admin.dto.DiseaseQueryDTO;
 import org.springframework.data.domain.Page;
 
 import javax.servlet.http.HttpSession;
@@ -22,7 +23,7 @@ public interface DiseaseConfigService {
      * @param pageSize   每页显示数
      * @return Page<DiseaseClassEntity>
      */
-    Page<DiseaseClass> getDiseaseClass(int pageNumber, int pageSize);
+    Page<DiseaseClass> getDiseaseClass(DiseaseQueryDTO diseaseQueryDTO);
 
     /**
      * 新增疾病大类
