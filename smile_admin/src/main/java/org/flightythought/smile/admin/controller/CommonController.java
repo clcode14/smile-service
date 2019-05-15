@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.CommonService;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
+import sun.rmi.runtime.Log;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -67,6 +69,18 @@ public class CommonController {
         } catch (Exception e) {
             LOG.error("删除图片失败", e);
             return ResponseBean.error("删除图片失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "获取解决方案下拉选", notes = "获取解决方案下拉选")
+    @GetMapping("/solutionOptions")
+    public ResponseBean getSolutionSelectOption() {
+        try {
+            List<SelectItemOption> result = commonService.getSolutionOptions();
+            return ResponseBean.ok("获取成功", result);
+        } catch (Exception e) {
+            LOG.error("获取失败", e);
+            return ResponseBean.error("获取失败", e.getMessage());
         }
     }
 }

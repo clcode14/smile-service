@@ -15,11 +15,10 @@ import org.flightythought.smile.admin.service.CourseRegistrationService;
 import org.flightythought.smile.admin.service.HomeBannerService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 import java.util.Comparator;
@@ -48,7 +47,7 @@ public class BannerServiceImpl implements HomeBannerService {
         List<HomeBanner> homeBanners = homeBannerRepository
                 .findAll()
                 .stream()
-                .sorted(Comparator.comparingInt(HomeBannerEntity::getSort))
+                .sorted(Comparator.comparingInt(value -> value.getSort() == null ? 0 : value.getSort()))
                 .map(homeBannerEntity -> {
                     HomeBanner homeBanner = new HomeBanner();
                     BeanUtils.copyProperties(homeBannerEntity, homeBanner);
@@ -63,7 +62,9 @@ public class BannerServiceImpl implements HomeBannerService {
     @Override
     public HomeBannerEntity findOne(Integer id) {
         AtomicReference<HomeBannerEntity> homeBannerEntity = new AtomicReference<>();
-        homeBannerRepository.findById(id)
+        HomeBannerEntity exampleEntity = new HomeBannerEntity();
+        exampleEntity.setId(id);
+        homeBannerRepository.findOne(Example.of(exampleEntity))
                 .ifPresent(homeBanner -> {
                     String domainPort = platformUtils.getDomainPort();
                     ImagesEntity imagesEntity = homeBanner.getImagesEntity();
@@ -91,7 +92,7 @@ public class BannerServiceImpl implements HomeBannerService {
     @Override
     public HomeBannerEntity modify(HomeBannerDTO homebannerDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
-        HomeBannerEntity homeBannerEntity = homeBannerRepository.getOne(homebannerDTO.getId());
+        HomeBannerEntity homeBannerEntity = homeBannerRepository.findById(homebannerDTO.getId());
         homeBannerEntity.setSort(homebannerDTO.getSort());
         homeBannerEntity.setLink(homebannerDTO.getLink());
         homeBannerEntity.setTitle(homebannerDTO.getTitle());
@@ -109,15 +110,17 @@ public class BannerServiceImpl implements HomeBannerService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Integer id) {
-        HomeBannerEntity homeBannerEntity = homeBannerRepository.getOne(id);
+        HomeBannerEntity homeBannerEntity = homeBannerRepository.findById(id);
         // 删除图片
         Integer imageId = homeBannerEntity.getImageId();
         if (imageId != null) {
             // 删除原始图片
             commonService.deleteImage(imageId);
         }
-        homeBannerRepository.deleteById(id);
+        homeBannerEntity = homeBannerRepository.findById(id);
+        homeBannerRepository.delete(homeBannerEntity);
     }
 
     @Override

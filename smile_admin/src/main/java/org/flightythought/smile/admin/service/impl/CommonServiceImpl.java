@@ -1,14 +1,17 @@
 package org.flightythought.smile.admin.service.impl;
 
 import com.aliyun.oss.OSSClient;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.flightythought.smile.admin.bean.ImageInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.config.ALiOSSConfig;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysParameterEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.repository.ImagesRepository;
+import org.flightythought.smile.admin.database.repository.SolutionRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.CommonService;
@@ -45,6 +48,8 @@ public class CommonServiceImpl implements CommonService {
     private ImagesRepository imagesRepository;
     @Autowired
     private ALiOSSConfig aLiOSSConfig;
+    @Autowired
+    private SolutionRepository solutionRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
@@ -229,7 +234,12 @@ public class CommonServiceImpl implements CommonService {
                     OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
                     // objectName
                     String objectName = imagesEntity.getOssKey();
-                    ossClient.deleteObject(bucketName, objectName);
+                    if (StringUtils.isNotBlank(objectName)) {
+                        boolean found = ossClient.doesObjectExist(bucketName, objectName);
+                        if (found) {
+                            ossClient.deleteObject(bucketName, objectName);
+                        }
+                    }
                     ossClient.shutdown();
                 } else {
                     // 删除文件
@@ -242,5 +252,16 @@ public class CommonServiceImpl implements CommonService {
                 imagesRepository.delete(imagesEntity);
             }
         }
+    }
+
+    @Override
+    public List<SelectItemOption> getSolutionOptions() {
+        List<SelectItemOption> result = solutionRepository.findAll().stream().map(solutionEntity -> {
+            SelectItemOption selectItemOption = new SelectItemOption();
+            selectItemOption.setKey(solutionEntity.getId() + "");
+            selectItemOption.setValue(solutionEntity.getTitle());
+            return selectItemOption;
+        }).collect(Collectors.toList());
+        return result;
     }
 }

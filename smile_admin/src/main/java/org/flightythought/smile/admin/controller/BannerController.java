@@ -128,7 +128,7 @@ public class BannerController {
 
     @DeleteMapping("/courseBanner")
     @ApiOperation(value = "删除课程Banner图", notes = "删除课程Banner图")
-    public ResponseBean deleteCourseBanner(List<Integer> courseIds) {
+    public ResponseBean deleteCourseBanner(@RequestParam(value = "courseIds") List<Integer> courseIds) {
         try {
             homeBannerService.deleteCourseBanner(courseIds);
             return ResponseBean.ok("删除成功");

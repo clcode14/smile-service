@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.service;
 
 import org.flightythought.smile.admin.bean.ImageInfo;
+import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,4 +31,9 @@ public interface CommonService {
      * @param imageId 图片ID
      */
     void deleteImage(Integer imageId);
+
+    /**
+     * 获取解决方案下拉选
+     */
+    List<SelectItemOption> getSolutionOptions();
 }

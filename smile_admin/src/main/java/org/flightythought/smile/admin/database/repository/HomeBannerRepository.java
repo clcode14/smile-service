@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface HomeBannerRepository extends JpaRepository<HomeBannerEntity, Integer> {
+public interface HomeBannerRepository extends JpaRepository<HomeBannerEntity, Long> {
+    HomeBannerEntity findById(Integer id);
 }
