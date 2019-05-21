@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -21,4 +23,6 @@ public interface SolutionRepository extends JpaRepository<SolutionEntity, Intege
     @Query("update SolutionEntity s set s.recoverNumber=s.recoverNumber-1 where s.id=?1")
     @Modifying
     void updateRecoverNum(Integer solutionId);
+
+    List<SolutionEntity> findByIdIn(List<Integer> ids);
 }

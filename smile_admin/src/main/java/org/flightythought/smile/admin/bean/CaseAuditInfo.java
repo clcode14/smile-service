@@ -33,6 +33,26 @@ public class CaseAuditInfo {
     private String journeyName;
 
     /**
+     * 养生旅程是否完成
+     */
+    private Boolean finished;
+
+    /**
+     * 审核状态
+     */
+    private Boolean audit;
+
+    /**
+     * 是否为康复案例
+     */
+    private Boolean recoverCase;
+
+    /**
+     * 养生旅程标题
+     */
+    private String title;
+
+    /**
      * 养生成果
      */
     private List<String> healthResult;

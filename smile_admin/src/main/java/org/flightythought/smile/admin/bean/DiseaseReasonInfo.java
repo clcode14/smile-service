@@ -18,6 +18,16 @@ public class DiseaseReasonInfo {
     private String diseaseName;
 
     /**
+     * 疾病大类ID
+     */
+    private Integer diseaseId;
+
+    /**
+     * 疾病小类ID
+     */
+    private Integer diseaseDetailId;
+
+    /**
      * 疾病小类名称
      */
     private String diseaseDetailName;

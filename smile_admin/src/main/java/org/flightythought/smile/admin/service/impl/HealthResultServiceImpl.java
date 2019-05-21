@@ -51,6 +51,10 @@ public class HealthResultServiceImpl implements HealthResultService {
     @Override
     public HealthResultEntity modifyHealthResult(HealthResultEntity healthResultEntity) {
         HealthResultEntity entity = healthResultRepository.getOne(healthResultEntity.getId());
+        healthResultEntity.setCreateUserName(entity.getCreateUserName());
+        healthResultEntity.setCreateTime(entity.getCreateTime());
+        SysUserEntity sysUserEntity = platformUtils.getCurrentLoginUser();
+        healthResultEntity.setUpdateUserName(sysUserEntity.getLoginName());
         BeanUtils.copyProperties(healthResultEntity, entity);
         return healthResultRepository.save(entity);
     }

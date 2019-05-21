@@ -43,8 +43,21 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             if (entity == null) {
                 throw new FlightyThoughtException("修改失败，normTypeId=" + healthNormTypeEntity.getNormTypeId() + "，没找到对应的数据");
             } else {
+                // 体检指标名称
                 entity.setNormName(healthNormTypeEntity.getNormName());
+                // 体检指标编码
                 entity.setNormNumber(healthNormTypeEntity.getNormNumber());
+                // 单位
+                entity.setUnit(healthNormTypeEntity.getUnit());
+                // 最大值
+                entity.setMax(healthNormTypeEntity.getMax());
+                // 最小值
+                entity.setMin(healthNormTypeEntity.getMin());
+                // 步进
+                entity.setStep(healthNormTypeEntity.getStep());
+                // 输入类型
+                entity.setInputType(healthNormTypeEntity.getInputType());
+                // 修改者
                 entity.setUpdateUserName(sysUserEntity.getLoginName());
                 return healthNormTypeRepository.save(entity);
             }

@@ -115,7 +115,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                 List<ImagesEntity> solutionImagesEntities = solutionEntity.getImages();
                 List<String> imageUrls = new ArrayList<>();
                 solutionImagesEntities.forEach(imagesEntity -> {
-                    String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
+                    String imageUrl = platformUtils.getImageInfo(imagesEntity, domainPort).getUrl();
                     imageUrls.add(imageUrl);
                 });
                 // 解决方案配图

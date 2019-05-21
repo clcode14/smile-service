@@ -1,9 +1,11 @@
 package org.flightythought.smile.appserver.service.impl;
 
+import com.aliyun.oss.OSSClient;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.flightythought.smile.appserver.bean.*;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
+import org.flightythought.smile.appserver.config.ALiOSSConfig;
 import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.flightythought.smile.appserver.dto.*;
@@ -16,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,15 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.flightythought.smile.appserver.service.impl.CommonServiceImpl.getSuffix;
 
 @Service
 public class JourneyHealthServiceImpl implements JourneyHealthService {
@@ -71,11 +72,16 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private RecoverCaseRepository recoverCaseRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ALiOSSConfig aLiOSSConfig;
 
     @Value("${static-url}")
     private String staticUrl;
     @Value("${server.servlet.context-path}")
     private String contentPath;
+    @Value("${oss-status}")
+    private Boolean ossStatus;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(JourneyHealthServiceImpl.class);
 
@@ -101,25 +107,35 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 break;
             }
         }
-        // 获取系统参数
-        SysParameterEntity sysParameterEntity = sysParameterRepository.getFilePathParam();
         // 获取当前登陆用户
-        UserEntity userEntity = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
         SysParameterEntity domainPortEntity = sysParameterRepository.getDomainPortParam();
         String domainPort = domainPortEntity.getParameterValue();
-        String filePath, userPath;
-        if (sysParameterEntity == null) {
-            throw new FlightyThoughtException("请设置上传文件路径系统参数");
+        String filePath = "", userPath;
+        if (ossStatus) {
+            if (!"".equals(fileType)) {
+                userPath = fileType + "/" + userEntity.getId();
+            } else {
+                userPath = userEntity.getId() + "";
+            }
         } else {
-            filePath = sysParameterEntity.getParameterValue();
             if (!"".equals(fileType)) {
                 userPath = File.separator + fileType + File.separator + userEntity.getId();
             } else {
                 userPath = File.separator + userEntity.getId();
             }
-            File file = new File(filePath + userPath);
-            if (!file.exists()) {
-                file.mkdirs();
+        }
+        if (!ossStatus) {
+            // 获取系统参数
+            SysParameterEntity sysParameterEntity = sysParameterRepository.getFilePathParam();
+            if (sysParameterEntity == null) {
+                throw new FlightyThoughtException("请设置上传文件路径系统参数");
+            } else {
+                filePath = sysParameterEntity.getParameterValue();
+                File file = new File(filePath + userPath);
+                if (!file.exists()) {
+                    file.mkdirs();
+                }
             }
         }
         List<MedicalReportEntity> medicalReportEntities = new ArrayList<>();
@@ -141,23 +157,58 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 String fileName = multipartFile.getOriginalFilename();
                 // 新建文件
                 if (fileName != null) {
-                    String path = userPath + File.separator + System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."));
-                    // 文件名称
-                    medicalReportEntity.setFileName(fileName);
-                    // 文件路径
-                    medicalReportEntity.setPath(path);
-                    File file = new File(filePath + path);
-                    try {
-                        // 创建文件输出流
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                        // 复制文件
-                        IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                        medicalReportEntities.add(medicalReportEntity);
-                    } catch (IOException e) {
-                        LOG.error("上传体检报告失败", e);
-                        throw new FlightyThoughtException("上传体检报告失败", e);
+                    if (!ossStatus) {
+                        String path = userPath + File.separator + System.currentTimeMillis() + fileName.substring(fileName.lastIndexOf("."));
+                        // 文件名称
+                        medicalReportEntity.setFileName(fileName);
+                        // 文件路径
+                        medicalReportEntity.setPath(path);
+                        File file = new File(filePath + path);
+                        try {
+                            // 创建文件输出流
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            // 复制文件
+                            IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                            medicalReportEntities.add(medicalReportEntity);
+                        } catch (IOException e) {
+                            LOG.error("上传体检报告失败", e);
+                            throw new FlightyThoughtException("上传体检报告失败", e);
+                        }
+                    } else {
+                        // OSS 对象存储
+                        // 1. 获取文件后缀名
+                        String suffix = getSuffix(multipartFile);
+                        // 2. 获取OSS参数信息
+                        String endpoint = aLiOSSConfig.getEndpoint();
+                        String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                        String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                        String bucketName = aLiOSSConfig.getBucketName();
+                        // 创建OSSClient实例
+                        OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                        // 文件KEY
+                        String fileKey = userPath + "/" + System.currentTimeMillis() + "." + suffix;
+                        // 上传文件
+                        try {
+                            ossClient.putObject(bucketName, fileKey, multipartFile.getInputStream());
+                            // 设置URL过期时间为100年
+                            Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+
+                            // 生成URL
+                            URL url = ossClient.generatePresignedUrl(bucketName, fileKey, expiration);
+                            // 保存数据对象
+                            // 文件名称
+                            medicalReportEntity.setFileName(fileName);
+                            medicalReportEntity.setOssKey(fileKey);
+                            medicalReportEntity.setOssUrl(url.toString());
+                            medicalReportEntities.add(medicalReportEntity);
+                        } catch (IOException e) {
+                            LOG.error("上传图片失败", e);
+                            throw new FlightyThoughtException("上传图片失败", e);
+                        } finally {
+                            ossClient.shutdown();
+                        }
                     }
                 }
             }
@@ -171,8 +222,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 fileInfo.setName(medicalReportEntity.getFileName());
                 fileInfo.setSize(medicalReportEntity.getSize());
                 fileInfo.setType(medicalReportEntity.getType());
-                String fileUrl = domainPort + contentPath + staticUrl + medicalReportEntity.getPath();
-                fileInfo.setUrl(fileUrl.replace("\\", "/"));
+                if (ossStatus) {
+                    fileInfo.setUrl(medicalReportEntity.getOssUrl());
+                } else {
+                    String fileUrl = domainPort + contentPath + staticUrl + medicalReportEntity.getPath();
+                    fileInfo.setUrl(fileUrl.replace("\\", "/"));
+                }
                 fileInfos.add(fileInfo);
             });
             return fileInfos;
@@ -205,6 +260,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setCoverImageId(healthJourneyStartDTO.getCoverImageId());
         // 是否审核
         journeyEntity.setAudit(false);
+        // 养生旅程是否结束
+        journeyEntity.setFinished(false);
         // 保存养生旅程
         journeyEntity = journeyRepository.save(journeyEntity);
         // 获取体检指标
@@ -309,9 +366,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         }
         if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
             if (finished != null) {
-                journeyEntities = journeyRepository.findByUserIdAndFinished(userId, finished);
+                journeyEntities = journeyRepository.findByUserIdAndFinishedOrderByFinishedAsc(userId, finished);
             } else {
-                journeyEntities = journeyRepository.findByUserId(userId);
+                journeyEntities = journeyRepository.findByUserIdOrderByFinishedAsc(userId);
             }
             pageRequest = PageRequest.of(0, journeyEntities.size() + 1);
             total = (long) journeyEntities.size();
@@ -319,9 +376,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
             Page<JourneyEntity> journeyEntityPage;
             if (finished != null) {
-                journeyEntityPage = journeyRepository.findByUserIdAndFinished(userId, finished, pageRequest);
+                journeyEntityPage = journeyRepository.findByUserIdAndFinishedOrderByFinishedAsc(userId, finished, pageRequest);
             } else {
-                journeyEntityPage = journeyRepository.findByUserId(userId, pageRequest);
+                journeyEntityPage = journeyRepository.findByUserIdOrderByFinishedAsc(userId, pageRequest);
             }
             journeyEntities = journeyEntityPage.getContent();
             total = journeyEntityPage.getTotalElements();
@@ -459,8 +516,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 medicalReportEntities.forEach(medicalReportEntity -> {
                     FileInfo fileInfo = new FileInfo();
                     // 资源URL
-                    String url = platformUtils.getStaticUrlByPath(medicalReportEntity.getPath(), domainPort);
-                    fileInfo.setUrl(url);
+                    if (ossStatus) {
+                        fileInfo.setUrl(medicalReportEntity.getOssUrl());
+                    } else {
+                        String url = platformUtils.getMedicalReportStaticUrlByPath(medicalReportEntity.getPath(), domainPort);
+                        fileInfo.setUrl(url);
+                    }
                     // 文件名称
                     fileInfo.setName(medicalReportEntity.getFileName());
                     // 主键ID
@@ -494,11 +555,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                     // 背景图片
                     ImagesEntity imagesEntity = healthEntity.getBgImage();
                     if (imagesEntity != null) {
-                        ImageInfo bgImage = new ImageInfo();
-                        bgImage.setUrl(platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort));
-                        bgImage.setName(imagesEntity.getFileName());
-                        bgImage.setSize(imagesEntity.getSize());
-                        bgImage.setId(imagesEntity.getId());
+                        ImageInfo bgImage = platformUtils.getImageInfo(imagesEntity, domainPort);
                         healthClass.setBgImage(bgImage);
                     }
                     // 内容介绍
@@ -627,7 +684,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 // 封面图片URL
                 ImagesEntity coverImage = journeyNoteEntity.getCoverImage();
                 if (coverImage != null) {
-                    String coverImageUrl = platformUtils.getStaticUrlByPath(coverImage.getPath(), domainPort);
+                    String coverImageUrl = platformUtils.getImageInfo(coverImage, domainPort).getUrl();
                     journeyNote.setCoverImageUrl(coverImageUrl);
                 }
                 // 日记内容
@@ -644,11 +701,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 if (imagesEntities != null) {
                     List<ImageInfo> imageInfos = new ArrayList<>();
                     imagesEntities.forEach(imagesEntity -> {
-                        ImageInfo imageInfo = new ImageInfo();
-                        imageInfo.setName(imagesEntity.getFileName());
-                        imageInfo.setSize(imagesEntity.getSize());
-                        imageInfo.setId(imagesEntity.getId());
-                        imageInfo.setUrl(platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort));
+                        ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                         imageInfos.add(imageInfo);
                     });
                     journeyNote.setImages(imageInfos);
@@ -731,21 +784,27 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setUpdateTime(LocalDateTime.now());
         // 保存修改的养生旅程
         journeyRepository.save(journeyEntity);
-        // 关联养生方式以及对应的养生成果
-        List<HealthAndResultIdDTO> healthAndResultIdDTOS = healthJourneyEndDTO.getHealthDetailAndResultIds();
-        if (healthAndResultIdDTOS != null && healthAndResultIdDTOS.size() > 0) {
-            List<JourneyHealthEntity> journeyHealthEntities = new ArrayList<>();
-            healthAndResultIdDTOS.forEach(healthAndResultIdDTO -> {
-                JourneyHealthEntity journeyHealthEntity = new JourneyHealthEntity();
+        // 关联疾病小类以及对应的养生成果
+        List<DiseaseAndHealthResult> diseaseAndHealthResults = healthJourneyEndDTO.getDiseaseAndHealthResults();
+        if (diseaseAndHealthResults != null && diseaseAndHealthResults.size() > 0) {
+            // 删除之前绑定的疾病小类
+            journeyDiseaseRepository.deleteAllByJourneyId(journeyEntity.getJourneyId());
+            List<JourneyDiseaseEntity> journeyDiseaseEntities = journeyDiseaseRepository.findByJourneyId(journeyEntity.getJourneyId());
+            if (journeyDiseaseEntities == null || journeyDiseaseEntities.size() == 0) {
+                LOG.info("养生旅程ID：{}, 对应的疾病小类删除成功", journeyEntity.getJourneyId());
+            }
+            List<JourneyDiseaseEntity> journeyDiseaseEntityList = new ArrayList<>();
+            diseaseAndHealthResults.forEach(diseaseAndHealthResult -> {
+                JourneyDiseaseEntity journeyDiseaseEntity = new JourneyDiseaseEntity();
                 // 旅程ID
-                journeyHealthEntity.setJourneyId(journeyEntity.getJourneyId());
-                // 养生ID
-                journeyHealthEntity.setHealthId(healthAndResultIdDTO.getHealthId());
+                journeyDiseaseEntity.setJourneyId(journeyEntity.getJourneyId());
+                // 疾病ID
+                journeyDiseaseEntity.setDiseaseDetailId(diseaseAndHealthResult.getDiseaseDetailId());
                 // 养生结果ID
-                journeyHealthEntity.setHealthResultId(healthAndResultIdDTO.getHealthResultId());
-                journeyHealthEntities.add(journeyHealthEntity);
+                journeyDiseaseEntity.setHealthResultId(diseaseAndHealthResult.getHealthResultId());
+                journeyDiseaseEntityList.add(journeyDiseaseEntity);
             });
-            journeyHealthRepository.saveAll(journeyHealthEntities);
+            journeyDiseaseRepository.saveAll(journeyDiseaseEntityList);
         }
         // 参加课程
         List<Integer> courseIds = healthJourneyEndDTO.getCourseIds();
@@ -791,24 +850,19 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             }
             journeyToReportRepository.saveAll(journeyToReportEntities);
         }
-        List<Integer> diseaseClassDetailIds = healthJourneyEndDTO.getDiseaseClassDetailIds();
-        if (diseaseClassDetailIds != null && diseaseClassDetailIds.size() > 0) {
-            // 删除之前绑定的疾病小类
-            journeyDiseaseRepository.deleteAllByJourneyId(journeyEntity.getJourneyId());
-            List<JourneyDiseaseEntity> journeyDiseaseEntities = journeyDiseaseRepository.findByJourneyId(journeyEntity.getJourneyId());
-            if (journeyDiseaseEntities == null || journeyDiseaseEntities.size() == 0) {
-                LOG.info("养生旅程ID：{}, 对应的疾病小类删除成功", journeyEntity.getJourneyId());
-            }
-            List<JourneyDiseaseEntity> finalJourneyDiseaseEntities = new ArrayList<>();
-            diseaseClassDetailIds.forEach(diseaseClassDetailId -> {
-                JourneyDiseaseEntity diseaseEntity = new JourneyDiseaseEntity();
+        List<Integer> healthIds = healthJourneyEndDTO.getHealthIds();
+        if (healthIds != null && healthIds.size() > 0) {
+
+            List<JourneyHealthEntity> journeyHealthEntities = new ArrayList<>();
+            healthIds.forEach(healthId -> {
+                JourneyHealthEntity journeyHealthEntity = new JourneyHealthEntity();
                 // 疾病小类ID
-                diseaseEntity.setDiseaseDetailId(diseaseClassDetailId);
+                journeyHealthEntity.setJourneyId(journeyEntity.getJourneyId());
                 // 养生旅程ID
-                diseaseEntity.setJourneyId(journeyEntity.getJourneyId());
-                finalJourneyDiseaseEntities.add(diseaseEntity);
+                journeyHealthEntity.setHealthId(healthId);
+                journeyHealthEntities.add(journeyHealthEntity);
             });
-            journeyDiseaseRepository.saveAll(finalJourneyDiseaseEntities);
+            journeyHealthRepository.saveAll(journeyHealthEntities);
         }
         return getHealthJourney(journeyEntity.getJourneyId(), null);
     }

@@ -24,8 +24,8 @@ public class HealthJourneyEndDTO {
     @ApiModelProperty(value = "养生旅程名称")
     private String journeyName;
 
-    @ApiModelProperty(value = "养生方式ID以及对应的养生成果ID")
-    private List<HealthAndResultIdDTO> healthDetailAndResultIds;
+    @ApiModelProperty(value = "疾病小类ID以及对应的养生成果ID")
+    private List<DiseaseAndHealthResult> diseaseAndHealthResults;
 
     @ApiModelProperty(value = "养生概述")
     private String summarize;
@@ -36,8 +36,8 @@ public class HealthJourneyEndDTO {
     @ApiModelProperty(value = "体检指标类型")
     private List<HealthNormTypeDTO> healthNormTypes;
 
-    @ApiModelProperty(value = "选择的疾病小类ID集合")
-    private List<Integer> diseaseClassDetailIds;
+    @ApiModelProperty(value = "选择的养生ID集合")
+    private List<Integer> healthIds;
 
     @ApiModelProperty(value = "体检报告")
     private List<FileImageDTO> files;

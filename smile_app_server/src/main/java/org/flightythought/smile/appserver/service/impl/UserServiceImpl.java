@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
             // 用户头像
             ImagesEntity imagesEntity = userEntity.getPhotoImage();
             if (imagesEntity != null) {
-                String photoUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
+                String photoUrl = platformUtils.getImageInfo(imagesEntity, domainPort).getUrl();
                 userInfo.setPhoto(photoUrl);
             }
             // 手机号

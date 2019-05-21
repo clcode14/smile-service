@@ -25,11 +25,19 @@ public class PlatformUtils {
     private String staticUrl;
     @Value("${server.servlet.context-path}")
     private String contentPath;
+    @Value("${oss-status}")
+    private Boolean ossStatus;
 
     @Autowired
     private SysParameterRepository sysParameterRepository;
 
-    public String getStaticUrlByPath(String path, String domainPort) {
+    private String getStaticUrlByPath(String path, String domainPort) {
+        String url = domainPort + contentPath + staticUrl + path;
+        url = url.replace("\\", "/");
+        return url;
+    }
+
+    public String getMedicalReportStaticUrlByPath(String path, String domainPort) {
         String url = domainPort + contentPath + staticUrl + path;
         url = url.replace("\\", "/");
         return url;
@@ -50,7 +58,11 @@ public class PlatformUtils {
     public ImageInfo getImageInfo(ImagesEntity imagesEntity, String domainPort) {
         if (imagesEntity != null) {
             ImageInfo imageInfo = new ImageInfo();
-            imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));
+            if (ossStatus) {
+                imageInfo.setUrl(imagesEntity.getOssUrl());
+            } else {
+                imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));
+            }
             imageInfo.setName(imagesEntity.getFileName());
             imageInfo.setId(imagesEntity.getId());
             imageInfo.setSize(imagesEntity.getSize());
@@ -67,11 +79,17 @@ public class PlatformUtils {
             // 文件名称
             fileInfo.setName(filesEntity.getFileName());
             // 资源URL
-            fileInfo.setUrl(getStaticUrlByPath(filesEntity.getPath(), domainPort));
+            if (!ossStatus) {
+                fileInfo.setUrl(getStaticUrlByPath(filesEntity.getPath(), domainPort));
+            } else {
+                fileInfo.setUrl(filesEntity.getOssUrl());
+            }
             // 文件大小
             fileInfo.setSize(filesEntity.getSize());
             // 文件类型
             fileInfo.setFileType(filesEntity.getFileType());
+            // OSS KEY
+            fileInfo.setOssKey(filesEntity.getOssKey());
             return fileInfo;
         }
         return null;

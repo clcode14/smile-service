@@ -21,4 +21,6 @@ public interface JourneyRepository extends JpaRepository<JourneyEntity, Integer>
     @Query("update JourneyEntity j set j.audit=true where j.journeyId=?1")
     @Modifying
     void updateCheckStatus(Integer journeyId);
+
+    JourneyEntity findByJourneyId(Integer journeyId);
 }

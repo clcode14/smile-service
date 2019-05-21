@@ -1,43 +1,41 @@
 package org.flightythought.smile.appserver.database.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName JourneyHealthEntity
- * @CreateTime 2019/4/10 2:12
+ * @ClassName OfficeImageEntity
+ * @CreateTime 2019/5/21 23:41
  * @Description: TODO
  */
-@Entity
-@Table(name = "tb_journey_health")
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class JourneyHealthEntity {
+@Entity
+@Table(name = "tb_office_image")
+public class OfficeImageEntity {
+
     /**
-     * 自增主键
+     * 自增主键ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     /**
-     * 养生旅程ID
+     * 机构ID
      */
-    @Column(name = "journey_id")
-    private Integer journeyId;
+    @Column(name = "office_id")
+    private Long officeId;
 
     /**
-     * 养生方式ID
+     * 图片ID
      */
-    @Column(name = "health_id")
-    private Integer healthId;
+    @Column(name = "image_id")
+    private Integer imageId;
 }

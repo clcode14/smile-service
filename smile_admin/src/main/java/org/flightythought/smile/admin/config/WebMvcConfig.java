@@ -44,6 +44,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
 
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         //设置允许跨域的路径

@@ -41,4 +41,9 @@ public class FileInfo {
      * 文件类型
      */
     private String fileType;
+
+    /**
+     * OSS KEY
+     */
+    private String ossKey;
 }

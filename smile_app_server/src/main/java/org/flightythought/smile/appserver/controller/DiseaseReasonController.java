@@ -9,12 +9,16 @@ import org.flightythought.smile.appserver.dto.AboutDiseaseDetailQueryDTO;
 import org.flightythought.smile.appserver.service.DiseaseReasonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth/disease")
@@ -32,7 +36,13 @@ public class DiseaseReasonController {
     public ResponseBean getDiseaseReason(@RequestBody AboutDiseaseDetailQueryDTO diseaseDetailQueryDTO) {
         try {
             Page<DiseaseReasonEntity> diseaseReasonEntities = diseaseReasonService.getDiseaseReason(diseaseDetailQueryDTO);
-            return ResponseBean.ok("返回成功", diseaseReasonEntities);
+            List<DiseaseReasonEntity> diseaseReasonEntityList = diseaseReasonEntities.getContent().stream().map(diseaseReasonEntity -> {
+                DiseaseReasonEntity entity = new DiseaseReasonEntity();
+                BeanUtils.copyProperties(diseaseReasonEntity, entity);
+                entity.setSolutions(null);
+                return entity;
+            }).collect(Collectors.toList());
+            return ResponseBean.ok("返回成功", new PageImpl<>(diseaseReasonEntityList, diseaseReasonEntities.getPageable(), diseaseReasonEntities.getTotalElements()));
         } catch (Exception e) {
             LOG.error("返回失败", e);
             return ResponseBean.error("返回失败", e.getMessage());

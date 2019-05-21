@@ -155,7 +155,12 @@ public class BannerServiceImpl implements HomeBannerService {
         List<CourseBannerEntity> courseBannerEntities = courseBannerRepository.findAll();
         List<Integer> courseIds = courseBannerEntities.stream().map(CourseBannerEntity::getCourseId).collect(Collectors.toList());
         Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
-        Page<CourseRegistrationEntity> courseRegistrationEntities = courseRegistrationRepository.findByCourseIdNotIn(courseIds, pageable);
+        Page<CourseRegistrationEntity> courseRegistrationEntities;
+        if (courseIds.size() > 0) {
+            courseRegistrationEntities = courseRegistrationRepository.findByCourseIdNotIn(courseIds, pageable);
+        } else {
+            courseRegistrationEntities = courseRegistrationRepository.findAll(pageable);
+        }
         List<CourseInfo> courseInfos = courseRegistrationEntities.stream().map(courseRegistrationEntity -> courseRegistrationService.getCourseInfo(courseRegistrationEntity)).collect(Collectors.toList());
         return new PageImpl<>(courseInfos, pageable, courseRegistrationEntities.getTotalElements());
     }

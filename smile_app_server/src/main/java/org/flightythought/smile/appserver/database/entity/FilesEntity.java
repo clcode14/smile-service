@@ -51,4 +51,16 @@ public class FilesEntity extends BaseEntity {
      */
     @Column(name = "module")
     private String module;
+
+    /**
+     * OSS URL
+     */
+    @Column(name = "oss_url")
+    private String ossUrl;
+
+    /**
+     * OSS KEY
+     */
+    @Column(name = "oss_key")
+    private String ossKey;
 }

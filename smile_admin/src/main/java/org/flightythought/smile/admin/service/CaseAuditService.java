@@ -1,6 +1,7 @@
 package org.flightythought.smile.admin.service;
 
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
+import org.flightythought.smile.admin.dto.CheckCaseAuditDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.data.domain.Page;
 
@@ -15,5 +16,5 @@ public interface CaseAuditService {
 
     void cancelCase(Integer id) throws Exception;
 
-    void doAudit(Map<String,String> params, HttpSession session) throws FlightyThoughtException;
+    void doAudit(CheckCaseAuditDTO checkCaseAuditDTO) throws FlightyThoughtException;
 }

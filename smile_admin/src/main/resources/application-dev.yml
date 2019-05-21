@@ -8,6 +8,10 @@ server:
 spring:
   application:
     name: smile-admin
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 500MB
   mvc:
     # 资源映射路径为/static/**，你想在url访问的请求路径
     static-path-pattern: /static/**

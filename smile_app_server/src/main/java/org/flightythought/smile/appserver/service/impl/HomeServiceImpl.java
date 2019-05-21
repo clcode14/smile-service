@@ -49,12 +49,7 @@ public class HomeServiceImpl implements HomeService {
             // 图片
             ImagesEntity imagesEntity = homeBannerEntity.getImage();
             if (imagesEntity != null) {
-                ImageInfo imageInfo = new ImageInfo();
-                imageInfo.setId(imagesEntity.getId());
-                imageInfo.setSize(imagesEntity.getSize());
-                imageInfo.setName(imagesEntity.getFileName());
-                String url = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                imageInfo.setUrl(url);
+                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                 homeBanner.setImage(imageInfo);
             }
             homeBanner.setSort(homeBannerEntity.getSort());

@@ -68,12 +68,7 @@ public class HealthServiceImpl implements HealthService {
                 // 背景图片URL
                 ImagesEntity imagesEntity = healthEntity.getBgImage();
                 if (imagesEntity != null) {
-                    String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                    ImageInfo bgImage = new ImageInfo();
-                    bgImage.setId(imagesEntity.getId());
-                    bgImage.setName(imagesEntity.getFileName());
-                    bgImage.setSize(imagesEntity.getSize());
-                    bgImage.setUrl(imageUrl);
+                    ImageInfo bgImage = platformUtils.getImageInfo(imagesEntity, domainPort);
                     healthClass.setBgImage(bgImage);
                 }
                 // 内容介绍
@@ -95,7 +90,7 @@ public class HealthServiceImpl implements HealthService {
                         List<ImagesEntity> imagesEntities = solutionEntity.getImages();
                         if (imagesEntities != null && imagesEntities.size() > 0) {
                             imagesEntities.forEach(image -> {
-                                String url = platformUtils.getStaticUrlByPath(image.getPath(), domainPort);
+                                String url = platformUtils.getImageInfo(image, domainPort).getUrl();
                                 imageUrls.add(url);
                             });
                         }
@@ -126,12 +121,7 @@ public class HealthServiceImpl implements HealthService {
             // 背景图片
             ImagesEntity imagesEntity = healthEntity.getBgImage();
             if (imagesEntity != null) {
-                ImageInfo imageInfo = new ImageInfo();
-                imageInfo.setId(imagesEntity.getId());
-                imageInfo.setSize(imagesEntity.getSize());
-                imageInfo.setName(imagesEntity.getFileName());
-                String imageUrl = platformUtils.getStaticUrlByPath(imagesEntity.getPath(), domainPort);
-                imageInfo.setUrl(imageUrl);
+                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                 healthClass.setBgImage(imageInfo);
             }
             // 内容介绍

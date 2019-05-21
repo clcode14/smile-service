@@ -15,6 +15,10 @@ import lombok.Data;
 @Data
 @ApiModel(value = "审核旅程DTO", description = "审核旅程DTO")
 public class CheckCaseAuditDTO {
+
+    @ApiModelProperty(value = "养生旅程ID")
+    private Integer journeyId;
+
     @ApiModelProperty(value = "案例标题")
     private String title;
 

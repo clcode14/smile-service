@@ -48,9 +48,9 @@ public class JourneyHealthController {
         }
     }
 
-    @PostMapping("deleteHealthNormType")
+    @DeleteMapping("deleteHealthNormType/{normTypeId}")
     @ApiOperation(value = "删除体检指标类型", notes = "删除体检指标类型")
-    public ResponseBean deleteHealthNormType(Integer normTypeId) {
+    public ResponseBean deleteHealthNormType(@PathVariable Integer normTypeId) {
         journeyHealthService.deleteHealthNormType(normTypeId);
         return ResponseBean.ok("删除成功");
     }

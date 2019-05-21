@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
 import org.flightythought.smile.admin.bean.JourneyNoteInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.dto.CheckCaseAuditDTO;
 import org.flightythought.smile.admin.service.CaseAuditService;
 import org.flightythought.smile.admin.service.JourneyNoteService;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
@@ -61,15 +63,11 @@ public class CaseAuditController {
     }
 
 
-    @GetMapping("/doAudit")
+    @PostMapping("/doAudit")
     @ApiOperation(value = "案例审核", notes = "案例审核")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "journeyId", value = "旅程id"),
-            @ApiImplicitParam(name = "solutionIds", value = "解决方案ids，多个以逗号分开"),
-    })
-    public ResponseBean doAudit(@RequestParam Map<String, String> params, @ApiIgnore HttpSession session) {
+    public ResponseBean doAudit(@RequestBody CheckCaseAuditDTO checkCaseAuditDTO) {
         try {
-            caseAuditService.doAudit(params, session);
+            caseAuditService.doAudit(checkCaseAuditDTO);
             return ResponseBean.ok("案例审核成功");
         } catch (Exception e) {
             LOG.error("案例审核失败", e);

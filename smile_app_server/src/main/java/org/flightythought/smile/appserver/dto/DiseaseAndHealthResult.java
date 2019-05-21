@@ -8,15 +8,15 @@ import lombok.Data;
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
  * @Author: LiLei
- * @ClassName HealthAndResultIdDTO
+ * @ClassName DiseaseAndHealthResult
  * @CreateTime 2019/4/13 22:50
  * @Description: TODO
  */
 @ApiModel(value = "养生小类对应的养生成果DTO", description = "养生方式对应的养生成果DTO")
 @Data
-public class HealthAndResultIdDTO {
-    @ApiModelProperty(value = "养生小类ID")
-    private Integer healthId;
+public class DiseaseAndHealthResult {
+    @ApiModelProperty(value = "疾病小类ID")
+    private Integer diseaseDetailId;
 
     @ApiModelProperty(value = "养生成果ID")
     private Integer healthResultId;

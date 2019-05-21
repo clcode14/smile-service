@@ -63,6 +63,9 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     public DiseaseReasonEntity saveDiseaseReason(DiseaseReasonDTO diseaseReasonDTO, HttpSession session) throws FlightyThoughtException {
         // 获取当前登录用户
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
+        if (diseaseReasonDTO.getDiseaseDetailId() == null || diseaseReasonDTO.getDiseaseId() == null) {
+            throw new FlightyThoughtException("请选择原因所对应的疾病大类和疾病小类");
+        }
         DiseaseReasonEntity diseaseReasonEntity;
         Integer diseaseReasonId = diseaseReasonDTO.getId();
         if (diseaseReasonId == null || diseaseReasonId == 0) {
@@ -190,6 +193,10 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                     diseaseReasonInfo.setDiseaseName(diseaseClassEntity.getDiseaseName());
                     // 疾病小类名称
                     diseaseReasonInfo.setDiseaseDetailName(diseaseClassDetail.getDiseaseDetailName());
+                    // 疾病大类ID
+                    diseaseReasonInfo.setDiseaseId(diseaseClassEntity.getDiseaseId());
+                    // 疾病小类ID
+                    diseaseReasonInfo.setDiseaseDetailId(diseaseClassDetail.getDiseaseDetailId());
                     // 相关解决方案
                     List<SelectItemOption> solutions = diseaseReason.getSolutions()
                             .stream()

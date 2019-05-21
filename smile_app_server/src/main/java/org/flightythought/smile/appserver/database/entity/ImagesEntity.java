@@ -36,4 +36,16 @@ public class ImagesEntity extends BaseEntity {
      */
     @Column(name = "path")
     private String path;
+
+    /**
+     * OSS URL
+     */
+    @Column(name = "oss_url")
+    private String ossUrl;
+
+    /**
+     * OSS KEY
+     */
+    @Column(name = "oss_key")
+    private String ossKey;
 }

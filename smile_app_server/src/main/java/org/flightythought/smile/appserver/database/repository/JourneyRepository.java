@@ -18,13 +18,13 @@ import java.util.List;
  */
 @Repository
 public interface JourneyRepository extends JpaRepository<JourneyEntity, Long> {
-    List<JourneyEntity> findByUserId(Long userId);
+    List<JourneyEntity> findByUserIdOrderByFinishedAsc(Long userId);
 
-    List<JourneyEntity> findByUserIdAndFinished(Long userId, Boolean finished);
+    List<JourneyEntity> findByUserIdAndFinishedOrderByFinishedAsc(Long userId, Boolean finished);
 
-    Page<JourneyEntity> findByUserId(Long userId, Pageable pageable);
+    Page<JourneyEntity> findByUserIdOrderByFinishedAsc(Long userId, Pageable pageable);
 
-    Page<JourneyEntity> findByUserIdAndFinished(Long userId, Boolean finished, Pageable pageable);
+    Page<JourneyEntity> findByUserIdAndFinishedOrderByFinishedAsc(Long userId, Boolean finished, Pageable pageable);
 
     JourneyEntity findByJourneyId(Integer journeyId);
 

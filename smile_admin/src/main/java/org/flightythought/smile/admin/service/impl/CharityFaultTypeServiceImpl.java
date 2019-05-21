@@ -51,6 +51,10 @@ public class CharityFaultTypeServiceImpl implements CharityFaultTypeService {
     public CharityFaultTypeEntity modifyCharityFaultType(CharityFaultTypeEntity charityFaultTypeEntity) {
         CharityFaultTypeEntity entity = charityFaultTypeRepository.findByCfTypeId(charityFaultTypeEntity.getCfTypeId());
         if (entity != null) {
+            charityFaultTypeEntity.setCreateUserName(entity.getCreateUserName());
+            charityFaultTypeEntity.setCreateTime(entity.getCreateTime());
+            SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
+            charityFaultTypeEntity.setUpdateUserName(userEntity.getLoginName());
             BeanUtils.copyProperties(charityFaultTypeEntity, entity);
             return charityFaultTypeRepository.save(entity);
         }

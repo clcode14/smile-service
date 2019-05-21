@@ -93,6 +93,8 @@ public class CharityFaultTypeContentServiceImpl implements CharityFaultTypeConte
         SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
         CharityFaultTypeContentEntity entity = charityFaultTypeContentRepository.findById(charityFaultTypeContentEntity.getId());
         if (entity != null) {
+            charityFaultTypeContentEntity.setCreateUserName(entity.getCreateUserName());
+            charityFaultTypeContentEntity.setCreateTime(entity.getCreateTime());
             BeanUtils.copyProperties(charityFaultTypeContentEntity, entity);
             entity.setUpdateUserName(userEntity.getLoginName());
             charityFaultTypeContentRepository.save(entity);

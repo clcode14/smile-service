@@ -57,6 +57,10 @@ public class CourseTypeServiceImpl implements CourseTypeService {
             throw new FlightyThoughtException("课程类型ID不能为Null");
         }
         CourseTypeEntity entity = courseTypeRepository.findById(courseTypeEntity.getId());
+        courseTypeEntity.setCreateUserName(entity.getCreateUserName());
+        courseTypeEntity.setCreateTime(entity.getCreateTime());
+        SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
+        courseTypeEntity.setUpdateUserName(userEntity.getLoginName());
         BeanUtils.copyProperties(courseTypeEntity, entity);
         entity = courseTypeRepository.save(entity);
         return entity;
