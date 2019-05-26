@@ -39,4 +39,10 @@ public class JourneyDiseaseEntity {
      */
     @Column(name = "disease_detail_id")
     private Integer diseaseDetailId;
+
+    /**
+     * 养生成果ID
+     */
+    @Column(name = "health_result_id")
+    private Integer healthResultId;
 }

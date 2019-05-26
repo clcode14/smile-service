@@ -260,6 +260,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyEntity.setCoverImageId(healthJourneyStartDTO.getCoverImageId());
         // 是否审核
         journeyEntity.setAudit(false);
+        // 是否是案例
+        journeyEntity.setRecoverCase(false);
         // 养生旅程是否结束
         journeyEntity.setFinished(false);
         // 保存养生旅程

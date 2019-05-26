@@ -81,7 +81,7 @@ public class RecoverServiceImpl implements RecoverService {
     public Page<RecoverCaseEntity> getRecoverCaseEntities(HealthOrDiseaseByIdQueryDTO healthOrDiseaseByIdQueryDTO) {
         // 组装SQL语句
         String totalSql = "SELECT COUNT(*) AS total FROM (";
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.`id` AS recoverId FROM `vw_disease_health_recover_case` a WHERE 1 = 1");
+        StringBuilder sql = new StringBuilder("SELECT a.`id` AS recoverId FROM `vw_disease_health_recover_case` a WHERE 1 = 1");
         List<Integer> diseaseDetailIds = healthOrDiseaseByIdQueryDTO.getDiseaseDetailIds();
         if (diseaseDetailIds != null && diseaseDetailIds.size() > 0) {
             sql.append(" AND a.`disease_detail_id` IN (");
@@ -96,6 +96,7 @@ public class RecoverServiceImpl implements RecoverService {
             sql.deleteCharAt(sql.length() - 1);
             sql.append(")");
         }
+        sql.append(" GROUP BY a.`journey_id` ");
         totalSql += sql.toString() + ") T";
         // 获取Total总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();

@@ -255,6 +255,7 @@ public class CaseAuditServiceImpl implements CaseAuditService {
         } else if (checkCaseAuditDTO.getCheckType() == GlobalConstant.CHECK_CASE) {
             // 标记为已审核
             journeyEntity.setAudit(true);
+            // 不是案例
             journeyEntity.setRecoverCase(false);
         }
         // 报错养生旅程

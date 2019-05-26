@@ -61,6 +61,7 @@ public class OfficeEntity extends BaseEntity {
     /**
      * 描述
      */
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
 }

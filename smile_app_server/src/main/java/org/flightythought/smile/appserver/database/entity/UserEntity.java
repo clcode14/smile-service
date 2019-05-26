@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 
 @Data
 @Entity
@@ -31,7 +30,7 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
-    @GenericGenerator(name = "id", strategy = "identity")
+    @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
     private Long id;
 

@@ -97,6 +97,12 @@ public class JourneyEntity extends BaseEntity {
     private Boolean finished;
 
     /**
+     * 是否为案例
+     */
+    @Column(name = "recover_case")
+    private Boolean recoverCase;
+
+    /**
      * 访问量
      */
     @Column(name = "read_num")

@@ -1,24 +1,23 @@
 package org.flightythought.smile.admin.database.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
 /**
- * Copyright 2019 Flighty-Thought All rights reserved.
+ * Copyright 2019 Oriental Standard All rights reserved.
  *
  * @Author: LiLei
- * @ClassName JourneyHealthEntity
- * @CreateTime 2019/4/10 2:12
+ * @ClassName null.java
+ * @CreateTime 2019/5/22 13:23
  * @Description: TODO
  */
-@Entity
-@Table(name = "tb_journey_health")
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class JourneyHealthEntity {
+@Entity
+@Table(name = "tb_commodity_image")
+public class CommodityImageEntity {
+
     /**
      * 自增主键
      */
@@ -29,15 +28,14 @@ public class JourneyHealthEntity {
     private Integer id;
 
     /**
-     * 养生旅程ID
+     * 商品ID
      */
-    @Column(name = "journey_id")
-    private Integer journeyId;
+    @Column(name = "commodity_id")
+    private Integer commodityId;
 
     /**
-     * 养生方式ID
+     * 图片ID
      */
-    @Column(name = "health_id")
-    private Integer healthId;
-
+    @Column(name = "image_id")
+    private Integer imageId;
 }
