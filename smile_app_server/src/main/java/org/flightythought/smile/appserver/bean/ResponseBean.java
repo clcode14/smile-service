@@ -1,7 +1,5 @@
 package org.flightythought.smile.appserver.bean;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -10,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @CreateTime 2019/3/27 18:51
  * @Description: 响应结果实体类
  */
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResponseBean {
     private Integer code;
     private String message;

@@ -65,6 +65,12 @@ public class DynamicDetailMessageEntity extends BaseEntity {
     private Boolean read;
 
     /**
+     * 标志类型
+     */
+    @Column(name = "flag_type")
+    private Integer flagType;
+
+    /**
      * 下级信息
      */
     @OneToMany(fetch = FetchType.LAZY)
@@ -84,5 +90,7 @@ public class DynamicDetailMessageEntity extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_user_id", updatable = false, insertable = false)
     private UserEntity toUser;
+
+
 
 }

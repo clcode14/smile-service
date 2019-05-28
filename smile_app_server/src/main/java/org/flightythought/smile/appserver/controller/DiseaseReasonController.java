@@ -45,7 +45,7 @@ public class DiseaseReasonController {
             return ResponseBean.ok("返回成功", new PageImpl<>(diseaseReasonEntityList, diseaseReasonEntities.getPageable(), diseaseReasonEntities.getTotalElements()));
         } catch (Exception e) {
             LOG.error("返回失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ public class DiseaseReasonController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取疾病原因类型失败", e);
-            return ResponseBean.error("获取疾病原因失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ public class DiseaseReasonController {
             return ResponseBean.ok("获取疾病原因详情成功", diseaseReason);
         } catch (Exception e) {
             LOG.error("获取疾病原因详情失败", e);
-            return ResponseBean.error("获取疾病原因详情失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

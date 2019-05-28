@@ -28,6 +28,10 @@ public interface DynamicService {
      */
     DynamicSimple addDynamic(AddDynamicDTO addDynamicDTO);
 
+    DynamicSimple getDynamicSimple(Integer dynamicId);
+
+    DynamicDetailSimple getDynamicDetailSimple(Integer dynamicDetailId);
+
     /**
      * 获取我的动态
      *
@@ -43,6 +47,8 @@ public interface DynamicService {
      * @return 分页动态简单对象
      */
     Page<DynamicSimple> getOtherDynamicWithNoHidden(UserIdQueryDTO userIdQueryDTO);
+
+    Page<DynamicSimple> getHotDynamic(PageFilterDTO pageFilterDTO);
 
     /**
      * 获取分页动态实体集合
@@ -118,6 +124,10 @@ public interface DynamicService {
      * @return 动态明细评论简单对象集合
      */
     List<DynamicDetailMessageSimple> getDynamicDetailMessage(Integer dynamicDetailId);
+
+    Page<DynamicDetailMessageSimple> getDynamicDetailMessage(DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO);
+
+    Page<DynamicDetailMessageSimple> getDynamicDetailMessageInfo(DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO);
 
     /**
      * 递归获取动态明细评论集合

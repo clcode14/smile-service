@@ -33,7 +33,7 @@ public class SolutionController {
             return ResponseBean.ok("获取成功", solutionSimples);
         } catch (Exception e) {
             LOG.error("获取解决方案失败", e);
-            return ResponseBean.error("获取解决方案失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ public class SolutionController {
             return ResponseBean.ok("获取解决方案成功", result);
         } catch (Exception e) {
             LOG.error("获取解决方案失败", e);
-            return ResponseBean.error("获取解决方案失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -57,7 +57,7 @@ public class SolutionController {
             return ResponseBean.ok("返回成功", solutionPage);
         } catch (Exception e) {
             LOG.error("获取解决方案页面对象失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

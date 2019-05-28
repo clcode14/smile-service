@@ -3,10 +3,13 @@ package org.flightythought.smile.appserver.service.impl;
 import org.flightythought.smile.appserver.bean.HealthWaySimple;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.database.entity.HealthWayEntity;
-import org.flightythought.smile.appserver.database.entity.ImagesEntity;
+import org.flightythought.smile.appserver.database.entity.*;
+import org.flightythought.smile.appserver.database.repository.HealthWayMusicRepository;
 import org.flightythought.smile.appserver.database.repository.HealthWayRepository;
+import org.flightythought.smile.appserver.database.repository.HealthWayValueRepository;
 import org.flightythought.smile.appserver.dto.HealthWayQueryDTO;
+import org.flightythought.smile.appserver.dto.HealthWayValueDTO;
+import org.flightythought.smile.appserver.dto.HealthWayValueQueryDTO;
 import org.flightythought.smile.appserver.service.HealthWayService;
 import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
@@ -29,6 +32,10 @@ public class HealthWayServiceImpl implements HealthWayService {
     private PlatformUtils platformUtils;
     @Autowired
     private HealthWayRepository healthWayRepository;
+    @Autowired
+    private HealthWayMusicRepository healthWayMusicRepository;
+    @Autowired
+    private HealthWayValueRepository healthWayValueRepository;
 
 
     @Override
@@ -96,5 +103,48 @@ public class HealthWayServiceImpl implements HealthWayService {
             healthWaySimples.add(healthWaySimple);
         });
         return new PageImpl<>(healthWaySimples, healthWayEntities.getPageable(), healthWayEntities.getTotalElements());
+    }
+
+    @Override
+    public List<HealthWayMusicEntity> getHealthWayMusics(Integer healthWayId) {
+        return healthWayMusicRepository.findByHealthWayId(healthWayId);
+    }
+
+    @Override
+    public HealthWayValueEntity saveHealthWayValue(HealthWayValueDTO healthWayValueDTO) {
+        // 获取当前登录用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        Long userId = userEntity.getId();
+        HealthWayValueEntity healthWayValueEntity = new HealthWayValueEntity();
+        // 持续时间
+        healthWayValueEntity.setDuration(healthWayValueDTO.getDurationSec());
+        // 开始时间
+        healthWayValueEntity.setStartTime(healthWayValueDTO.getStartTime());
+        // 养生方式ID
+        healthWayValueEntity.setHealthWayId(healthWayValueDTO.getHealthWayId());
+        // 用户ID
+        healthWayValueEntity.setUserId(userId);
+        // 创建者
+        healthWayValueEntity.setCreateUserName(userId + "");
+        // 保存实体类
+        healthWayValueEntity = healthWayValueRepository.save(healthWayValueEntity);
+        return healthWayValueEntity;
+    }
+
+    @Override
+    public Page<HealthWayValueEntity> getHealthWayValue(HealthWayValueQueryDTO healthWayValueQueryDTO) {
+        // 是否有分页查询
+        Integer pageSize = healthWayValueQueryDTO.getPageSize();
+        Integer pageNumber = healthWayValueQueryDTO.getPageNumber();
+
+        Integer healthWayId = healthWayValueQueryDTO.getHealthWayId();
+        if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
+            List<HealthWayValueEntity> healthWayValueEntities = healthWayValueRepository.findByHealthWayId(healthWayId);
+            PageRequest pageRequest = PageRequest.of(0, healthWayValueEntities.size() + 1);
+            return new PageImpl<>(healthWayValueEntities, pageRequest, healthWayValueEntities.size());
+        } else {
+            PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
+            return healthWayValueRepository.findByHealthWayId(healthWayId, pageRequest);
+        }
     }
 }

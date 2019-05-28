@@ -42,7 +42,7 @@ public class CommonController {
             return ResponseBean.ok("上传图片成功", images);
         } catch (FlightyThoughtException e) {
             LOG.error("上传图片失败", e);
-            return ResponseBean.error("上传图片失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -57,7 +57,7 @@ public class CommonController {
             return ResponseBean.ok("上传图片成功", result);
         } catch (FlightyThoughtException e) {
             LOG.error("上传图片失败", e);
-            return ResponseBean.error("上传图片失败", e.getMessage());
+            return ResponseBean.error( e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class CommonController {
             return ResponseBean.ok("上传文件成功", result);
         } catch (Exception e) {
             LOG.error("上传文件失败", e);
-            return ResponseBean.error("上传文件失败", e.getMessage());
+            return ResponseBean.error( e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class CommonController {
             return ResponseBean.ok("上传文件成功", result);
         } catch (Exception e) {
             LOG.error("上传文件失败", e);
-            return ResponseBean.error("上传文件失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -100,7 +100,7 @@ public class CommonController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取疾病小类失败", e);
-            return ResponseBean.error("获取失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 

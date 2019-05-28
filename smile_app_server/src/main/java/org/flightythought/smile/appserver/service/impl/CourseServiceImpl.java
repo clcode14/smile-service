@@ -174,18 +174,21 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public Page<CourseSimple> getUserCourses(PageFilterDTO pageFilterDTO) {
+        // 当前登录用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        Long userId = userEntity.getId();
         Integer pageNumber = pageFilterDTO.getPageNumber();
         Integer pageSize = pageFilterDTO.getPageSize();
         PageRequest pageRequest;
         List<UserFollowCourseEntity> userFollowCourseEntities;
         long total;
         if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
-            userFollowCourseEntities = userFollowCourseRepository.findAll();
-            pageRequest = PageRequest.of(0, userFollowCourseEntities.size());
+            userFollowCourseEntities = userFollowCourseRepository.findByUserId(userId);
+            pageRequest = PageRequest.of(0, userFollowCourseEntities.size() + 1);
             total = (long) userFollowCourseEntities.size();
         } else {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
-            Page<UserFollowCourseEntity> userFollowCourseEntityPage = userFollowCourseRepository.findAll(pageRequest);
+            Page<UserFollowCourseEntity> userFollowCourseEntityPage = userFollowCourseRepository.findByUserId(userId, pageRequest);
             userFollowCourseEntities = userFollowCourseEntityPage.getContent();
             total = userFollowCourseEntityPage.getTotalElements();
         }
@@ -193,6 +196,13 @@ public class CourseServiceImpl implements CourseService {
         userFollowCourseEntities.forEach(userFollowCourseEntity -> courseIds.add(userFollowCourseEntity.getCourseId()));
         List<CourseRegistrationEntity> courseRegistrationEntities = courseRegistrationRepository.findByCourseIdIn(courseIds);
         List<CourseSimple> courseSimples = getCourseSimple(courseRegistrationEntities);
+        // 获取当前用户ID
+
+
+        courseSimples.forEach(courseSimple -> {
+            UserFollowCourseEntity userFollowCourseEntity = userFollowCourseRepository.findByUserIdAndCourseId(userId, courseSimple.getCourseId());
+            courseSimple.setUserFollowCourse(userFollowCourseEntity);
+        });
         return new PageImpl<>(courseSimples, pageRequest, total);
     }
 

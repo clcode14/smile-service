@@ -75,4 +75,10 @@ public class CommodityEntity extends BaseEntity {
     @JoinTable(name = "tb_commodity_image", joinColumns = {@JoinColumn(name = "commodity_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "image_id", nullable = false, updatable = false)})
     private List<ImagesEntity> images;
+
+    /**
+     * 商品URL
+     */
+    @Column(name = "url")
+    private String url;
 }

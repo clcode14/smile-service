@@ -33,7 +33,7 @@ public class RecoverController {
             return ResponseBean.ok("获取康复案例成功", result);
         } catch (Exception e) {
             LOG.error("获取康复案例失败", e);
-            return ResponseBean.error("获取康复案例失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ public class RecoverController {
             return ResponseBean.ok("获取康复人员列表成功", result);
         } catch (Exception e) {
             LOG.error("获取康复人员列表失败", e);
-            return ResponseBean.error("获取康复人员列表失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

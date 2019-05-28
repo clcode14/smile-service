@@ -31,7 +31,7 @@ public class UserInfo {
      * 昵称
      */
     private String nickName;
-    
+
     /**
      * 头像
      */
@@ -68,4 +68,24 @@ public class UserInfo {
      * 性别
      */
     private Integer sex;
+
+    /**
+     * 粉丝数量
+     */
+    private Integer fanNumber;
+
+    /**
+     * 关注数量
+     */
+    private Integer followNumber;
+
+    /**
+     * 日记数量
+     */
+    private Integer journeyNumber;
+
+    /**
+     * 是否关注
+     */
+    private Boolean follow;
 }

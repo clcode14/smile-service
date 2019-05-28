@@ -1,8 +1,13 @@
 package org.flightythought.smile.appserver;
 
+import org.flightythought.smile.appserver.bean.PushMessage;
+import org.flightythought.smile.appserver.common.PushCodeEnum;
+import org.flightythought.smile.appserver.common.utils.JPushUtils;
+import org.flightythought.smile.appserver.database.entity.CommodityEntity;
+import org.flightythought.smile.appserver.database.entity.CustomEntity;
 import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
-import org.flightythought.smile.appserver.database.repository.SolutionRepository;
-import org.flightythought.smile.appserver.database.repository.UserCharityFaultRecordRepository;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.repository.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +30,26 @@ public class AppServerApplicationTests {
     private SolutionRepository solutionRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private CommodityRepository commodityRepository;
 
     @Autowired
     private UserCharityFaultRecordRepository userCharityFaultRecordRepository;
+    @Autowired
+    private JPushUtils jPushUtils;
+
+    @Test
+    @Transactional
+    public void test02() {
+        PushMessage<List<CommodityEntity>> pushMessage = new PushMessage<>();
+        pushMessage.setData(commodityRepository.findAll());
+        pushMessage.setCode(PushCodeEnum.CHARITY_FAULT_MESSAGE.getMessage());
+        pushMessage.setTitle("推送信息");
+        pushMessage.setType(3);
+        pushMessage.setMessage("message");
+        jPushUtils.pushData(pushMessage,2L);
+        System.out.println("推送信息");
+    }
 
     @Test
     @Transactional

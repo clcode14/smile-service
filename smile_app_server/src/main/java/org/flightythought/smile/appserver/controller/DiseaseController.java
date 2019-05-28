@@ -34,7 +34,7 @@ public class DiseaseController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取常见疾病列表失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public class DiseaseController {
             return ResponseBean.ok("操作成功");
         } catch (Exception e) {
             LOG.error("操作失败", e);
-            return ResponseBean.error("操作失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ public class DiseaseController {
             return ResponseBean.ok("返回成功", diseaseClassEntities);
         } catch (Exception e) {
             LOG.error("疾病大类列表查询失败", e);
-            return ResponseBean.error("疾病大类列表查询失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ public class DiseaseController {
             return ResponseBean.ok("操作成功", diseaseClassDetailSimple);
         } catch (Exception e) {
             LOG.error("获取疾病详情失败", e);
-            return ResponseBean.error("操作失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

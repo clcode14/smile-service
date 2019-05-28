@@ -66,3 +66,7 @@ ali-oss:
   accessKeyId: LTAICSkNdBY7Z0KK
   #  你的accessKeySecret
   accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
+
+jpush:
+  masterSecret: aa9222fdde926e1e21a00b8f
+  appKey: 8834def6f6cc21907d942b4b

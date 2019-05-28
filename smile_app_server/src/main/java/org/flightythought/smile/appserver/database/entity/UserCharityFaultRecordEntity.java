@@ -32,6 +32,10 @@ public class UserCharityFaultRecordEntity extends BaseEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity userEntity;
+
     /**
      * 行善过失类型 0:善行1，过失
      */
@@ -101,6 +105,12 @@ public class UserCharityFaultRecordEntity extends BaseEntity {
      */
     @Column(name = "address")
     private String address;
+
+    /**
+     * 是否隐藏
+     */
+    @Column(name = "hidden")
+    private Boolean hidden;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "tb_charity_fault_record_image", joinColumns = {@JoinColumn(name = "charity_fault_record_id", nullable = false, updatable = false)},

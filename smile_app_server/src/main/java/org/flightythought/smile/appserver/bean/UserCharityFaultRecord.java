@@ -23,6 +23,11 @@ public class UserCharityFaultRecord {
     private Long userId;
 
     /**
+     * 用户信息
+     */
+    private UserInfo userInfo;
+
+    /**
      * 行善 忏悔 类型
      */
     private Integer type;
@@ -86,6 +91,11 @@ public class UserCharityFaultRecord {
      */
     private List<ImageInfo> images;
 
+    /**
+     * 是否隐藏
+     */
+    private Boolean hidden;
+
     public UserCharityFaultRecord() {
     }
 
@@ -103,6 +113,7 @@ public class UserCharityFaultRecord {
         this.longitude = userCharityFaultRecordEntity.getLongitude();
         this.latitude = userCharityFaultRecordEntity.getLatitude();
         this.address = userCharityFaultRecordEntity.getAddress();
+        this.hidden = userCharityFaultRecordEntity.getHidden();
         this.images = images;
     }
 }

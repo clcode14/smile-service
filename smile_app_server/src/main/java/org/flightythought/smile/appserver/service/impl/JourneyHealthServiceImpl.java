@@ -9,6 +9,7 @@ import org.flightythought.smile.appserver.config.ALiOSSConfig;
 import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.flightythought.smile.appserver.dto.*;
+import org.flightythought.smile.appserver.service.CommodityService;
 import org.flightythought.smile.appserver.service.JourneyHealthService;
 import org.flightythought.smile.appserver.service.UserService;
 import org.slf4j.Logger;
@@ -70,6 +71,10 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private UserFollowCourseRepository userFollowCourseRepository;
     @Autowired
     private RecoverCaseRepository recoverCaseRepository;
+    @Autowired
+    private JourneyToCommodityRepository journeyToCommodityRepository;
+    @Autowired
+    private CommodityService commodityService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -238,15 +243,21 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     @Override
     @Transactional
     public JourneyEntity startHealthJourney(HealthJourneyStartDTO healthJourneyStartDTO) {
+        // 获得当前登录用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        Long userId = userEntity.getId();
+        // 查看当前用户有无未完成的养生旅程
+        List<JourneyEntity> hasJourneyEntities = journeyRepository.findByUserIdAndFinished(userId, false);
+        if (hasJourneyEntities != null && hasJourneyEntities.size() > 0) {
+            throw new FlightyThoughtException("还有未完成的养生旅程，不能再次开启新的旅程");
+        }
         // 获取养生旅程数据
         JourneyEntity journeyEntity = new JourneyEntity();
         // 养生旅程名称
         journeyEntity.setJourneyName(healthJourneyStartDTO.getJourneyName());
         // 养生旅程概述
         journeyEntity.setSummarize(healthJourneyStartDTO.getSummarize());
-        // 获得当前登录用户
-        UserEntity userEntity = platformUtils.getCurrentLoginUser();
-        Long userId = userEntity.getId();
+        // 用户ID
         journeyEntity.setUserId(userId);
         // 设置开始时间
         journeyEntity.setStartTime(LocalDateTime.now());
@@ -579,6 +590,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 }).collect(Collectors.toList());
                 healthJourney.setHealthResult(healthResultSimples);
             }
+            // 旅程对应的商品
+            List<CommodityEntity> commodityEntities = journeyEntity.getCommodities();
+            if (commodityEntities != null && commodityEntities.size() > 0) {
+                List<CommoditySimple> commoditySimples = commodityService.getCommoditySimples(commodityEntities);
+                healthJourney.setCommodities(commoditySimples);
+            }
             return healthJourney;
         }
         return null;
@@ -759,7 +776,17 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             for (HealthNormTypeDTO healthNormTypeDTO : healthNormTypeDTOS) {
                 JourneyNormEntity journeyNormEntity = journeyNormRepository.findByJourneyIdAndNormTypeId(healthJourneyEndDTO.getJourneyId(), healthNormTypeDTO.getNormTypeId());
                 if (journeyNormEntity == null) {
-                    throw new FlightyThoughtException("体检指标中包含在开启养生旅程时未选择的体检指标！");
+                    journeyNormEntity = new JourneyNormEntity();
+                    // 体检指标类型ID
+                    journeyNormEntity.setNormTypeId(healthNormTypeDTO.getNormTypeId());
+                    // 养生旅程ID
+                    journeyNormEntity.setJourneyId(journeyEntity.getJourneyId());
+                    // 结束数值
+                    journeyNormEntity.setEndValue1(healthNormTypeDTO.getValue1());
+                    journeyNormEntity.setEndValue2(healthNormTypeDTO.getValue2());
+                    // 创建者
+                    journeyNormEntity.setCreateUserName(userEntity.getId() + "");
+                    journeyNormRepository.save(journeyNormEntity);
                 } else {
                     journeyNormEntity.setEndValue1(healthNormTypeDTO.getValue1());
                     journeyNormEntity.setEndValue2(healthNormTypeDTO.getValue2());
@@ -814,10 +841,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             List<JourneyToCourseEntity> journeyToCourseEntities = new ArrayList<>();
             courseIds.forEach(courseId -> {
                 // 判断是否是当前用户报名课程
+                /*
                 UserFollowCourseEntity userFollowCourseEntity = userFollowCourseRepository.findByUserIdAndCourseId(userEntity.getId(), courseId);
                 if (userFollowCourseEntity == null) {
                     throw new FlightyThoughtException("所选课程用户未报名参加");
                 }
+                */
                 JourneyToCourseEntity journeyToCourseEntity = new JourneyToCourseEntity();
                 // 旅程ID
                 journeyToCourseEntity.setJourneyId(journeyEntity.getJourneyId());
@@ -854,7 +883,6 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         }
         List<Integer> healthIds = healthJourneyEndDTO.getHealthIds();
         if (healthIds != null && healthIds.size() > 0) {
-
             List<JourneyHealthEntity> journeyHealthEntities = new ArrayList<>();
             healthIds.forEach(healthId -> {
                 JourneyHealthEntity journeyHealthEntity = new JourneyHealthEntity();
@@ -865,6 +893,17 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 journeyHealthEntities.add(journeyHealthEntity);
             });
             journeyHealthRepository.saveAll(journeyHealthEntities);
+        }
+        // 商品集合
+        List<Integer> commodityIds = healthJourneyEndDTO.getCommodityIds();
+        if (commodityIds != null && commodityIds.size() > 0) {
+            List<JourneyToCommodityEntity> journeyToCommodityEntities = commodityIds.stream().map(commodityId -> {
+                JourneyToCommodityEntity journeyToCommodityEntity = new JourneyToCommodityEntity();
+                journeyToCommodityEntity.setCommodityId(commodityId);
+                journeyToCommodityEntity.setJourneyId(journeyEntity.getJourneyId());
+                return journeyToCommodityEntity;
+            }).collect(Collectors.toList());
+            journeyToCommodityRepository.saveAll(journeyToCommodityEntities);
         }
         return getHealthJourney(journeyEntity.getJourneyId(), null);
     }

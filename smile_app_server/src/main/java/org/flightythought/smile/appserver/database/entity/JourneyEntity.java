@@ -153,5 +153,13 @@ public class JourneyEntity extends BaseEntity {
             inverseJoinColumns = {@JoinColumn(name = "report_id", nullable = false, updatable = false)})
     private List<MedicalReportEntity> medicalReports;
 
+    /**
+     * 体检报告
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_commodity", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "commodity_id", nullable = false, updatable = false)})
+    private List<CommodityEntity> commodities;
+
 
 }

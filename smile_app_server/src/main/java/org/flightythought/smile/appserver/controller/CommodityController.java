@@ -41,7 +41,7 @@ public class CommodityController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取相关商品失败", e);
-            return ResponseBean.error("获取失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

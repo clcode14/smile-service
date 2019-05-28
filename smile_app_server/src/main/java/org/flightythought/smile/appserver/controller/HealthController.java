@@ -40,7 +40,7 @@ public class HealthController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取养生大类失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class HealthController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取养生大类明细失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

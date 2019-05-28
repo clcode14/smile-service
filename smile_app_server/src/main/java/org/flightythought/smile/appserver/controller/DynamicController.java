@@ -6,6 +6,8 @@ import org.flightythought.smile.appserver.bean.DynamicDetailSimple;
 import org.flightythought.smile.appserver.bean.DynamicSimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.database.entity.DynamicDetailMessageEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicDetailsEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicEntity;
 import org.flightythought.smile.appserver.dto.*;
 import org.flightythought.smile.appserver.service.DynamicService;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ public class DynamicController {
             return ResponseBean.ok("新增动态成功", result);
         } catch (Exception e) {
             LOG.error("新增动态失败", e);
-            return ResponseBean.error("新增动态失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -46,7 +48,7 @@ public class DynamicController {
             return ResponseBean.ok("获取我的动态成功", result);
         } catch (Exception e) {
             LOG.error("获取我的动态失败", e);
-            return ResponseBean.error("获取我的动态失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -58,7 +60,19 @@ public class DynamicController {
             return ResponseBean.ok("获取动态信息成功", result);
         } catch (Exception e) {
             LOG.error("获取动态信息失败", e);
-            return ResponseBean.error("获取动态信息失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/hotDynamic")
+    @ApiOperation(value = "获取热门动态", notes = "获取热门动态成功，分页查询")
+    public ResponseBean getHotDynamic(@RequestBody PageFilterDTO pageFilterDTO) {
+        try {
+            Page<DynamicSimple> result = dynamicService.getHotDynamic(pageFilterDTO);
+            return ResponseBean.ok("获取热门动态成功", result);
+        } catch (Exception e) {
+            LOG.error("获取热门动态失败", e);
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -71,7 +85,7 @@ public class DynamicController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取失败", e);
-            return ResponseBean.error("获取失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -83,7 +97,7 @@ public class DynamicController {
             return ResponseBean.ok("获取动态明细内容成功", result);
         } catch (Exception e) {
             LOG.error("获取动态明细内容失败", e);
-            return ResponseBean.error("获取动态明细内容失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -96,7 +110,7 @@ public class DynamicController {
             return ResponseBean.ok("新增动态明细成功", result);
         } catch (Exception e) {
             LOG.error("新增动态明细失败", e);
-            return ResponseBean.error("新增动态明细失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -108,19 +122,44 @@ public class DynamicController {
             return ResponseBean.ok("评论成功", dynamicDetailMessageEntity);
         } catch (Exception e) {
             LOG.error("评论失败", e);
-            return ResponseBean.error("评论失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
     @GetMapping("/message/{dynamicDetailId}")
     @ApiOperation(value = "获取动态明细评论", notes = "获取动态明细评论集合")
+    @Deprecated
     public ResponseBean getDynamicDetailMessage(@PathVariable("dynamicDetailId") Integer dynamicDetailId) {
         try {
             List<DynamicDetailMessageSimple> result = dynamicService.getDynamicDetailMessage(dynamicDetailId);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取动态明细评论失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/message")
+    @ApiOperation(value = "获取动态明细主评论", notes = "获取动态明细主评论，messageId可以不用传递")
+    public ResponseBean getDynamicDetailMessage(@RequestBody DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO) {
+        try {
+            Page<DynamicDetailMessageSimple> result = dynamicService.getDynamicDetailMessage(dynamicDetailMessageQueryDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取动态明细评论失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/messageDetail")
+    @ApiOperation(value = "根据动态明细ID，获取详情评论信息", notes = "根据动态明细ID，获取详情评论信息")
+    public ResponseBean getDynamicDetailMessageInfo(@RequestBody DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO) {
+        try {
+            Page<DynamicDetailMessageSimple> result = dynamicService.getDynamicDetailMessageInfo(dynamicDetailMessageQueryDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取动态明细评论失败", e);
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -133,7 +172,7 @@ public class DynamicController {
             return ResponseBean.ok("操作成功");
         } catch (Exception e) {
             LOG.error("操作失败", e);
-            return ResponseBean.error("操作失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -146,7 +185,7 @@ public class DynamicController {
             return ResponseBean.ok("操作成功");
         } catch (Exception e) {
             LOG.error("操作失败", e);
-            return ResponseBean.error("操作失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

@@ -42,7 +42,7 @@ public class CourseController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取相关课程失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -54,7 +54,7 @@ public class CourseController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取课程失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -66,7 +66,7 @@ public class CourseController {
             return ResponseBean.ok("获取课程类型成功", result);
         } catch (Exception e) {
             LOG.error("获取课程类型失败", e);
-            return ResponseBean.error("获取课程类型失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -78,7 +78,7 @@ public class CourseController {
             return ResponseBean.ok("预约报名课程成功", result);
         } catch (Exception e) {
             LOG.error("预约报名课程失败", e);
-            return ResponseBean.error("预约报名课程失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -90,7 +90,7 @@ public class CourseController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取当前用户参加的课程失败", e);
-            return ResponseBean.error("获取失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -115,10 +115,10 @@ public class CourseController {
             return ResponseBean.ok("获取课程成功", result);
         } catch (NumberFormatException e) {
             LOG.error("获取近期课程失败，未填写近期课程时间区间", e);
-            return ResponseBean.error("获取课程失败", "请在后台管理系统中填写近期课程时间区间");
+            return ResponseBean.error("请在后台管理系统中填写近期课程时间区间");
         } catch (Exception e) {
             LOG.error("获取课程失败", e);
-            return ResponseBean.error("获取课程失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -130,7 +130,7 @@ public class CourseController {
             return ResponseBean.ok("获取课程Banner图成功", result);
         } catch (Exception e) {
             LOG.error("获取课程Banner图失败", e);
-            return ResponseBean.error("获取课程Banner图失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

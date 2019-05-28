@@ -56,48 +56,45 @@ public class LoginServiceImpl implements LoginService {
             return ResponseBean.error("请输入正确的手机号");
         }
 
-        if (LocalCache.hasRegisterRequest(phone)) {
-            return ResponseBean.error("一分钟只能只能请求一次短信验证码，请一分钟之后再次尝试");
-        }
+//        if (LocalCache.hasRegisterRequest(phone)) {
+//            return ResponseBean.error("一分钟只能只能请求一次短信验证码，请一分钟之后再次尝试");
+//        }
 
-        // 创建4位数验证码
-        int code = (int) Math.ceil(Math.random() * 9000 + 1000);
-//        Map<String, Object> map = new HashMap<>(2);
-//        map.put("mobile", phone);
-//        map.put("code", code);
-
-        String host = "http://yzxyzm.market.alicloudapi.com";
-        String path = "/yzx/verifySms";
-        String method = "POST";
-        Map<String, String> headers = new HashMap<>();
-        // 最后在header中的格式(中间是英文空格)为Authorization:APPCODE
-        headers.put("Authorization", "APPCODE " + APP_CODE);
-        Map<String, String> queries = new HashMap<>();
-        queries.put("phone", phone);
-        queries.put("templateId", "TP18040314");
-        queries.put("variable", "code:" + code);
-        Map<String, String> bodies = new HashMap<>();
-        try {
-            /*
-             * 重要提示如下:
-             * HttpUtils请从
-             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/src/main/java/com/aliyun/api/gateway/demo/util/HttpUtils.java
-             * 下载
-             *
-             * 相应的依赖请参照
-             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/pom.xml
-             */
-            HttpResponse response = HttpUtils.doPost(host, path, method, headers, queries, bodies);
-            LOG.info(response.toString());
-        } catch (Exception e) {
-            LOG.error("发送短信验证码失败", e);
-            return ResponseBean.error("发送短信验证码失败", e.getMessage());
-        }
+//        // 创建4位数验证码
+//        int code = (int) Math.ceil(Math.random() * 9000 + 1000);
+//
+//        String host = "http://yzxyzm.market.alicloudapi.com";
+//        String path = "/yzx/verifySms";
+//        String method = "POST";
+//        Map<String, String> headers = new HashMap<>();
+//        // 最后在header中的格式(中间是英文空格)为Authorization:APPCODE
+//        headers.put("Authorization", "APPCODE " + APP_CODE);
+//        Map<String, String> queries = new HashMap<>();
+//        queries.put("phone", phone);
+//        queries.put("templateId", "TP18040314");
+//        queries.put("variable", "code:" + code);
+//        Map<String, String> bodies = new HashMap<>();
+//        try {
+//            /*
+//             * 重要提示如下:
+//             * HttpUtils请从
+//             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/src/main/java/com/aliyun/api/gateway/demo/util/HttpUtils.java
+//             * 下载
+//             *
+//             * 相应的依赖请参照
+//             * https://github.com/aliyun/api-gateway-demo-sign-java/blob/master/pom.xml
+//             */
+//            HttpResponse response = HttpUtils.doPost(host, path, method, headers, queries, bodies);
+//            LOG.info(response.toString());
+//        } catch (Exception e) {
+//            LOG.error("发送短信验证码失败", e);
+//            return ResponseBean.error("发送短信验证码失败", e.getMessage());
+//        }
+        int code = 123456;
         smsCodeData.setPhone(phone);
         smsCodeData.setVCode(code + "");
         smsCodeData.setTime(System.currentTimeMillis());
 
-//        session.setAttribute("smsCode", map);
 
         try {
             String codeResult = AesUtils.aesEncryptHexString(JSON.toJSONString(smsCodeData), appProperties.getTokenKey());

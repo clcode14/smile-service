@@ -3,7 +3,9 @@ package org.flightythought.smile.appserver.service;
 import org.flightythought.smile.appserver.bean.UserInfo;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
 import org.flightythought.smile.appserver.dto.UserHeightWeightBirthdayDTO;
+import org.flightythought.smile.appserver.dto.UserIdQueryDTO;
 import org.flightythought.smile.appserver.dto.UserInfoDTO;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
     /**
@@ -29,8 +31,17 @@ public interface UserService {
 
     /**
      * 修改用户信息
+     *
      * @param userInfo
      * @return
      */
     UserInfo updateUserInfoDetails(UserInfoDTO userInfoDTO);
+
+    void followUser(Long userId);
+
+    void cancelFollowUser(Long userId);
+
+    Page<UserInfo> getFanUser(UserIdQueryDTO userIdQueryDTO);
+
+    Page<UserInfo> getFollowUser(UserIdQueryDTO userIdQueryDTO);
 }

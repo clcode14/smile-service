@@ -20,6 +20,8 @@ import java.util.List;
 public interface JourneyRepository extends JpaRepository<JourneyEntity, Long> {
     List<JourneyEntity> findByUserIdOrderByFinishedAsc(Long userId);
 
+    List<JourneyEntity> findByUserIdAndFinished(Long userId, Boolean finished);
+
     List<JourneyEntity> findByUserIdAndFinishedOrderByFinishedAsc(Long userId, Boolean finished);
 
     Page<JourneyEntity> findByUserIdOrderByFinishedAsc(Long userId, Pageable pageable);
@@ -29,4 +31,6 @@ public interface JourneyRepository extends JpaRepository<JourneyEntity, Long> {
     JourneyEntity findByJourneyId(Integer journeyId);
 
     JourneyEntity findByJourneyIdAndUserId(Integer journeyId, Long userId);
+
+    int countByUserId(Long userId);
 }

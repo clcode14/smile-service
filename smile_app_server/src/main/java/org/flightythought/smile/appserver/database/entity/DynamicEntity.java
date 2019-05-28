@@ -65,9 +65,15 @@ public class DynamicEntity extends BaseEntity {
     private Boolean hidden;
 
     /**
+     * 是否是热门动态：0 普通动态 1 热门动态
+     */
+    @Column(name = "hot")
+    private Integer hot;
+
+    /**
      * 动态上传的文件
      */
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(name = "tb_dynamic_files", joinColumns = {@JoinColumn(name = "dynamic_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "file_id", nullable = false, updatable = false)})
     private List<FilesEntity> files;

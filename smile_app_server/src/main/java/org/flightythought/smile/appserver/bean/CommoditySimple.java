@@ -60,4 +60,9 @@ public class CommoditySimple {
      * 商品图片
      */
     private List<ImageInfo> images;
+
+    /**
+     * 商品URL
+     */
+    private String url;
 }

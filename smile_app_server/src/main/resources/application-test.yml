@@ -19,7 +19,7 @@ spring:
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/smile_test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://47.102.126.36:3306/smile_test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: lt2015196
     tomcat:
@@ -66,3 +66,7 @@ ali-oss:
   accessKeyId: LTAICSkNdBY7Z0KK
   #  你的accessKeySecret
   accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
+
+jpush:
+  masterSecret: aa9222fdde926e1e21a00b8f
+  appKey: 8834def6f6cc21907d942b4b

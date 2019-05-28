@@ -41,7 +41,7 @@ public class OfficeController {
             return ResponseBean.ok("查询成功", result);
         } catch (Exception e) {
             LOG.error("查询失败", e);
-            return ResponseBean.error("查询失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 }

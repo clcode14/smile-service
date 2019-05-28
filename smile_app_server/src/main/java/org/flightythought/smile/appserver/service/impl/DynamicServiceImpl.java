@@ -1,7 +1,10 @@
 package org.flightythought.smile.appserver.service.impl;
 
 import org.flightythought.smile.appserver.bean.*;
+import org.flightythought.smile.appserver.common.Constants;
+import org.flightythought.smile.appserver.common.PushCodeEnum;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.common.utils.JPushUtils;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
@@ -16,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -48,6 +52,10 @@ public class DynamicServiceImpl implements DynamicService {
     private UserToDynamicDetailLikeRepository userToDynamicDetailLikeRepository;
     @Autowired
     private UserToMessageLikeRepository userToMessageLikeRepository;
+    @Autowired
+    private JPushUtils jPushUtils;
+    @Autowired
+    private FilesRepository filesRepository;
 
     @Override
     @Transactional
@@ -70,6 +78,8 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicEntity.setHidden(addDynamicDTO.getHidden() == null ? false : addDynamicDTO.getHidden());
         // 创建者
         dynamicEntity.setCreateUserName(userId + "");
+        // 热门动态
+        dynamicEntity.setHot(0);
         // 保存动态
         dynamicEntity = dynamicRepository.save(dynamicEntity);
         // 保存动态图片
@@ -89,7 +99,17 @@ public class DynamicServiceImpl implements DynamicService {
         if (dynamicFilesEntities.size() > 0) {
             dynamicFilesRepository.saveAll(dynamicFilesEntities);
         }
+        // 查询文件
+        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
+        dynamicEntity.setFiles(filesEntities);
         dynamicEntity.setUser(userEntity);
+        return getDynamicSimple(dynamicEntity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NESTED)
+    public DynamicSimple getDynamicSimple(Integer dynamicId) {
+        DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicId);
         return getDynamicSimple(dynamicEntity);
     }
 
@@ -116,7 +136,7 @@ public class DynamicServiceImpl implements DynamicService {
         PageFilterDTO pageFilterDTO = new PageFilterDTO();
         pageFilterDTO.setPageSize(userIdQueryDTO.getPageSize());
         pageFilterDTO.setPageNumber(userIdQueryDTO.getPageNumber());
-        Page<DynamicEntity> dynamicEntities = getDynamics(pageFilterDTO, userId, false, false);
+        Page<DynamicEntity> dynamicEntities = getDynamics(pageFilterDTO, userId, false, userIdQueryDTO.getIncludingMyself());
         List<DynamicSimple> dynamicSimples;
         if (dynamicEntities != null) {
             long total = dynamicEntities.getTotalElements();
@@ -126,6 +146,14 @@ public class DynamicServiceImpl implements DynamicService {
         }
         dynamicSimples = new ArrayList<>();
         return new PageImpl<>(dynamicSimples, PageRequest.of(0, 1), 0);
+    }
+
+    @Override
+    public Page<DynamicSimple> getHotDynamic(PageFilterDTO pageFilterDTO) {
+        PageRequest pageRequest = PageRequest.of(pageFilterDTO.getPageNumber() - 1, pageFilterDTO.getPageSize());
+        Page<DynamicEntity> dynamicEntities = dynamicRepository.findByHotOrderByCreateTimeDesc(1, pageRequest);
+        List<DynamicSimple> dynamicSimples = dynamicEntities.stream().map(this::getDynamicSimple).collect(Collectors.toList());
+        return new PageImpl<>(dynamicSimples, pageRequest, dynamicEntities.getTotalElements());
     }
 
     @Override
@@ -163,6 +191,7 @@ public class DynamicServiceImpl implements DynamicService {
                 sql += " AND d.`user_id` <> " + currentUserId;
             }
         }
+        sql += " ORDER BY d.create_time DESC";
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
@@ -215,6 +244,7 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
+    @Transactional
     public Page<DynamicDetailSimple> getDynamicDetailByDynamicId(DynamicDetailQueryDTO dynamicDetailQueryDTO) {
         // 获取当前登录用户
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
@@ -238,13 +268,13 @@ public class DynamicServiceImpl implements DynamicService {
             // 获取动态明细
             if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
                 // 获取全部动态信息
-                dynamicDetailsEntities = dynamicDetailsRepository.findByDynamicIdAndHidden(dynamicId, false);
+                dynamicDetailsEntities = dynamicDetailsRepository.findByDynamicIdAndHiddenOrderByCreateTimeDesc(dynamicId, false);
                 pageable = PageRequest.of(0, dynamicDetailsEntities.size() + 1);
                 total = dynamicDetailsEntities.size();
             } else {
                 pageable = PageRequest.of(pageNumber - 1, pageSize);
                 // 分页获取动态信息
-                Page<DynamicDetailsEntity> dynamicDetailsEntityPage = dynamicDetailsRepository.findByDynamicIdAndHidden(dynamicId, false, pageable);
+                Page<DynamicDetailsEntity> dynamicDetailsEntityPage = dynamicDetailsRepository.findByDynamicIdAndHiddenOrderByCreateTimeDesc(dynamicId, false, pageable);
                 dynamicDetailsEntities = dynamicDetailsEntityPage.getContent();
                 total = dynamicDetailsEntityPage.getTotalElements();
             }
@@ -252,13 +282,13 @@ public class DynamicServiceImpl implements DynamicService {
             // 自身所创建的动态
             if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
                 // 获取全部动态
-                dynamicDetailsEntities = dynamicDetailsRepository.findByDynamicId(dynamicId);
+                dynamicDetailsEntities = dynamicDetailsRepository.findByDynamicIdOrderByCreateTimeDesc(dynamicId);
                 pageable = PageRequest.of(0, dynamicDetailsEntities.size() + 1);
                 total = dynamicDetailsEntities.size();
             } else {
                 pageable = PageRequest.of(pageNumber - 1, pageSize);
                 // 分页获取动态信息
-                Page<DynamicDetailsEntity> dynamicDetailsEntityPage = dynamicDetailsRepository.findByDynamicId(dynamicId, pageable);
+                Page<DynamicDetailsEntity> dynamicDetailsEntityPage = dynamicDetailsRepository.findByDynamicIdOrderByCreateTimeDesc(dynamicId, pageable);
                 dynamicDetailsEntities = dynamicDetailsEntityPage.getContent();
                 total = dynamicDetailsEntityPage.getTotalElements();
             }
@@ -378,6 +408,15 @@ public class DynamicServiceImpl implements DynamicService {
             // 保存文件信息
             dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
         }
+        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
+        dynamicDetailsEntity.setFiles(filesEntities);
+        return getDynamicDetailSimple(dynamicDetailsEntity);
+    }
+
+    @Transactional
+    @Override
+    public DynamicDetailSimple getDynamicDetailSimple(Integer dynamicDetailId) {
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
         return getDynamicDetailSimple(dynamicDetailsEntity);
     }
 
@@ -417,6 +456,10 @@ public class DynamicServiceImpl implements DynamicService {
     @Override
     public DynamicDetailMessageEntity addDynamicDetailMessage(DynamicDetailMessageDTO dynamicDetailMessageDTO) {
         // 获取当前登录用户
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailMessageDTO.getDynamicDetailId());
+        if (dynamicDetailsEntity == null) {
+            throw new FlightyThoughtException("没有找到评论的动态明细");
+        }
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         DynamicDetailMessageEntity dynamicDetailMessageEntity = new DynamicDetailMessageEntity();
         // 动态明细ID
@@ -433,10 +476,27 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicDetailMessageEntity.setLikeNum(0);
         // 接受者用户是否查看
         dynamicDetailMessageEntity.setRead(false);
+        // 标志类型
+        dynamicDetailMessageEntity.setFlagType(dynamicDetailMessageDTO.getFlagType());
         // 创建者
         dynamicDetailMessageEntity.setCreateUserName(userEntity.getId() + "");
         // 保存
-        return dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
+        dynamicDetailMessageEntity = dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
+        // 评论数+1
+        dynamicDetailsEntity.setMessageNum(dynamicDetailsEntity.getMessageNum() == null ? 1 : dynamicDetailsEntity.getMessageNum() + 1);
+        dynamicDetailsRepository.save(dynamicDetailsEntity);
+        // 自己评论自己不推送
+        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
+            // 评论信息推送
+            PushMessage<DynamicDetailMessageEntity> pushMessage = new PushMessage<>();
+            pushMessage.setData(dynamicDetailMessageEntity);
+            pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE.getMessage());
+            pushMessage.setTitle("您有一条新评论");
+            pushMessage.setMessage("您有一条新评论");
+            pushMessage.setType(Constants.NOTICE_MESSAGE);
+            jPushUtils.pushData(pushMessage, dynamicDetailMessageDTO.getToUserId());
+        }
+        return dynamicDetailMessageEntity;
     }
 
     @Override
@@ -452,10 +512,53 @@ public class DynamicServiceImpl implements DynamicService {
                 throw new FlightyThoughtException("访问者无权限");
             }
         }
-        List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNull(dynamicDetailId);
+        List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities, result);
         return result;
+    }
+
+    @Override
+    @Transactional
+    public Page<DynamicDetailMessageSimple> getDynamicDetailMessage(DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        long userId = userEntity.getId();
+        Integer dynamicDetailId = dynamicDetailMessageQueryDTO.getDynamicDetailId();
+        // 获取动态明细
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+        if (dynamicDetailsEntity != null && dynamicDetailsEntity.getUserId() != userId) {
+            if (dynamicDetailsEntity.getHidden()) {
+                throw new FlightyThoughtException("访问者无权限");
+            }
+        }
+        Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
+        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId, pageable);
+        List<DynamicDetailMessageSimple> result = new ArrayList<>();
+        getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
+        return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public Page<DynamicDetailMessageSimple> getDynamicDetailMessageInfo(DynamicDetailMessageQueryDTO dynamicDetailMessageQueryDTO) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        long userId = userEntity.getId();
+        Integer dynamicDetailId = dynamicDetailMessageQueryDTO.getDynamicDetailId();
+        // 获取动态明细
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+        if (dynamicDetailsEntity != null && dynamicDetailsEntity.getUserId() != userId) {
+            if (dynamicDetailsEntity.getHidden()) {
+                throw new FlightyThoughtException("访问者无权限");
+            }
+        }
+        Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
+        Integer messageId = dynamicDetailMessageQueryDTO.getMessageId();
+        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(dynamicDetailId, messageId, pageable);
+        List<DynamicDetailMessageSimple> result = new ArrayList<>();
+        getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
+        return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
     }
 
     @Override
@@ -503,6 +606,10 @@ public class DynamicServiceImpl implements DynamicService {
             } else {
                 dynamicDetailMessageSimple.setLike(false);
             }
+            // flagType
+            dynamicDetailMessageSimple.setFlagType(dynamicDetailMessageEntity.getFlagType());
+            // 创建时间
+            dynamicDetailMessageSimple.setCreateTime(dynamicDetailMessageEntity.getCreateTime());
             // 判断是否有子集
             List<DynamicDetailMessageEntity> childDetailMessageEntities = dynamicDetailMessageEntity.getChildMessage();
             if (childDetailMessageEntities != null && childDetailMessageEntities.size() > 0) {
@@ -527,14 +634,30 @@ public class DynamicServiceImpl implements DynamicService {
         UserToDynamicDetailLikeEntity likeEntity = userToDynamicDetailLikeRepository.findByUserIdAndDynamicDetailId(userId, dynamicDetailId);
         if (likeEntity != null) {
             // 取消点赞
+            dynamicDetailsEntity.setLikeNum(dynamicDetailsEntity.getLikeNum() - 1);
             userToDynamicDetailLikeRepository.delete(likeEntity);
         } else {
             // 点赞
+            // 点赞数 + 1
+            dynamicDetailsEntity.setLikeNum(dynamicDetailsEntity.getLikeNum() == null ? 1 : dynamicDetailsEntity.getLikeNum() + 1);
             likeEntity = new UserToDynamicDetailLikeEntity();
             likeEntity.setUserId(userId);
             likeEntity.setDynamicDetailId(dynamicDetailId);
             userToDynamicDetailLikeRepository.save(likeEntity);
+            // 点赞自己发布的不推送
+            if (userId != dynamicDetailsEntity.getUserId()) {
+                // 评论点赞推送
+                DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
+                PushMessage<DynamicDetailSimple> pushMessage = new PushMessage<>();
+                pushMessage.setData(dynamicDetailSimple);
+                pushMessage.setType(Constants.NOTICE_LIKE);
+                pushMessage.setCode(PushCodeEnum.DYNAMIC_LIKE.getMessage());
+                pushMessage.setTitle("您发表的动态有用户点赞");
+                pushMessage.setMessage("您发表的动态有用户点赞");
+                jPushUtils.pushData(pushMessage, dynamicDetailsEntity.getUserId());
+            }
         }
+        dynamicDetailsRepository.save(dynamicDetailsEntity);
     }
 
     @Override
@@ -551,13 +674,33 @@ public class DynamicServiceImpl implements DynamicService {
         UserToMessageLikeEntity likeEntity = userToMessageLikeRepository.findByUserIdAndMessageId(userId, messageId);
         if (likeEntity != null) {
             // 取消点赞
+            dynamicDetailMessageEntity.setLikeNum(dynamicDetailMessageEntity.getLikeNum() - 1);
             userToMessageLikeRepository.delete(likeEntity);
         } else {
             // 点赞
+            dynamicDetailMessageEntity.setLikeNum(dynamicDetailMessageEntity.getLikeNum() == null ? 1 : dynamicDetailMessageEntity.getLikeNum() + 1);
             likeEntity = new UserToMessageLikeEntity();
             likeEntity.setUserId(userId);
             likeEntity.setMessageId(messageId);
             userToMessageLikeRepository.save(likeEntity);
+            // 点赞自己发布的不推送
+            if (userId != dynamicDetailMessageEntity.getFromUserId()) {
+                // 动态明细评论信息推送
+                List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = new ArrayList<>();
+                List<DynamicDetailMessageSimple> dynamicDetailMessageSimples = new ArrayList<>();
+                dynamicDetailMessageEntities.add(dynamicDetailMessageEntity);
+                getDynamicDetailMessageSimple(dynamicDetailMessageEntities, dynamicDetailMessageSimples);
+                DynamicDetailMessageSimple dynamicDetailMessageSimple = dynamicDetailMessageSimples.get(0);
+
+                PushMessage<DynamicDetailMessageSimple> pushMessage = new PushMessage<>();
+                pushMessage.setMessage("有人点赞您发表的评论");
+                pushMessage.setTitle("有人点赞您发表的评论");
+                pushMessage.setType(Constants.NOTICE_LIKE);
+                pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE_LIKE.getMessage());
+                pushMessage.setData(dynamicDetailMessageSimple);
+                jPushUtils.pushData(pushMessage, dynamicDetailMessageEntity.getFromUserId());
+            }
         }
+        dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
     }
 }

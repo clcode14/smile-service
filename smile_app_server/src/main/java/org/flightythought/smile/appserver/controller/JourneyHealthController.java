@@ -35,7 +35,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取体检指标类型失败", e);
-            return ResponseBean.error("获取体检指标类型失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -50,7 +50,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("上传成功", result);
         } catch (Exception e) {
             LOG.error("上传体检报告失败", e);
-            return ResponseBean.error("上传失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("上传体检报告成功", results);
         } catch (Exception e) {
             LOG.error("上传体检报告失败", e);
-            return ResponseBean.error("上传体检报告失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("开启养生旅程成功", result);
         } catch (Exception e) {
             LOG.error("开启养生旅程失败", e);
-            return ResponseBean.error("开启养生旅程失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("修改成功", result);
         } catch (Exception e) {
             LOG.error("修改当前登录用户的养生旅程失败", e);
-            return ResponseBean.error("修改失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取当前用户养生旅程失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -119,11 +119,11 @@ public class JourneyHealthController {
             PageFilterDTO pageFilterDTO = new PageFilterDTO();
             pageFilterDTO.setPageNumber(healthJourneyQueryDTO.getPageNumber());
             pageFilterDTO.setPageSize(healthJourneyQueryDTO.getPageSize());
-            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(userId, pageFilterDTO, null);
+            Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(userId, pageFilterDTO, true);
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取失败", e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -137,7 +137,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取养生旅程信息失败", e);
-            return ResponseBean.error("获取养生旅程失敗", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -149,7 +149,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("新增养生日记成功", journeyNoteEntity);
         } catch (Exception e) {
             LOG.error("新增养生日记失败", e);
-            return ResponseBean.error("新增养生日记失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -161,7 +161,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("获取养生日记成功", result);
         } catch (Exception e) {
             LOG.error("获取养生日记失败", e);
-            return ResponseBean.error("获取养生日记失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -173,7 +173,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("获取养生成果成果", result);
         } catch (Exception e) {
             LOG.error("获取养生成果失败", e);
-            return ResponseBean.error("获取养生成果失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -185,7 +185,7 @@ public class JourneyHealthController {
             return ResponseBean.ok("操作成功", result);
         } catch (Exception e) {
             LOG.error("结束养生旅程失败", e);
-            return ResponseBean.error("结束养生旅程失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 

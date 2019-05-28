@@ -72,4 +72,11 @@ public class HealthWayEntity extends BaseEntity {
      */
     @Column(name = "type")
     private Integer type;
+
+    /**
+     * 音乐链接
+     */
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "health_way_id", insertable = false, updatable = false)
+    private List<HealthWayMusicEntity> musicEntities;
 }

@@ -41,4 +41,9 @@ public class HealthJourney extends HealthJourneySimple {
      * 旅程结束体检报告
      */
     private List<FileInfo> endReports;
+
+    /**
+     * 旅程对应的商品
+     */
+    private List<CommoditySimple> commodities;
 }

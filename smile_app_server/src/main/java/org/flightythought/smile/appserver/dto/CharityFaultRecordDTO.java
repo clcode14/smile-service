@@ -51,6 +51,9 @@ public class CharityFaultRecordDTO {
     @ApiModelProperty(value = "地址")
     private String address;
 
+    @ApiModelProperty(value = "是否隐藏")
+    private Boolean hidden;
+
     @ApiModelProperty(value = "上传的图片ID")
     private List<FileImageDTO> images;
 }

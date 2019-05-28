@@ -10,13 +10,13 @@ import java.util.List;
 
 @Repository
 public interface DynamicDetailsRepository extends JpaRepository<DynamicDetailsEntity, Long> {
-    List<DynamicDetailsEntity> findByDynamicIdAndHidden(Integer dynamicId, boolean hidden);
+    List<DynamicDetailsEntity> findByDynamicIdAndHiddenOrderByCreateTimeDesc(Integer dynamicId, boolean hidden);
 
-    List<DynamicDetailsEntity> findByDynamicId(Integer dynamicId);
+    List<DynamicDetailsEntity> findByDynamicIdOrderByCreateTimeDesc(Integer dynamicId);
 
     DynamicDetailsEntity findByDynamicDetailId(Integer dynamicDetailId);
 
-    Page<DynamicDetailsEntity> findByDynamicIdAndHidden(Integer dynamicId, boolean hidden, Pageable pageable);
+    Page<DynamicDetailsEntity> findByDynamicIdAndHiddenOrderByCreateTimeDesc(Integer dynamicId, boolean hidden, Pageable pageable);
 
-    Page<DynamicDetailsEntity> findByDynamicId(Integer dynamicId, Pageable pageable);
+    Page<DynamicDetailsEntity> findByDynamicIdOrderByCreateTimeDesc(Integer dynamicId, Pageable pageable);
 }

@@ -1,7 +1,11 @@
 package org.flightythought.smile.appserver.bean;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -64,4 +68,16 @@ public class DynamicDetailMessageSimple {
      * 当前用户是否点赞
      */
     private Boolean like;
+
+    /**
+     * 标志类型
+     */
+    private Integer flagType;
+
+    /**
+     * 创建时间
+     */
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
 }

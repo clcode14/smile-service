@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
+import org.flightythought.smile.appserver.database.entity.UserFollowCourseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -68,4 +69,10 @@ public class CourseSimple {
      * 课程类型ID
      */
     private Integer typeId;
+
+    /**
+     * 报名者信息
+     */
+    private UserFollowCourseEntity userFollowCourse;
+
 }

@@ -43,7 +43,7 @@ public class HomeController {
             return ResponseBean.ok("获取成功", homeBanners);
         } catch (Exception e) {
             LOG.error("获取主页Banner图失败", e);
-            return ResponseBean.error("获取失败", e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 

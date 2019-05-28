@@ -31,5 +31,6 @@ public class DynamicDetailMessageDTO {
     @ApiModelProperty(value = "信息接收用户ID")
     private Long toUserId;
 
-
+    @ApiModelProperty(value = "标志类型 1：回复主评论，2：回复子评论")
+    private Integer flagType;
 }

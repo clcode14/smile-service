@@ -42,4 +42,7 @@ public class HealthJourneyEndDTO {
     @ApiModelProperty(value = "体检报告")
     private List<FileImageDTO> files;
 
+    @ApiModelProperty(value = "商品ID集合")
+    private List<Integer> commodityIds;
+
 }
