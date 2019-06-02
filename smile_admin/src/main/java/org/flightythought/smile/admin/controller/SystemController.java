@@ -37,7 +37,7 @@ public class SystemController {
             @ApiImplicitParam(name = "versionId", value = "版本序号"),
             @ApiImplicitParam(name = "version", value = "版本号"),
             @ApiImplicitParam(name = "forceUpdate", value = "是否强制更新"),
-            @ApiImplicitParam(name = "description", value = "描述")
+            @ApiImplicitParam(name = "details", value = "描述")
     })
     public ResponseBean uploadAppFile(MultipartFile file, Integer versionId, String version,
                                       Boolean forceUpdate, String description) {

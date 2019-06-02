@@ -126,7 +126,7 @@ public class SystemServiceImpl implements SystemService {
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         Long userId = userEntity.getId();
         Integer type = noticeQueryDTO.getType();
-        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageNumber());
+        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageSize());
         Page<PushDataEntity> pushDataEntities = pushDataRepository.findByUserIdAndReadAndTypeOrderByCreateTimeDesc(userId, false, type, pageRequest);
         // 将消息置为已读
         pushDataEntities.forEach(pushDataEntity -> {

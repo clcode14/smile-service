@@ -95,7 +95,7 @@ public class CourseServiceImpl implements CourseService {
             // 活动地址
             courseSimple.setAddress(courseRegistrationEntity.getAddress());
             // 详情描述
-            courseSimple.setDescription(courseRegistrationEntity.getDescription());
+            courseSimple.setDetails(courseRegistrationEntity.getDescription());
             // 课程类型ID
             courseSimple.setTypeId(courseRegistrationEntity.getTypeId());
             courseSimples.add(courseSimple);
@@ -240,7 +240,7 @@ public class CourseServiceImpl implements CourseService {
             });
             courseSimple.setCourseImages(courseImages);
             // 详情描述
-            courseSimple.setDescription(courseRegistrationEntity.getDescription());
+            courseSimple.setDetails(courseRegistrationEntity.getDescription());
             courseSimples.add(courseSimple);
         });
         return courseSimples;
