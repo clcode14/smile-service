@@ -43,6 +43,9 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
 
     @Column(name = "nick_name")
     private String nickName;
+    
+    @Column(name = "recommender_id")
+    private Long recommenderId;
 
     @Column(name = "id_card")
     private String idCard;

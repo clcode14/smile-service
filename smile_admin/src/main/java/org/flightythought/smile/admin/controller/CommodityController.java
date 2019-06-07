@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.Commodity;
 import org.flightythought.smile.admin.bean.ResponseBean;
@@ -75,6 +77,22 @@ public class CommodityController {
         } catch (Exception e) {
             LOG.error("更新失败", e);
             return ResponseBean.error("更新失败", e.getMessage());
+        }
+    }
+    
+    @PutMapping("/sell")
+    @ApiOperation(value = "售卖/停售商品", notes = "售卖/停售商品")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "commodityId", value = "商品ID"),
+        @ApiImplicitParam(name = "opType", value = "操作类型，0-上架，1-下架")
+    })
+    public ResponseBean updateCommodity(Integer commodityId,Integer opType) {
+        try {
+            commodityService.updateCommodityStatus(commodityId,opType);
+            return ResponseBean.ok("售卖/停售商品成功");
+        } catch (Exception e) {
+            LOG.error("售卖/停售商品失败", e);
+            return ResponseBean.error("售卖/停售商品失败", e.getMessage());
         }
     }
 

@@ -249,4 +249,23 @@ public class CommodityServiceImpl implements CommodityService {
             commodityRepository.delete(commodityEntity);
         }
     }
+
+    @Override
+    public void updateCommodityStatus(Integer commodityId, Integer opType) {
+        SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
+        if (commodityId == null) {
+            throw new FlightyThoughtException("请传递commodityId");
+        }
+        CommodityEntity commodityEntity = commodityRepository.findByCommodityId(commodityId);
+        if (commodityEntity != null) {
+            // 运费类型
+            //opType-0,status-->0
+            //opType-1,status-->1
+            commodityEntity.setStatus(opType);
+            // 更新者
+            commodityEntity.setUpdateUserName(userEntity.getLoginName());
+            // 更新商品
+            commodityRepository.save(commodityEntity);
+        }
+    }
 }

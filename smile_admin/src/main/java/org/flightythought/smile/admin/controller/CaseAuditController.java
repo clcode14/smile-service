@@ -7,7 +7,9 @@ import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
 import org.flightythought.smile.admin.bean.JourneyNoteInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.dto.AppUserQueryDTO;
 import org.flightythought.smile.admin.dto.CheckCaseAuditDTO;
+import org.flightythought.smile.admin.dto.JourneyNoteQueryDTO;
 import org.flightythought.smile.admin.service.CaseAuditService;
 import org.flightythought.smile.admin.service.JourneyNoteService;
 import org.slf4j.Logger;
@@ -108,9 +110,9 @@ public class CaseAuditController {
 
     @GetMapping("/journey-notes")
     @ApiOperation(value = "养生日记列表", notes = "养生日记")
-    public ResponseBean journeyNotes(@RequestParam Map<String, String> params) {
+    public ResponseBean journeyNotes(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
         try {
-            List<JourneyNoteInfo> journeyNoteInfos = journeyNoteService.findAll(params);
+            Page<JourneyNoteInfo> journeyNoteInfos = journeyNoteService.queryNotePage(journeyNoteQueryDTO);
             return ResponseBean.ok("返回成功", journeyNoteInfos);
         } catch (Exception e) {
             LOG.error("案例审核列表失败", e);

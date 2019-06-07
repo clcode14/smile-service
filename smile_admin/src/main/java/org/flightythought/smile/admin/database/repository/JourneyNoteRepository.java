@@ -1,8 +1,8 @@
 package org.flightythought.smile.admin.database.repository;
 
-import org.flightythought.smile.admin.database.entity.JourneyEntity;
 import org.flightythought.smile.admin.database.entity.JourneyNoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
  * @Description: TODO
  */
 @Repository
-public interface JourneyNoteRepository extends JpaRepository<JourneyNoteEntity, Long> {
+public interface JourneyNoteRepository extends JpaRepository<JourneyNoteEntity, Long>,JpaSpecificationExecutor<JourneyNoteEntity>  {
 }
