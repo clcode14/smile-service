@@ -38,5 +38,8 @@ public class SolutionDTO {
 
     @ApiModelProperty(value = "相关机构ID")
     private List<Long> officeIds;
+    
+    @ApiModelProperty(value = "相关商品ID")
+    private List<Integer> commodityIds;
 
 }

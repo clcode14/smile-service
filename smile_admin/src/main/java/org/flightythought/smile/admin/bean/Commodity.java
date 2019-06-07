@@ -50,6 +50,11 @@ public class Commodity extends BaseEntity {
      * 运费类型 0：包邮 1：不包邮
      */
     private Integer freightType;
+    
+    /**
+     * 状态 0：售卖中 1：已停售
+     */
+    private Integer status;
 
     /**
      * 商品图片

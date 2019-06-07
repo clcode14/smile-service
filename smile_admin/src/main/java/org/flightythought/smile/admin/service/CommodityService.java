@@ -29,4 +29,6 @@ public interface CommodityService {
     List<Commodity> getCommodities(List<CommodityEntity> commodityEntities);
 
     void deleteCommodity(Integer commodityId);
+
+    void updateCommodityStatus(Integer commodityId, Integer opType);
 }

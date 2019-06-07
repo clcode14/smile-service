@@ -1,20 +1,42 @@
 package org.flightythought.smile.admin.service.impl;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
-import org.flightythought.smile.admin.database.entity.*;
-import org.flightythought.smile.admin.database.repository.*;
+import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
+import org.flightythought.smile.admin.database.entity.ImagesEntity;
+import org.flightythought.smile.admin.database.entity.OfficeEntity;
+import org.flightythought.smile.admin.database.entity.SolutionCommodityEntity;
+import org.flightythought.smile.admin.database.entity.SolutionCourseEntity;
+import org.flightythought.smile.admin.database.entity.SolutionEntity;
+import org.flightythought.smile.admin.database.entity.SolutionImageEntity;
+import org.flightythought.smile.admin.database.entity.SolutionOfficeEntity;
+import org.flightythought.smile.admin.database.entity.SysParameterEntity;
+import org.flightythought.smile.admin.database.entity.SysUserEntity;
+import org.flightythought.smile.admin.database.repository.CommodityRepository;
+import org.flightythought.smile.admin.database.repository.CourseRegistrationRepository;
+import org.flightythought.smile.admin.database.repository.OfficeRepository;
+import org.flightythought.smile.admin.database.repository.SolutionCommodityRepository;
+import org.flightythought.smile.admin.database.repository.SolutionCourseRepository;
+import org.flightythought.smile.admin.database.repository.SolutionImageRepository;
+import org.flightythought.smile.admin.database.repository.SolutionOfficeRepository;
+import org.flightythought.smile.admin.database.repository.SolutionRepository;
+import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.ImageDTO;
 import org.flightythought.smile.admin.dto.SolutionDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,12 +44,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.google.common.collect.Lists;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -53,7 +70,11 @@ public class SolutionServiceImpl implements SolutionService {
     @Autowired
     private SolutionOfficeRepository solutionOfficeRepository;
     @Autowired
+    private SolutionCommodityRepository solutionCommodityRepository;
+    @Autowired
     private OfficeRepository officeRepository;
+    @Autowired
+    private CommodityRepository commodityRepository;
     @Autowired
     private PlatformUtils platformUtils;
 
@@ -81,10 +102,11 @@ public class SolutionServiceImpl implements SolutionService {
             solutionEntity = solutionRepository.findById(solutionId).get();
             // 修改者
             solutionEntity.setUpdateUserName(sysUserEntity.getLoginName());
-            // 删除相关课程和相关配图
+            // 删除相关课程/相关配图/相关机构/相关商品
             solutionImageRepository.deleteAllBySolutionId(solutionId);
             solutionCourseRepository.deleteAllBySolutionId(solutionId);
             solutionOfficeRepository.deleteAllBySolutionId(solutionId);
+            solutionCommodityRepository.deleteAllBySolutionId(solutionId);
         } else {
             // 新增解决方案
             solutionEntity = new SolutionEntity();
@@ -125,7 +147,18 @@ public class SolutionServiceImpl implements SolutionService {
                 solutionOfficeEntities.add(solutionOfficeEntity);
             });
             solutionOfficeRepository.saveAll(solutionOfficeEntities);
-
+            
+            //获取相关商品
+            List<SolutionCommodityEntity> solutionCommodityEntities = Lists.newArrayList();
+            List<Integer> commodityIds = solutionDTO.getCommodityIds();
+            commodityIds.forEach(commodityId -> {
+                SolutionCommodityEntity solutionCommodityEntity = new SolutionCommodityEntity();
+                solutionCommodityEntity.setCommodityId(commodityId);
+                solutionCommodityEntity.setSolutionId(finalSolutionId);
+                solutionCommodityEntities.add(solutionCommodityEntity);
+            });
+            solutionCommodityRepository.saveAll(solutionCommodityEntities);
+            
             // 获取解决方案配图
             List<ImageDTO> imageDTOS = solutionDTO.getImages();
             List<SolutionImageEntity> solutionImageEntities = new ArrayList<>();
@@ -330,6 +363,19 @@ public class SolutionServiceImpl implements SolutionService {
                     SelectItemOption selectItemOption = new SelectItemOption();
                     selectItemOption.setKey(String.valueOf(officeEntity.getOfficeId()));
                     selectItemOption.setValue(officeEntity.getName());
+                    return selectItemOption;
+                }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SelectItemOption> getCommodities() {
+        return commodityRepository
+                .findAll()
+                .stream()
+                .map(commodityEntity -> {
+                    SelectItemOption selectItemOption = new SelectItemOption();
+                    selectItemOption.setKey(String.valueOf(commodityEntity.getCommodityId()));
+                    selectItemOption.setValue(commodityEntity.getName());
                     return selectItemOption;
                 }).collect(Collectors.toList());
     }

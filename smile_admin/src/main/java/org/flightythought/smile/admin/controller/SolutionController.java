@@ -61,6 +61,18 @@ public class SolutionController {
             return ResponseBean.error("返回失败", e.getMessage());
         }
     }
+    
+    @GetMapping("/commodities")
+    @ApiOperation(value = "获取相关商品", notes = "获取相关商品Option", position = 0)
+    public ResponseBean getCommodities() {
+        try {
+            List<SelectItemOption> result = solutionService.getCommodities();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("返回失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
 
     @GetMapping("/list")
     @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)

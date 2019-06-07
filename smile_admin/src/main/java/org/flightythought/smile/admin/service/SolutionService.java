@@ -44,4 +44,6 @@ public interface SolutionService {
     SolutionEntity findSolution(Integer id, HttpSession session);
 
     List<SelectItemOption> getOfficeItems();
+
+    List<SelectItemOption> getCommodities();
 }
