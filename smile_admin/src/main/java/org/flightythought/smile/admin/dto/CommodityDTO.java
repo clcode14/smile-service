@@ -42,6 +42,12 @@ public class CommodityDTO {
 
     @ApiModelProperty(value = "运费类型 0:包邮 1:不包邮")
     private Integer freightType;
+    
+    @ApiModelProperty(value = "商品url")
+    private String url;
+    
+    @ApiModelProperty(value = "售卖状态")
+    private String status;
 
     @ApiModelProperty(value = "图片ID")
     private List<Integer> imageIds;

@@ -2,7 +2,6 @@ package org.flightythought.smile.admin.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
@@ -13,6 +12,7 @@ import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
+import org.flightythought.smile.admin.database.entity.CommodityEntity;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
@@ -34,6 +34,7 @@ import org.flightythought.smile.admin.database.repository.SolutionRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.ImageDTO;
 import org.flightythought.smile.admin.dto.SolutionDTO;
+import org.flightythought.smile.admin.dto.SolutionQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,11 +243,11 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
-    public Page<SolutionInfo> findAllSolution(Map<String, String> params, HttpSession session) {
-        String pageNumber = params.get("pageNumber");
-        String pageSize = params.get("pageSize");
-        String title = params.get("title");
-        String number = params.get("number");
+    public Page<SolutionInfo> findAllSolution(SolutionQueryDTO solutionQueryDTO) {
+        Integer pageNumber = solutionQueryDTO.getPageNumber();
+        Integer pageSize = solutionQueryDTO.getPageSize();
+        String title = solutionQueryDTO.getTitle();
+        String number = solutionQueryDTO.getNumber();
 
         SolutionEntity solutionEntity = new SolutionEntity();
         if (StringUtils.isNotBlank(title)) {
@@ -255,13 +256,13 @@ public class SolutionServiceImpl implements SolutionService {
         if (StringUtils.isNotBlank(number)) {
             solutionEntity.setNumber(number);
         }
-        if (StringUtils.isBlank(pageNumber)) {
-            pageNumber = "1";
+        if (pageNumber==null) {
+            pageNumber = 1;
         }
-        if (StringUtils.isBlank(pageSize)) {
-            pageSize = "10";
+        if (pageSize==null) {
+            pageSize = 10;
         }
-        PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
+        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
         Page<SolutionEntity> page = solutionRepository.findAll(Example.of(solutionEntity), pageRequest);
 
         SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
@@ -286,6 +287,11 @@ public class SolutionServiceImpl implements SolutionService {
                             .stream()
                             .map(OfficeEntity::getName)
                             .collect(Collectors.toList());
+                    
+                    List<String> solutionCommodities = solution.getCommodities()
+                            .stream()
+                            .map(CommodityEntity::getName)
+                            .collect(Collectors.toList());
 
                     List<ImageInfo> imageInfos = solution.getImages()
                             .stream()
@@ -296,7 +302,7 @@ public class SolutionServiceImpl implements SolutionService {
                     solutionInfo.setImages(imageInfos);
                     solutionInfo.setRefCourses(solutionCourse);
                     solutionInfo.setRefOffices(solutionOffices);
-
+                    solutionInfo.setRefCommodities(solutionCommodities);
                     return solutionInfo;
                 }).collect(Collectors.toList());
 

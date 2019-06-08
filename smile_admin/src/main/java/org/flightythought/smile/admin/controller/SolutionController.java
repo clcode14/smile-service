@@ -7,7 +7,9 @@ import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.database.entity.SolutionEntity;
+import org.flightythought.smile.admin.dto.CourseFollowQueryDTO;
 import org.flightythought.smile.admin.dto.SolutionDTO;
+import org.flightythought.smile.admin.dto.SolutionQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.slf4j.Logger;
@@ -76,10 +78,9 @@ public class SolutionController {
 
     @GetMapping("/list")
     @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)
-    public ResponseBean findAllSolution(Map<String, String> params,
-                                        @ApiIgnore HttpSession session) {
+    public ResponseBean findAllSolution(@RequestBody SolutionQueryDTO solutionQueryDTO) {
         try {
-            Page<SolutionInfo> solutionEntity = solutionService.findAllSolution(params, session);
+            Page<SolutionInfo> solutionEntity = solutionService.findAllSolution(solutionQueryDTO);
             return ResponseBean.ok("查询成功", solutionEntity);
         } catch (Exception e) {
             LOG.error("查询方案失败", e);

@@ -66,6 +66,15 @@ public class SolutionEntity extends BaseEntity {
     @JoinTable(name = "tb_solution_office", joinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "office_id", nullable = false, updatable = false)})
     private Set<OfficeEntity> offices;
+    
+    /**
+     * 商品
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_solution_commodity", joinColumns = {@JoinColumn(name = "solution_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "commodity_id", nullable = false, updatable = false)})
+    private Set<CommodityEntity> commodities;
+    
     /**
      * 康复人数
      */
