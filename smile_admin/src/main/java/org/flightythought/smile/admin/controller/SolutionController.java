@@ -76,7 +76,7 @@ public class SolutionController {
         }
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)
     public ResponseBean findAllSolution(@RequestBody SolutionQueryDTO solutionQueryDTO) {
         try {
