@@ -10,6 +10,6 @@ import lombok.Data;
 public class JourneyNoteQueryDTO extends PageFilterDTO {
 
     @ApiModelProperty(value = "旅程ID")
-    private String journeyId;
+    private Integer journeyId;
 
 }

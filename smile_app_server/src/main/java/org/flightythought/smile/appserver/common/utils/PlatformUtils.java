@@ -1,7 +1,9 @@
 package org.flightythought.smile.appserver.common.utils;
 
+import com.aliyun.oss.OSSClient;
 import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.ImageInfo;
+import org.flightythought.smile.appserver.config.ALiOSSConfig;
 import org.flightythought.smile.appserver.database.entity.FilesEntity;
 import org.flightythought.smile.appserver.database.entity.ImagesEntity;
 import org.flightythought.smile.appserver.database.entity.UserEntity;
@@ -10,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.util.Date;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -27,6 +32,8 @@ public class PlatformUtils {
     private String contentPath;
     @Value("${oss-status}")
     private Boolean ossStatus;
+    @Autowired
+    private ALiOSSConfig aLiOSSConfig;
 
     @Autowired
     private SysParameterRepository sysParameterRepository;
@@ -59,7 +66,19 @@ public class PlatformUtils {
         if (imagesEntity != null) {
             ImageInfo imageInfo = new ImageInfo();
             if (ossStatus) {
-                imageInfo.setUrl(imagesEntity.getOssUrl());
+                // 获取url
+                // 2. 获取OSS参数信息
+                String endpoint = aLiOSSConfig.getEndpoint();
+                String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                String bucketName = aLiOSSConfig.getBucketName();
+                // 创建OSSClient实例
+                OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                // 设置URL过期时间为100年
+                Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+                // 生成URL
+                URL url = ossClient.generatePresignedUrl(bucketName, imagesEntity.getOssKey(), expiration);
+                imageInfo.setUrl(url.toString());
             } else {
                 imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));
             }
@@ -82,7 +101,19 @@ public class PlatformUtils {
             if (!ossStatus) {
                 fileInfo.setUrl(getStaticUrlByPath(filesEntity.getPath(), domainPort));
             } else {
-                fileInfo.setUrl(filesEntity.getOssUrl());
+                // 获取url
+                // 2. 获取OSS参数信息
+                String endpoint = aLiOSSConfig.getEndpoint();
+                String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                String bucketName = aLiOSSConfig.getBucketName();
+                // 创建OSSClient实例
+                OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                // 设置URL过期时间为100年
+                Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+                // 生成URL
+                URL url = ossClient.generatePresignedUrl(bucketName, filesEntity.getOssKey(), expiration);
+                fileInfo.setUrl(url.toString());
             }
             // 文件大小
             fileInfo.setSize(filesEntity.getSize());

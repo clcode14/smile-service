@@ -13,6 +13,7 @@ import org.flightythought.smile.appserver.service.DynamicService;
 import org.flightythought.smile.appserver.service.UserService;
 import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -56,6 +57,8 @@ public class DynamicServiceImpl implements DynamicService {
     private JPushUtils jPushUtils;
     @Autowired
     private FilesRepository filesRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     @Transactional
@@ -303,6 +306,7 @@ public class DynamicServiceImpl implements DynamicService {
         if (dynamicDetailsEntities.size() > 0) {
             // 获取当前登录用户
             UserEntity userEntity = platformUtils.getCurrentLoginUser();
+            String domainPort = platformUtils.getDomainPort();
             // 获取所有动态明细ID
             List<Integer> dynamicDetailIds = dynamicDetailsEntities.stream().map(DynamicDetailsEntity::getDynamicDetailId).collect(Collectors.toList());
             // 判断当前用户是否点赞
@@ -318,6 +322,10 @@ public class DynamicServiceImpl implements DynamicService {
                 } else {
                     dynamicDetailSimple.setLike(false);
                 }
+                // 动态图片
+                List<FilesEntity> filesEntities = dynamicDetailsEntity.getFiles();
+                List<FileInfo> fileInfos = filesEntities.stream().map(filesEntity -> platformUtils.getFileInfo(filesEntity, domainPort)).collect(Collectors.toList());
+                dynamicDetailSimple.setFiles(fileInfos);
                 return dynamicDetailSimple;
             }).collect(Collectors.toList());
             return dynamicDetailSimples;
@@ -486,16 +494,28 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicDetailsEntity.setMessageNum(dynamicDetailsEntity.getMessageNum() == null ? 1 : dynamicDetailsEntity.getMessageNum() + 1);
         dynamicDetailsRepository.save(dynamicDetailsEntity);
         // 自己评论自己不推送
-        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
-            // 评论信息推送
-            PushMessage<DynamicDetailMessageEntity> pushMessage = new PushMessage<>();
-            pushMessage.setData(dynamicDetailMessageEntity);
-            pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE.getMessage());
-            pushMessage.setTitle("您有一条新评论");
-            pushMessage.setMessage("您有一条新评论");
-            pushMessage.setType(Constants.NOTICE_MESSAGE);
-            jPushUtils.pushData(pushMessage, dynamicDetailMessageDTO.getToUserId());
-        }
+//        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
+        // 评论信息推送
+        PushMessage<DynamicDetailMessageSimple> pushMessage = new PushMessage<>();
+        // 封装评论用户
+        DynamicDetailMessageEntity detailMessageEntity = new DynamicDetailMessageEntity();
+        BeanUtils.copyProperties(dynamicDetailMessageEntity, detailMessageEntity);
+        UserEntity fromUser = userRepository.getOne(detailMessageEntity.getFromUserId());
+        UserEntity toUser = userRepository.getOne(detailMessageEntity.getToUserId());
+        detailMessageEntity.setFromUser(fromUser);
+        detailMessageEntity.setToUser(toUser);
+        List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = new ArrayList<>();
+        dynamicDetailMessageEntities.add(detailMessageEntity);
+        List<DynamicDetailMessageSimple> dynamicDetailMessageSimples = new ArrayList<>();
+        getDynamicDetailMessageSimple(dynamicDetailMessageEntities, dynamicDetailMessageSimples);
+        DynamicDetailMessageSimple dynamicDetailMessageSimple = dynamicDetailMessageSimples.get(0);
+        pushMessage.setData(dynamicDetailMessageSimple);
+        pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE.getMessage());
+        pushMessage.setTitle("您有一条新评论");
+        pushMessage.setMessage("您有一条新评论");
+        pushMessage.setType(Constants.NOTICE_MESSAGE);
+        jPushUtils.pushData(pushMessage, dynamicDetailMessageDTO.getToUserId());
+//        }
         return dynamicDetailMessageEntity;
     }
 
@@ -645,17 +665,22 @@ public class DynamicServiceImpl implements DynamicService {
             likeEntity.setDynamicDetailId(dynamicDetailId);
             userToDynamicDetailLikeRepository.save(likeEntity);
             // 点赞自己发布的不推送
-            if (userId != dynamicDetailsEntity.getUserId()) {
-                // 评论点赞推送
-                DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
-                PushMessage<DynamicDetailSimple> pushMessage = new PushMessage<>();
-                pushMessage.setData(dynamicDetailSimple);
-                pushMessage.setType(Constants.NOTICE_LIKE);
-                pushMessage.setCode(PushCodeEnum.DYNAMIC_LIKE.getMessage());
-                pushMessage.setTitle("您发表的动态有用户点赞");
-                pushMessage.setMessage("您发表的动态有用户点赞");
-                jPushUtils.pushData(pushMessage, dynamicDetailsEntity.getUserId());
-            }
+//            if (userId != dynamicDetailsEntity.getUserId()) {
+            // 评论点赞推送
+            // 点赞用户
+            UserInfo userInfo = userService.getUserInfo(userId);
+            DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
+            LikeData<DynamicDetailSimple> likeData = new LikeData<>();
+            likeData.setData(dynamicDetailSimple);
+            likeData.setLikeUser(userInfo);
+            PushMessage<LikeData> pushMessage = new PushMessage<>();
+            pushMessage.setData(likeData);
+            pushMessage.setType(Constants.NOTICE_LIKE);
+            pushMessage.setCode(PushCodeEnum.DYNAMIC_LIKE.getMessage());
+            pushMessage.setTitle("您发表的动态有用户点赞");
+            pushMessage.setMessage("您发表的动态有用户点赞");
+            jPushUtils.pushData(pushMessage, dynamicDetailsEntity.getUserId());
+//            }
         }
         dynamicDetailsRepository.save(dynamicDetailsEntity);
     }
@@ -684,22 +709,26 @@ public class DynamicServiceImpl implements DynamicService {
             likeEntity.setMessageId(messageId);
             userToMessageLikeRepository.save(likeEntity);
             // 点赞自己发布的不推送
-            if (userId != dynamicDetailMessageEntity.getFromUserId()) {
-                // 动态明细评论信息推送
-                List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = new ArrayList<>();
-                List<DynamicDetailMessageSimple> dynamicDetailMessageSimples = new ArrayList<>();
-                dynamicDetailMessageEntities.add(dynamicDetailMessageEntity);
-                getDynamicDetailMessageSimple(dynamicDetailMessageEntities, dynamicDetailMessageSimples);
-                DynamicDetailMessageSimple dynamicDetailMessageSimple = dynamicDetailMessageSimples.get(0);
-
-                PushMessage<DynamicDetailMessageSimple> pushMessage = new PushMessage<>();
-                pushMessage.setMessage("有人点赞您发表的评论");
-                pushMessage.setTitle("有人点赞您发表的评论");
-                pushMessage.setType(Constants.NOTICE_LIKE);
-                pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE_LIKE.getMessage());
-                pushMessage.setData(dynamicDetailMessageSimple);
-                jPushUtils.pushData(pushMessage, dynamicDetailMessageEntity.getFromUserId());
-            }
+//            if (userId != dynamicDetailMessageEntity.getFromUserId()) {
+            // 动态明细评论信息推送
+            // 获取点赞用户
+            UserInfo userInfo = userService.getUserInfo(userId);
+            List<DynamicDetailMessageEntity> dynamicDetailMessageEntities = new ArrayList<>();
+            List<DynamicDetailMessageSimple> dynamicDetailMessageSimples = new ArrayList<>();
+            dynamicDetailMessageEntities.add(dynamicDetailMessageEntity);
+            getDynamicDetailMessageSimple(dynamicDetailMessageEntities, dynamicDetailMessageSimples);
+            DynamicDetailMessageSimple dynamicDetailMessageSimple = dynamicDetailMessageSimples.get(0);
+            LikeData<DynamicDetailMessageSimple> likeData = new LikeData<>();
+            likeData.setLikeUser(userInfo);
+            likeData.setData(dynamicDetailMessageSimple);
+            PushMessage<LikeData> pushMessage = new PushMessage<>();
+            pushMessage.setMessage("有人点赞您发表的评论");
+            pushMessage.setTitle("有人点赞您发表的评论");
+            pushMessage.setType(Constants.NOTICE_LIKE);
+            pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE_LIKE.getMessage());
+            pushMessage.setData(likeData);
+            jPushUtils.pushData(pushMessage, dynamicDetailMessageEntity.getFromUserId());
+//            }
         }
         dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
     }

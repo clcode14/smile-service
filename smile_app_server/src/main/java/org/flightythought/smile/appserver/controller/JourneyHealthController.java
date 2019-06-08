@@ -12,11 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth/journey")
@@ -104,6 +107,10 @@ public class JourneyHealthController {
             pageFilterDTO.setPageNumber(myJourneyQueryDTO.getPageNumber());
             pageFilterDTO.setPageSize(myJourneyQueryDTO.getPageSize());
             Page<HealthJourneySimple> result = journeyHealthService.getHealthJourney(null, pageFilterDTO, myJourneyQueryDTO.getFinished());
+            if (result.getContent().size() > 0) {
+                List<HealthJourneySimple> sort = result.stream().sorted(Comparator.comparing(HealthJourneySimple::getStartTime).reversed()).collect(Collectors.toList());
+                result = new PageImpl<>(sort, result.getPageable(), result.getTotalElements());
+            }
             return ResponseBean.ok("返回成功", result);
         } catch (Exception e) {
             LOG.error("获取当前用户养生旅程失败", e);
@@ -185,6 +192,18 @@ public class JourneyHealthController {
             return ResponseBean.ok("操作成功", result);
         } catch (Exception e) {
             LOG.error("结束养生旅程失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @GetMapping("/journeyDisease/{journeyId}")
+    @ApiOperation(value = "根据旅程ID获取该旅程关联的疾病列表")
+    public ResponseBean getDiseaseByJourneyId(@PathVariable Integer journeyId) {
+        try {
+            List<DiseaseClassDetailSimple> result = journeyHealthService.getDiseaseByJourneyId(journeyId);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("返回失败", e.getMessage());
             return ResponseBean.error(e.getMessage());
         }
     }

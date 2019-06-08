@@ -46,4 +46,9 @@ public class HealthJourney extends HealthJourneySimple {
      * 旅程对应的商品
      */
     private List<CommoditySimple> commodities;
+
+    /**
+     * 养生旅程对应的课程
+     */
+    private List<CourseSimple> courses;
 }

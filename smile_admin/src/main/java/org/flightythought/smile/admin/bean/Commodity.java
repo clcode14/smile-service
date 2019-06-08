@@ -60,4 +60,14 @@ public class Commodity extends BaseEntity {
      * 商品图片
      */
     private List<ImageInfo> images;
+
+    /**
+     * URL
+     */
+    private String url;
+
+    /**
+     * SKU
+     */
+    private String sku;
 }
