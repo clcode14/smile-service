@@ -534,7 +534,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                     FileInfo fileInfo = new FileInfo();
                     // 资源URL
                     if (ossStatus) {
-                        fileInfo.setUrl(medicalReportEntity.getOssUrl());
+                        fileInfo.setUrl(platformUtils.getOssUrl(medicalReportEntity.getOssKey()));
                     } else {
                         String url = platformUtils.getMedicalReportStaticUrlByPath(medicalReportEntity.getPath(), domainPort);
                         fileInfo.setUrl(url);

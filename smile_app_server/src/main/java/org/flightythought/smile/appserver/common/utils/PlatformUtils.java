@@ -90,6 +90,20 @@ public class PlatformUtils {
         return null;
     }
 
+    public String getOssUrl(String key) {
+        String endpoint = aLiOSSConfig.getEndpoint();
+        String accessKeyId = aLiOSSConfig.getAccessKeyId();
+        String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+        String bucketName = aLiOSSConfig.getBucketName();
+        // 创建OSSClient实例
+        OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+        // 设置URL过期时间为100年
+        Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+        // 生成URL
+        URL url = ossClient.generatePresignedUrl(bucketName, key, expiration);
+        return url.toString();
+    }
+
     public FileInfo getFileInfo(FilesEntity filesEntity, String domainPort) {
         if (filesEntity != null) {
             FileInfo fileInfo = new FileInfo();

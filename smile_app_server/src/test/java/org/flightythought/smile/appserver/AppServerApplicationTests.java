@@ -3,16 +3,15 @@ package org.flightythought.smile.appserver;
 import org.flightythought.smile.appserver.bean.PushMessage;
 import org.flightythought.smile.appserver.common.PushCodeEnum;
 import org.flightythought.smile.appserver.common.utils.JPushUtils;
-import org.flightythought.smile.appserver.database.entity.CommodityEntity;
-import org.flightythought.smile.appserver.database.entity.CustomEntity;
-import org.flightythought.smile.appserver.database.entity.UserCharityFaultRecordEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.EntityManager;
@@ -37,6 +36,8 @@ public class AppServerApplicationTests {
     private UserCharityFaultRecordRepository userCharityFaultRecordRepository;
     @Autowired
     private JPushUtils jPushUtils;
+    @Autowired
+    private RecoverCaseRepository recoverCaseRepository;
 
     @Test
     @Transactional
@@ -72,5 +73,12 @@ public class AppServerApplicationTests {
     public void test01() {
         UserCharityFaultRecordEntity result = userCharityFaultRecordRepository.findById(2);
         System.out.println(result);
+    }
+
+    @Test
+    public void test03() {
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        Page<RecoverCaseEntity> page = recoverCaseRepository.searchRecoverCase("ggg", pageRequest);
+        System.out.println(page);
     }
 }

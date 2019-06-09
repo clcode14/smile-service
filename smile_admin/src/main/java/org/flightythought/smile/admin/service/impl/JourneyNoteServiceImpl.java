@@ -198,6 +198,6 @@ public class JourneyNoteServiceImpl implements JourneyNoteService {
             });
             return new PageImpl<>(journeyNotes, pageRequest, total);
         }
-        return null;
+        return new PageImpl<>(new ArrayList<>(), pageRequest, 0);
     }
 }

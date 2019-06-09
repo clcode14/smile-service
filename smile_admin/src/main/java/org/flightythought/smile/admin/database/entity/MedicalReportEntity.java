@@ -49,4 +49,16 @@ public class MedicalReportEntity extends BaseEntity {
      */
     @Column(name = "file_type")
     private String fileType;
+
+    /**
+     * OSS URL
+     */
+    @Column(name = "oss_url")
+    private String ossUrl;
+
+    /**
+     * OSS KEY
+     */
+    @Column(name = "oss_key")
+    private String ossKey;
 }

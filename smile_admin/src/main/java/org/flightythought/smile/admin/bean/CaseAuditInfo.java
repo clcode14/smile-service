@@ -76,4 +76,9 @@ public class CaseAuditInfo {
      * 解决方案
      */
     private List<String> solutions;
+
+    /**
+     * 体检报告
+     */
+    private List<FileInfo> reports;
 }
