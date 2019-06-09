@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.database.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -16,6 +18,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "tb_app_version")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class AppVersionEntity extends BaseEntity {
     /**
      * 自增主键

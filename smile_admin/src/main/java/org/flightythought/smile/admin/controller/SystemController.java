@@ -7,6 +7,7 @@ import org.flightythought.smile.admin.service.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +48,18 @@ public class SystemController {
         } catch (Exception e) {
             LOG.error("上传APP更新失败", e);
             return ResponseBean.error("上传App失败", e.getMessage());
+        }
+    }
+    
+    @GetMapping("/getAppVersion")
+    @ApiOperation(value = "获取APP版本信息", notes = "获取APP版本信息")
+    public ResponseBean getAppVersion() {
+        try {
+            AppVersionEntity result = systemService.getAppVersion();
+            return ResponseBean.ok("获取APP版本信息成功", result);
+        } catch (Exception e) {
+            LOG.error("上传APP更新失败", e);
+            return ResponseBean.error("获取APP版本信息失败", e.getMessage());
         }
     }
 }

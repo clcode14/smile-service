@@ -14,4 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface SystemService {
     AppVersionEntity uploadAppFile(MultipartFile file, Integer versionId, String version,
                                    Boolean forceUpdate, String description);
+
+    AppVersionEntity getAppVersion();
 }

@@ -101,7 +101,7 @@ public class CommodityController {
     public ResponseBean deleteCommodity(Integer commodityId) {
         try {
             commodityService.deleteCommodity(commodityId);
-            return ResponseBean.error("删除成功");
+            return ResponseBean.ok("删除成功");
         } catch (Exception e) {
             LOG.error("删除失败", e);
             return ResponseBean.error("删除失败", e.getMessage());
