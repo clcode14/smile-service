@@ -9,7 +9,18 @@ public class Constants {
     /**
      * 爱心养生隐私 CODE
      */
+    @Deprecated
     public static final String CHARITY_FAULT_HIDDEN = "charity_fault_hidden";
+
+    /**
+     * 过失隐私
+     */
+    public static final String FAULT_HIDDEN = "fault_hidden";
+
+    /**
+     * 善行隐私
+     */
+    public static final String CHARITY_HIDDEN = "charity_hidden";
 
     /**
      * 动态隐私 CODE

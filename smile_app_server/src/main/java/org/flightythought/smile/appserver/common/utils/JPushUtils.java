@@ -2,6 +2,7 @@ package org.flightythought.smile.appserver.common.utils;
 
 import cn.jiguang.common.ClientConfig;
 import cn.jpush.api.JPushClient;
+import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
@@ -72,7 +73,7 @@ public class JPushUtils {
                     // 设置别名
                     .setAudience(Audience.alias(userId + ""))
                     // 设置消息
-                    .setNotification(Notification.alert(pushDataJson)).build();
+                    .setMessage(Message.newBuilder().setMsgContent(pushDataJson).build()).build();
             // 推送消息
             jPushClient.sendPush(pushPayload);
             jPushClient.close();

@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.common;
 
+import com.aliyun.oss.OSSClient;
 import org.flightythought.smile.admin.bean.ImageInfo;
+import org.flightythought.smile.admin.config.ALiOSSConfig;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.entity.UserEntity;
@@ -9,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.util.Date;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -26,6 +31,8 @@ public class PlatformUtils {
     private String contentPath;
     @Value("${oss-status}")
     private Boolean ossStatus;
+    @Autowired
+    private ALiOSSConfig aLiOSSConfig;
 
     @Autowired
     private SysParameterRepository sysParameterRepository;
@@ -44,7 +51,19 @@ public class PlatformUtils {
         if (imagesEntity != null) {
             ImageInfo imageInfo = new ImageInfo();
             if (ossStatus) {
-                imageInfo.setUrl(imagesEntity.getOssUrl());
+                // 获取url
+                // 2. 获取OSS参数信息
+                String endpoint = aLiOSSConfig.getEndpoint();
+                String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                String bucketName = aLiOSSConfig.getBucketName();
+                // 创建OSSClient实例
+                OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                // 设置URL过期时间为100年
+                Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+                // 生成URL
+                URL url = ossClient.generatePresignedUrl(bucketName, imagesEntity.getOssKey(), expiration);
+                imageInfo.setUrl(url.toString());
             } else {
                 imageInfo.setUrl(getStaticUrlByPath(imagesEntity.getPath(), domainPort));
             }

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
+import org.flightythought.smile.admin.bean.JourneyNote;
 import org.flightythought.smile.admin.bean.JourneyNoteInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.dto.AppUserQueryDTO;
@@ -50,8 +51,8 @@ public class CaseAuditController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNumber", value = "页码"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小"),
-            @ApiImplicitParam(name = "audit", value = "是否审核 ，0未审核，1已审核"),
-            @ApiImplicitParam(name = "recoverCase", value = "是否评为案例 ，0不是，1是")
+            @ApiImplicitParam(name = "audit", value = "是否审核 ，false未审核，true已审核"),
+            @ApiImplicitParam(name = "recoverCase", value = "是否评为案例 ，false不是，true是")
 
     })
     public ResponseBean findCaseAudits(@RequestParam Map<String, String> params) {
@@ -108,7 +109,7 @@ public class CaseAuditController {
     }
 
 
-    @GetMapping("/journey-notes")
+    @PostMapping("/journey-notes")
     @ApiOperation(value = "养生日记列表", notes = "养生日记")
     public ResponseBean journeyNotes(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
         try {
@@ -117,6 +118,18 @@ public class CaseAuditController {
         } catch (Exception e) {
             LOG.error("案例审核列表失败", e);
             return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "根据养生旅程ID获取养生日记", notes = "根据养生旅程ID获取养生日记")
+    @PostMapping("/notes")
+    public ResponseBean getJourneyHealthNote(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
+        try {
+            Page<JourneyNote> result = journeyNoteService.getJourneyHealthNote(journeyNoteQueryDTO);
+            return ResponseBean.ok("获取养生日记成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生日记失败", e);
+            return ResponseBean.error(e.getMessage());
         }
     }
 

@@ -1,9 +1,6 @@
 package org.flightythought.smile.appserver.service;
 
-import org.flightythought.smile.appserver.bean.FileInfo;
-import org.flightythought.smile.appserver.bean.HealthJourney;
-import org.flightythought.smile.appserver.bean.HealthJourneySimple;
-import org.flightythought.smile.appserver.bean.JourneyNote;
+import org.flightythought.smile.appserver.bean.*;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
@@ -35,6 +32,8 @@ public interface JourneyHealthService {
     HealthJourney endHealthJourney(HealthJourneyEndDTO healthJourneyEndDTO) throws FlightyThoughtException;
 
     Page<HealthResultEntity> getHealthResultList(PageFilterDTO pageFilterDTO);
+
+    List<DiseaseClassDetailSimple> getDiseaseByJourneyId(Integer journeyId);
 
     void deleteJourneyById(Integer journeyId);
 }

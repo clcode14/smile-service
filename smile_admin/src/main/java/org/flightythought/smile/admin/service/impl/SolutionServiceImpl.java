@@ -148,7 +148,7 @@ public class SolutionServiceImpl implements SolutionService {
                 solutionOfficeEntities.add(solutionOfficeEntity);
             });
             solutionOfficeRepository.saveAll(solutionOfficeEntities);
-            
+
             //获取相关商品
             List<SolutionCommodityEntity> solutionCommodityEntities = Lists.newArrayList();
             List<Integer> commodityIds = solutionDTO.getCommodityIds();
@@ -159,7 +159,7 @@ public class SolutionServiceImpl implements SolutionService {
                 solutionCommodityEntities.add(solutionCommodityEntity);
             });
             solutionCommodityRepository.saveAll(solutionCommodityEntities);
-            
+
             // 获取解决方案配图
             List<ImageDTO> imageDTOS = solutionDTO.getImages();
             List<SolutionImageEntity> solutionImageEntities = new ArrayList<>();
@@ -177,6 +177,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
+    @Transactional
     public SolutionEntity modifySolution(SolutionDTO solutionDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
         // 获取解决方案ID
@@ -256,10 +257,10 @@ public class SolutionServiceImpl implements SolutionService {
         if (StringUtils.isNotBlank(number)) {
             solutionEntity.setNumber(number);
         }
-        if (pageNumber==null) {
+        if (pageNumber == null) {
             pageNumber = 1;
         }
-        if (pageSize==null) {
+        if (pageSize == null) {
             pageSize = 10;
         }
         PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
@@ -287,7 +288,7 @@ public class SolutionServiceImpl implements SolutionService {
                             .stream()
                             .map(OfficeEntity::getName)
                             .collect(Collectors.toList());
-                    
+
                     List<String> solutionCommodities = solution.getCommodities()
                             .stream()
                             .map(CommodityEntity::getName)

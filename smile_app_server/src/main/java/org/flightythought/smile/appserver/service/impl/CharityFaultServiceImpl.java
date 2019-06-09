@@ -49,6 +49,8 @@ public class CharityFaultServiceImpl implements CharityFaultService {
     private UserCharityFaultMessageLikeRepository userCharityFaultMessageLikeRepository;
     @Autowired
     private JPushUtils jPushUtils;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     @Transactional
@@ -341,20 +343,29 @@ public class CharityFaultServiceImpl implements CharityFaultService {
         charityFaultMessageEntity.setFlagType(charityFaultMessageDTO.getFlagType());
         // 保存
         charityFaultMessageEntity = charityFaultMessageRepository.save(charityFaultMessageEntity);
-        CharityFaultMessageSimple result = new CharityFaultMessageSimple();
-        BeanUtils.copyProperties(charityFaultMessageEntity, result);
+        CharityFaultMessageEntity faultMessageEntity = new CharityFaultMessageEntity();
+        BeanUtils.copyProperties(charityFaultMessageEntity, faultMessageEntity);
+        UserEntity fromUser = userRepository.getOne(charityFaultMessageEntity.getFromUserId());
+        UserEntity toUser = userRepository.getOne(charityFaultMessageEntity.getToUserId());
+        faultMessageEntity.setFromUser(fromUser);
+        faultMessageEntity.setToUser(toUser);
         // 评论自己发布的或自己评论自己不推送
-        if (!userEntity.getId().equals(charityFaultMessageDTO.getToUserId()) && !charityFaultMessageDTO.getToUserId().equals(charityFaultMessageDTO.getFromUserId())) {
-            // 推送信息
-            PushMessage<CharityFaultMessageSimple> pushMessage = new PushMessage<>();
-            pushMessage.setData(result);
-            pushMessage.setCode(PushCodeEnum.CHARITY_FAULT_MESSAGE.getMessage());
-            pushMessage.setType(Constants.NOTICE_MESSAGE);
-            pushMessage.setMessage("您有一条新评论");
-            pushMessage.setTitle("您有一条新评论");
-            jPushUtils.pushData(pushMessage, charityFaultMessageDTO.getToUserId());
-        }
-        return result;
+//        if (!userEntity.getId().equals(charityFaultMessageDTO.getToUserId()) && !charityFaultMessageDTO.getToUserId().equals(charityFaultMessageDTO.getFromUserId())) {
+        List<CharityFaultMessageEntity> charityFaultMessageEntities = new ArrayList<>();
+        charityFaultMessageEntities.add(faultMessageEntity);
+        List<CharityFaultMessageSimple> charityFaultMessageSimples = new ArrayList<>();
+        getCharityFaultMessageSimple(charityFaultMessageEntities, charityFaultMessageSimples);
+        CharityFaultMessageSimple pushData = charityFaultMessageSimples.get(0);
+        // 推送信息
+        PushMessage<CharityFaultMessageSimple> pushMessage = new PushMessage<>();
+        pushMessage.setData(pushData);
+        pushMessage.setCode(PushCodeEnum.CHARITY_FAULT_MESSAGE.getMessage());
+        pushMessage.setType(Constants.NOTICE_MESSAGE);
+        pushMessage.setMessage("您有一条新评论");
+        pushMessage.setTitle("您有一条新评论");
+        jPushUtils.pushData(pushMessage, charityFaultMessageDTO.getToUserId());
+//        }
+        return pushData;
     }
 
     @Override
@@ -380,21 +391,25 @@ public class CharityFaultServiceImpl implements CharityFaultService {
             likeEntity.setMessageId(messageId);
             userCharityFaultMessageLikeRepository.save(likeEntity);
             // 点赞自己的评论不推送
-            if (userId != charityFaultMessageEntity.getFromUserId()) {
-                // 推送消息
-                List<CharityFaultMessageEntity> charityFaultMessageEntities = new ArrayList<>();
-                charityFaultMessageEntities.add(charityFaultMessageEntity);
-                List<CharityFaultMessageSimple> charityFaultMessageSimples = new ArrayList<>();
-                getCharityFaultMessageSimple(charityFaultMessageEntities, charityFaultMessageSimples);
-                CharityFaultMessageSimple charityFaultMessageSimple = charityFaultMessageSimples.get(0);
-                PushMessage<CharityFaultMessageSimple> pushMessage = new PushMessage<>();
-                pushMessage.setData(charityFaultMessageSimple);
-                pushMessage.setMessage("有人点赞您发表的评论");
-                pushMessage.setTitle("有人点赞您发表的评论");
-                pushMessage.setType(Constants.NOTICE_LIKE);
-                pushMessage.setCode(PushCodeEnum.CHARITY_FAULT_MESSAGE_LIKE.getMessage());
-                jPushUtils.pushData(pushMessage, charityFaultMessageEntity.getFromUserId());
-            }
+//            if (userId != charityFaultMessageEntity.getFromUserId()) {
+            // 推送消息
+            List<CharityFaultMessageEntity> charityFaultMessageEntities = new ArrayList<>();
+            charityFaultMessageEntities.add(charityFaultMessageEntity);
+            List<CharityFaultMessageSimple> charityFaultMessageSimples = new ArrayList<>();
+            getCharityFaultMessageSimple(charityFaultMessageEntities, charityFaultMessageSimples);
+            CharityFaultMessageSimple charityFaultMessageSimple = charityFaultMessageSimples.get(0);
+            UserInfo userInfo = userService.getUserInfo(userId);
+            LikeData<CharityFaultMessageSimple> likeData = new LikeData<>();
+            likeData.setData(charityFaultMessageSimple);
+            likeData.setLikeUser(userInfo);
+            PushMessage<LikeData> pushMessage = new PushMessage<>();
+            pushMessage.setData(likeData);
+            pushMessage.setMessage("有人点赞您发表的评论");
+            pushMessage.setTitle("有人点赞您发表的评论");
+            pushMessage.setType(Constants.NOTICE_LIKE);
+            pushMessage.setCode(PushCodeEnum.CHARITY_FAULT_MESSAGE_LIKE.getMessage());
+            jPushUtils.pushData(pushMessage, charityFaultMessageEntity.getFromUserId());
+//            }
         }
         charityFaultMessageRepository.save(charityFaultMessageEntity);
     }

@@ -9,9 +9,7 @@ import org.flightythought.smile.appserver.config.ALiOSSConfig;
 import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.*;
 import org.flightythought.smile.appserver.dto.*;
-import org.flightythought.smile.appserver.service.CommodityService;
-import org.flightythought.smile.appserver.service.JourneyHealthService;
-import org.flightythought.smile.appserver.service.UserService;
+import org.flightythought.smile.appserver.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,11 +72,17 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     @Autowired
     private JourneyToCommodityRepository journeyToCommodityRepository;
     @Autowired
+    private DiseaseClassDetailRepository diseaseClassDetailRepository;
+    @Autowired
     private CommodityService commodityService;
     @Autowired
     private UserService userService;
     @Autowired
     private ALiOSSConfig aLiOSSConfig;
+    @Autowired
+    private DiseaseService diseaseService;
+    @Autowired
+    private CourseService courseService;
 
     @Value("${static-url}")
     private String staticUrl;
@@ -596,6 +600,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 List<CommoditySimple> commoditySimples = commodityService.getCommoditySimples(commodityEntities);
                 healthJourney.setCommodities(commoditySimples);
             }
+            // 旅程对应的课程
+            List<CourseRegistrationEntity> courseRegistrationEntities = journeyEntity.getCourses();
+            if (courseRegistrationEntities != null && courseRegistrationEntities.size() > 0) {
+                List<CourseSimple> courseSimples = courseService.getCourseSimple(courseRegistrationEntities);
+                healthJourney.setCourses(courseSimples);
+            }
             return healthJourney;
         }
         return null;
@@ -924,6 +934,18 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             result = healthResultRepository.findAll(pageRequest);
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public List<DiseaseClassDetailSimple> getDiseaseByJourneyId(Integer journeyId) {
+        List<JourneyDiseaseEntity> journeyDiseaseEntities = journeyDiseaseRepository.findByJourneyId(journeyId);
+        if (journeyDiseaseEntities.size() > 0) {
+            List<Integer> diseaseDetailIds = journeyDiseaseEntities.stream().map(JourneyDiseaseEntity::getDiseaseDetailId).collect(Collectors.toList());
+            List<DiseaseClassDetailEntity> diseaseClassDetailEntities = diseaseClassDetailRepository.findByDiseaseDetailIdIn(diseaseDetailIds);
+            return diseaseService.getDiseaseClassDetailSimple(diseaseClassDetailEntities);
+        }
+        return null;
     }
 
     @Override
