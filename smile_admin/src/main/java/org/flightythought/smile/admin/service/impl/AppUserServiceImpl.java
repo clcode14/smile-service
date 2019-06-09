@@ -66,8 +66,12 @@ public class AppUserServiceImpl implements AppUserService {
             AppUserInfo appUserInfo = new AppUserInfo();
             appUserInfo.setMobile(e.getMobile());
             appUserInfo.setNickName(e.getNickName());
-            UserEntity recommender = userRepository.findById(e.getRecommenderId()).orElse(null);
-            appUserInfo.setRecommenderNickName(recommender == null ? "" : recommender.getNickName());
+            if(e.getRecommenderId()!=null) {
+                UserEntity recommender = userRepository.findById(e.getRecommenderId()).orElse(null);
+                appUserInfo.setRecommenderNickName(recommender == null ? "" : recommender.getNickName());
+            }else {
+                appUserInfo.setRecommenderNickName("");
+            }
             appUserInfo.setCreateTime(e.getCreateTime());
             return appUserInfo;
         }).collect(Collectors.toList());

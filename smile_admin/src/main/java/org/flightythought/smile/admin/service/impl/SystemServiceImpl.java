@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -165,5 +166,15 @@ public class SystemServiceImpl implements SystemService {
             }
         }
         return null;
+    }
+
+    @Override
+    public AppVersionEntity getAppVersion() {
+        List<AppVersionEntity> currentEntities = appVersionRepository.findByCurrent(true);
+        if(currentEntities != null && currentEntities.size() > 0) {
+            return currentEntities.get(0);
+        }else {
+            return null;
+        }
     }
 }
