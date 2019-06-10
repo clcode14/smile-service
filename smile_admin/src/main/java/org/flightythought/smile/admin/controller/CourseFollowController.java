@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
  * @version $Id: CourseFollowController.java, v 0.1 Jun 8, 2019 9:36:17 AM cl47872 Exp $
  */
 @RestController
-@RequestMapping("/course")
+@RequestMapping("/courseFollow")
 @Api(value = "报名管理", tags = "报名管理")
 public class CourseFollowController {
     @Autowired

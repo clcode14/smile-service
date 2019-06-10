@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * @Description: TODO
  */
 @RestController
-@RequestMapping("/course")
+@RequestMapping("/courseType")
 @Api(tags = "课程类型配置控制层", description = "课程类型配置控制层")
 public class CourseTypeController {
 

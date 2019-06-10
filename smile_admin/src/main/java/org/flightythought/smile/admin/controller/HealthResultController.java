@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/health")
-@Api(tags = "养生成果控制层", description = "养生成果控制层")
+@Api(value = "养生成果配置", tags = "养生成果控制层", description = "养生成果控制层")
 public class HealthResultController {
 
     private static final Logger LOG = LoggerFactory.getLogger(HealthResultController.class);

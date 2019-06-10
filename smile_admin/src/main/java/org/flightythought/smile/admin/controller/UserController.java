@@ -18,14 +18,14 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @RequestMapping("/user")
-@Api(value = "用户管理", tags = "用户管理")
+@Api(value = "用户管理", tags = "用户管理", description = "用户管理")
 public class UserController {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(UserController.class);
-    
+
     @Autowired
     private AppUserService appUserService;
-    
+
     @PostMapping("/list")
     @ApiOperation(value = "用户信息列表", notes = "获取用户信息列表")
     public ResponseBean findUsers(@RequestBody AppUserQueryDTO appUserQueryDTO) {

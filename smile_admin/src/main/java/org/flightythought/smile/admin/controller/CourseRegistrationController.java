@@ -27,7 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/course")
-@Api(value = "课程报名", tags = "课程报名")
+@Api(value = "课程配置", tags = "课程配置", description = "课程配置")
 public class CourseRegistrationController {
     @Autowired
     private CourseRegistrationService courseRegistrationService;

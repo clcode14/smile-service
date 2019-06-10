@@ -22,7 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/custom")
-@Api(value = "客服管理", tags = "客服管理")
+@Api(value = "其他配置", tags = "客服电话", description = "客服电话")
 public class CustomController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomController.class);
