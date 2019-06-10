@@ -3,6 +3,7 @@ package org.flightythought.smile.admin.service.impl;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
+import org.flightythought.smile.admin.bean.FileInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.*;
@@ -14,6 +15,7 @@ import org.flightythought.smile.admin.service.CaseAuditService;
 import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,12 @@ public class CaseAuditServiceImpl implements CaseAuditService {
     private PlatformUtils platformUtils;
     @Autowired
     private EntityManager entityManager;
+    @Value("${static-url}")
+    private String staticUrl;
+    @Value("${server.servlet.context-path}")
+    private String contentPath;
+    @Value("${oss-status}")
+    private Boolean ossStatus;
 
     @Override
     @Transactional
@@ -122,6 +130,41 @@ public class CaseAuditServiceImpl implements CaseAuditService {
                             .stream().map(HealthResultEntity::getName)
                             .collect(Collectors.toList());
                     caseAuditInfo.setHealthResult(healthResult);
+                    // 获取旅程体检报告
+                    List<FileInfo> startReports = new ArrayList<>();
+                    List<FileInfo> endReports = new ArrayList<>();
+                    List<MedicalReportEntity> medicalReportEntities = journeyEntity.getMedicalReports();
+                    if (medicalReportEntities != null && medicalReportEntities.size() > 0) {
+                        String domainPort = platformUtils.getDomainPort();
+                        medicalReportEntities.forEach(medicalReportEntity -> {
+                            FileInfo fileInfo = new FileInfo();
+                            // 资源URL
+                            if (ossStatus) {
+                                fileInfo.setUrl(platformUtils.getOssUrl(medicalReportEntity.getOssKey()));
+                            } else {
+                                String url = platformUtils.getMedicalReportStaticUrlByPath(medicalReportEntity.getPath(), domainPort);
+                                fileInfo.setUrl(url);
+                            }
+                            // 文件名称
+                            fileInfo.setName(medicalReportEntity.getFileName());
+                            // 主键ID
+                            fileInfo.setId(medicalReportEntity.getId());
+                            // 文件大小
+                            fileInfo.setSize(medicalReportEntity.getSize());
+                            // 类型
+                            fileInfo.setType(medicalReportEntity.getType());
+                            if (medicalReportEntity.getType() == 0) {
+                                // 开启养生旅程上传报告
+                                startReports.add(fileInfo);
+                            } else {
+                                endReports.add(fileInfo);
+                            }
+                        });
+                    }
+                    List<FileInfo> fileInfos = new ArrayList<>();
+                    fileInfos.addAll(startReports);
+                    fileInfos.addAll(endReports);
+                    caseAuditInfo.setReports(fileInfos);
                     return caseAuditInfo;
                 }).collect(Collectors.toList());
         PageImpl<CaseAuditInfo> result = new PageImpl<>(auditInfos, pageRequest, page.getTotalElements());
