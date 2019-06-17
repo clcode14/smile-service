@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/courseType")
-@Api(tags = "课程类型配置控制层", description = "课程类型配置控制层")
+@Api(value = "课程类型配置", tags = "课程类型配置控制层", description = "课程类型配置控制层")
 public class CourseTypeController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CourseTypeController.class);
