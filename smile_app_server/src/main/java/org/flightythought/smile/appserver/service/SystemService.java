@@ -1,9 +1,11 @@
 package org.flightythought.smile.appserver.service;
 
 import org.flightythought.smile.appserver.bean.AppUpdateData;
+import org.flightythought.smile.appserver.bean.HiddenConfig;
 import org.flightythought.smile.appserver.bean.NoticeNumber;
 import org.flightythought.smile.appserver.database.entity.PushDataEntity;
 import org.flightythought.smile.appserver.database.entity.UserSettingEntity;
+import org.flightythought.smile.appserver.dto.HiddenConfigDTO;
 import org.flightythought.smile.appserver.dto.NoticeQueryDTO;
 import org.springframework.data.domain.Page;
 
@@ -29,4 +31,8 @@ public interface SystemService {
     Page<PushDataEntity> getNotReadNotice(NoticeQueryDTO noticeQueryDTO);
 
     Page<PushDataEntity> getNotice(NoticeQueryDTO noticeQueryDTO);
+
+    HiddenConfig getHiddenConfig();
+
+    HiddenConfig saveHiddenConfig(HiddenConfigDTO hiddenConfig);
 }

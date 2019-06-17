@@ -7,7 +7,9 @@ import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.database.entity.SolutionEntity;
+import org.flightythought.smile.admin.dto.CourseFollowQueryDTO;
 import org.flightythought.smile.admin.dto.SolutionDTO;
+import org.flightythought.smile.admin.dto.SolutionQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/solution")
-@Api(value = "解决方案", tags = "解决方案")
+@Api(value = "解决方案管理", tags = "解决方案管理", description = "解决方案管理")
 public class SolutionController {
     private static final Logger LOG = LoggerFactory.getLogger(SolutionController.class);
     @Autowired
@@ -61,13 +63,24 @@ public class SolutionController {
             return ResponseBean.error("返回失败", e.getMessage());
         }
     }
-
-    @GetMapping("/list")
-    @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)
-    public ResponseBean findAllSolution(Map<String, String> params,
-                                        @ApiIgnore HttpSession session) {
+    
+    @GetMapping("/commodities")
+    @ApiOperation(value = "获取相关商品", notes = "获取相关商品Option", position = 0)
+    public ResponseBean getCommodities() {
         try {
-            Page<SolutionInfo> solutionEntity = solutionService.findAllSolution(params, session);
+            List<SelectItemOption> result = solutionService.getCommodities();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("返回失败", e);
+            return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @PostMapping("/list")
+    @ApiOperation(value = "解决方案列表", notes = "查询解决方案", position = 1)
+    public ResponseBean findAllSolution(@RequestBody SolutionQueryDTO solutionQueryDTO) {
+        try {
+            Page<SolutionInfo> solutionEntity = solutionService.findAllSolution(solutionQueryDTO);
             return ResponseBean.ok("查询成功", solutionEntity);
         } catch (Exception e) {
             LOG.error("查询方案失败", e);

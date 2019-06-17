@@ -154,12 +154,18 @@ public class JourneyEntity extends BaseEntity {
     private List<MedicalReportEntity> medicalReports;
 
     /**
-     * 体检报告
+     * 商品
      */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "tb_journey_to_commodity", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
             inverseJoinColumns = {@JoinColumn(name = "commodity_id", nullable = false, updatable = false)})
     private List<CommodityEntity> commodities;
 
-
+    /**
+     * 课程
+     */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "tb_journey_to_course", joinColumns = {@JoinColumn(name = "journey_id", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "course_id", nullable = false, updatable = false)})
+    private List<CourseRegistrationEntity> courses;
 }

@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.CaseAuditInfo;
+import org.flightythought.smile.admin.bean.JourneyNote;
 import org.flightythought.smile.admin.bean.JourneyNoteInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.dto.AppUserQueryDTO;
 import org.flightythought.smile.admin.dto.CheckCaseAuditDTO;
+import org.flightythought.smile.admin.dto.JourneyNoteQueryDTO;
 import org.flightythought.smile.admin.service.CaseAuditService;
 import org.flightythought.smile.admin.service.JourneyNoteService;
 import org.slf4j.Logger;
@@ -32,7 +35,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/audit")
-@Api(tags = "案例管理", description = "案例管理相关接口")
+@Api(value = "案例审核", tags = "案例审核", description = "案例审核")
 public class CaseAuditController {
 
     @Autowired
@@ -48,8 +51,8 @@ public class CaseAuditController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNumber", value = "页码"),
             @ApiImplicitParam(name = "pageSize", value = "分页大小"),
-            @ApiImplicitParam(name = "audit", value = "是否审核 ，0未审核，1已审核"),
-            @ApiImplicitParam(name = "recoverCase", value = "是否评为案例 ，0不是，1是")
+            @ApiImplicitParam(name = "audit", value = "是否审核 ，false未审核，true已审核"),
+            @ApiImplicitParam(name = "recoverCase", value = "是否评为案例 ，false不是，true是")
 
     })
     public ResponseBean findCaseAudits(@RequestParam Map<String, String> params) {
@@ -106,16 +109,29 @@ public class CaseAuditController {
     }
 
 
-    @GetMapping("/journey-notes")
+    @PostMapping("/journey-notes")
     @ApiOperation(value = "养生日记列表", notes = "养生日记")
-    public ResponseBean journeyNotes(@RequestParam Map<String, String> params) {
+    public ResponseBean journeyNotes(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
         try {
-            List<JourneyNoteInfo> journeyNoteInfos = journeyNoteService.findAll(params);
+            Page<JourneyNoteInfo> journeyNoteInfos = journeyNoteService.queryNotePage(journeyNoteQueryDTO);
             return ResponseBean.ok("返回成功", journeyNoteInfos);
         } catch (Exception e) {
             LOG.error("案例审核列表失败", e);
             return ResponseBean.error("返回失败", e.getMessage());
         }
     }
+
+    @ApiOperation(value = "根据养生旅程ID获取养生日记", notes = "根据养生旅程ID获取养生日记")
+    @PostMapping("/notes")
+    public ResponseBean getJourneyHealthNote(@RequestBody JourneyNoteQueryDTO journeyNoteQueryDTO) {
+        try {
+            Page<JourneyNote> result = journeyNoteService.getJourneyHealthNote(journeyNoteQueryDTO);
+            return ResponseBean.ok("获取养生日记成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生日记失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
 
 }

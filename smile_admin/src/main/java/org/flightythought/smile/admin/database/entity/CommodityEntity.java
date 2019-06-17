@@ -1,6 +1,8 @@
 package org.flightythought.smile.admin.database.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -18,6 +20,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "tb_commodity")
+@EqualsAndHashCode(callSuper = false)
 public class CommodityEntity extends BaseEntity {
 
     /**
@@ -70,6 +73,18 @@ public class CommodityEntity extends BaseEntity {
      */
     @Column(name = "freight_type")
     private Integer freightType;
+    
+    /**
+     * 商品URL
+     */
+    @Column(name = "url")
+    private String url;
+    
+    /**
+     * 状态
+     */
+    @Column(name = "status")
+    private Integer status;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "tb_commodity_image", joinColumns = {@JoinColumn(name = "commodity_id", nullable = false, updatable = false)},

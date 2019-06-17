@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/office")
-@Api(value = "机构管理", tags = "机构管理")
+@Api(value = "其他配置", tags = "机构管理", description = "机构管理")
 public class OfficeController {
 
     private static final Logger LOG = LoggerFactory.getLogger(OfficeController.class);

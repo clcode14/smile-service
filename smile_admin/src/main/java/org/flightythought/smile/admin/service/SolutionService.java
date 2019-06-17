@@ -1,16 +1,16 @@
 package org.flightythought.smile.admin.service;
 
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.database.entity.SolutionEntity;
 import org.flightythought.smile.admin.dto.SolutionDTO;
+import org.flightythought.smile.admin.dto.SolutionQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.springframework.data.domain.Page;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -37,11 +37,13 @@ public interface SolutionService {
 
     SolutionEntity modifySolution(SolutionDTO solutionDTO, HttpSession session);
 
-    Page<SolutionInfo> findAllSolution(Map<String,String> params, HttpSession session);
+    Page<SolutionInfo> findAllSolution(SolutionQueryDTO solutionQueryDTO);
 
     SolutionInfo getSolutionInfo(SolutionEntity solution);
 
     SolutionEntity findSolution(Integer id, HttpSession session);
 
     List<SelectItemOption> getOfficeItems();
+
+    List<SelectItemOption> getCommodities();
 }

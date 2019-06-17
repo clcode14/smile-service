@@ -3,11 +3,13 @@ package org.flightythought.smile.appserver.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.appserver.bean.AppUpdateData;
+import org.flightythought.smile.appserver.bean.HiddenConfig;
 import org.flightythought.smile.appserver.bean.NoticeNumber;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.database.entity.PushDataEntity;
 import org.flightythought.smile.appserver.database.entity.UserSettingEntity;
+import org.flightythought.smile.appserver.dto.HiddenConfigDTO;
 import org.flightythought.smile.appserver.dto.NoticeQueryDTO;
 import org.flightythought.smile.appserver.service.SystemService;
 import org.slf4j.Logger;
@@ -45,8 +47,33 @@ public class SystemController {
         }
     }
 
+    @GetMapping("/hiddenConfig")
+    @ApiOperation(value = "获取隐藏配置项", notes = "获取隐藏配置项")
+    public ResponseBean getHiddenConfig() {
+        try {
+            HiddenConfig result = systemService.getHiddenConfig();
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取隐私配置项失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("hiddenConfig")
+    @ApiOperation(value = "配置隐藏配置项", notes = "配置隐藏配置项")
+    public ResponseBean updateHiddenConfig(@RequestBody HiddenConfigDTO hiddenConfig) {
+        try {
+            HiddenConfig result = systemService.saveHiddenConfig(hiddenConfig);
+            return ResponseBean.ok("配置成功", result);
+        } catch (Exception e) {
+            LOG.error("配置失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
     @GetMapping("/charityFaultHiddenConfig")
     @ApiOperation(value = "获取当前用户爱心养生隐私设置", notes = "获取当前用户爱心养生隐私设置")
+    @Deprecated
     public ResponseBean getCharityFaultHiddenConfig() {
         try {
             UserSettingEntity userSettingEntity = systemService.getSettingByCode(Constants.CHARITY_FAULT_HIDDEN, "false");
@@ -59,6 +86,7 @@ public class SystemController {
 
     @PostMapping("/charityFaultHiddenConfig")
     @ApiOperation(value = "更改当前用户爱心养生隐私设置", notes = "更改当前用户爱心养生隐私设置")
+    @Deprecated
     public ResponseBean updateCharityFaultHiddenConfig(Boolean charityFaultHidden) {
         try {
             UserSettingEntity result = systemService.updateSettingByCode(Constants.CHARITY_FAULT_HIDDEN, charityFaultHidden + "");
@@ -71,6 +99,7 @@ public class SystemController {
 
     @GetMapping("/dynamicHiddenConfig")
     @ApiOperation(value = "获取当前用户动态评论隐私设置", notes = "获取当前用户动态评论隐私设置")
+    @Deprecated
     public ResponseBean getDynamicHiddenConfig() {
         try {
             UserSettingEntity userSettingEntity = systemService.getSettingByCode(Constants.DYNAMIC_HIDDEN, "false");
@@ -83,6 +112,7 @@ public class SystemController {
 
     @PostMapping("/dynamicHiddenConfig")
     @ApiOperation(value = "更改当前用户动态评论隐私设置", notes = "更改当前用户动态评论隐私设置")
+    @Deprecated
     public ResponseBean updateDynamicHiddenConfig(Boolean dynamicHidden) {
         try {
             UserSettingEntity result = systemService.updateSettingByCode(Constants.DYNAMIC_HIDDEN, dynamicHidden + "");

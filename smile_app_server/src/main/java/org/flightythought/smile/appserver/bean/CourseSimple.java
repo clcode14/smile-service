@@ -63,7 +63,7 @@ public class CourseSimple {
     /**
      * 详情描述
      */
-    private String description;
+    private String details;
 
     /**
      * 课程类型ID

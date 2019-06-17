@@ -16,7 +16,7 @@ import javax.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/journeyHealth")
-@Api(tags = "养生旅程配置相关控制层", description = "养生旅程等相关信息配置接口")
+@Api(value = "体检指标配置", tags = "养生旅程配置相关控制层", description = "养生旅程等相关信息配置接口")
 public class JourneyHealthController {
 
     @Autowired

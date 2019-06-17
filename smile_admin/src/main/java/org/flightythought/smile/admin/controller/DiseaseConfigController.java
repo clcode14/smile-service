@@ -31,7 +31,7 @@ import javax.servlet.http.HttpSession;
  */
 @RestController
 @RequestMapping("/disease")
-@Api(tags = "疾病大类控制层", description = "疾病大类相关接口")
+@Api(value = "疾病配置", tags = "疾病大类控制层", description = "疾病大类相关接口")
 public class DiseaseConfigController {
     private final DiseaseConfigService diseaseConfigService;
 

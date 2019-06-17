@@ -34,7 +34,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/diseaseDetail")
-@Api(value = "疾病配置", tags = "疾病小类")
+@Api(value = "疾病配置", tags = "疾病小类", description = "疾病配置，疾病小类控制层")
 public class DiseaseDetailConfigController {
 
     private final DiseaseDetailConfigService diseaseDetailConfigService;

@@ -52,6 +52,13 @@ public class UserCharityFaultRecord {
     private LocalDateTime charityTimeEnd;
 
     /**
+     * 创建时间
+     */
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createTime;
+
+    /**
      * 行善类型ID
      */
     private Integer cfTypeId;
@@ -115,5 +122,6 @@ public class UserCharityFaultRecord {
         this.address = userCharityFaultRecordEntity.getAddress();
         this.hidden = userCharityFaultRecordEntity.getHidden();
         this.images = images;
+        this.createTime = userCharityFaultRecordEntity.getCreateTime();
     }
 }

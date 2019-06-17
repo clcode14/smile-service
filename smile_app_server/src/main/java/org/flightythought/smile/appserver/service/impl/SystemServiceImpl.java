@@ -1,6 +1,7 @@
 package org.flightythought.smile.appserver.service.impl;
 
 import org.flightythought.smile.appserver.bean.AppUpdateData;
+import org.flightythought.smile.appserver.bean.HiddenConfig;
 import org.flightythought.smile.appserver.bean.NoticeNumber;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
@@ -12,6 +13,7 @@ import org.flightythought.smile.appserver.database.entity.UserSettingEntity;
 import org.flightythought.smile.appserver.database.repository.AppVersionRepository;
 import org.flightythought.smile.appserver.database.repository.PushDataRepository;
 import org.flightythought.smile.appserver.database.repository.UserSettingRepository;
+import org.flightythought.smile.appserver.dto.HiddenConfigDTO;
 import org.flightythought.smile.appserver.dto.NoticeQueryDTO;
 import org.flightythought.smile.appserver.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,7 +128,7 @@ public class SystemServiceImpl implements SystemService {
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         Long userId = userEntity.getId();
         Integer type = noticeQueryDTO.getType();
-        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageNumber());
+        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageSize());
         Page<PushDataEntity> pushDataEntities = pushDataRepository.findByUserIdAndReadAndTypeOrderByCreateTimeDesc(userId, false, type, pageRequest);
         // 将消息置为已读
         pushDataEntities.forEach(pushDataEntity -> {
@@ -142,11 +144,38 @@ public class SystemServiceImpl implements SystemService {
         Long userId = userEntity.getId();
         Integer type = noticeQueryDTO.getType();
         Boolean read = noticeQueryDTO.getRead();
-        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageNumber());
+        PageRequest pageRequest = PageRequest.of(noticeQueryDTO.getPageNumber() - 1, noticeQueryDTO.getPageSize());
         if (read == null) {
             return pushDataRepository.findByUserIdAndTypeOrderByCreateTimeDesc(userId, type, pageRequest);
         } else {
             return pushDataRepository.findByUserIdAndReadAndTypeOrderByCreateTimeDesc(userId, read, type, pageRequest);
         }
+    }
+
+    @Override
+    public HiddenConfig getHiddenConfig() {
+        // 动态隐私
+        UserSettingEntity dynamicSettingEntity = getSettingByCode(Constants.DYNAMIC_HIDDEN, "false");
+        // 行善隐私
+        UserSettingEntity charitySettingEntity = getSettingByCode(Constants.CHARITY_HIDDEN, "false");
+        // 过失隐私
+        UserSettingEntity faultSettingEntity = getSettingByCode(Constants.FAULT_HIDDEN, "false");
+        HiddenConfig hiddenConfig = new HiddenConfig();
+        hiddenConfig.setCharityHidden(Boolean.valueOf(charitySettingEntity.getValue()));
+        hiddenConfig.setFaultHidden(Boolean.valueOf(faultSettingEntity.getValue()));
+        hiddenConfig.setDynamicHidden(Boolean.valueOf(dynamicSettingEntity.getValue()));
+        return hiddenConfig;
+    }
+
+    @Override
+    public HiddenConfig saveHiddenConfig(HiddenConfigDTO hiddenConfigDTO) {
+        UserSettingEntity charitySettingEntity =  updateSettingByCode(Constants.CHARITY_HIDDEN, hiddenConfigDTO.getCharityHidden() + "");
+        UserSettingEntity faultSettingEntity = updateSettingByCode(Constants.FAULT_HIDDEN, hiddenConfigDTO.getFaultHidden() + "");
+        UserSettingEntity dynamicSettingEntity = updateSettingByCode(Constants.DYNAMIC_HIDDEN, hiddenConfigDTO.getDynamicHidden() + "");
+        HiddenConfig hiddenConfig = new HiddenConfig();
+        hiddenConfig.setDynamicHidden(Boolean.valueOf(dynamicSettingEntity.getValue()));
+        hiddenConfig.setFaultHidden(Boolean.valueOf(faultSettingEntity.getValue()));
+        hiddenConfig.setCharityHidden(Boolean.valueOf(charitySettingEntity.getValue()));
+        return hiddenConfig;
     }
 }
