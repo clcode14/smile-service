@@ -29,6 +29,7 @@ public class UrlAccessDecisionManager implements AccessDecisionManager {
                 if (authentication instanceof AnonymousAuthenticationToken) {
                     throw new BadCredentialsException("未登录");
                 } else {
+                    // 已登录，放行
                     return;
                 }
             }

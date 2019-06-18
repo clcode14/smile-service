@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/diseaseReason")
-@Api(tags = "疾病原因配置", description = "疾病原因配置")
+@Api(value = "疾病配置", tags = "疾病原因配置", description = "疾病原因配置")
 public class DiseaseReasonController {
 
     @Autowired

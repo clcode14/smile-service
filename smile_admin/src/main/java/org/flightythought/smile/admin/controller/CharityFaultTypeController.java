@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/charityFault")
-@Api(tags = "行善过失类型配置控制层", description = "行善过失类型配置控制层")
+@Api(value = "行善过失配置", tags = "行善过失类型配置控制层", description = "行善过失类型配置控制层")
 public class CharityFaultTypeController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CharityFaultTypeController.class);

@@ -23,13 +23,13 @@ import io.swagger.annotations.ApiOperation;
 
 /**
  * 鼓励话语配置控制层
- * 
+ *
  * @author cl47872
  * @version $Id: EncourageController.java, v 0.1 Jun 8, 2019 9:06:19 PM cl47872 Exp $
  */
 @RestController
 @RequestMapping("/encourage")
-@Api(tags = "鼓励话语配置控制层", description = "鼓励话语配置控制层")
+@Api(value = "行善过失配置", tags = "鼓励话语配置控制层", description = "鼓励话语配置控制层")
 public class EncourageController {
 
     private static final Logger LOG = LoggerFactory.getLogger(EncourageController.class);
@@ -83,7 +83,7 @@ public class EncourageController {
             return ResponseBean.error("更新失败", e.getMessage());
         }
     }
-    
+
     @DeleteMapping("/entity")
     @ApiOperation(value = "删除鼓励话语", notes = "删除鼓励话语")
     public ResponseBean deleteEncourage(Integer id) {

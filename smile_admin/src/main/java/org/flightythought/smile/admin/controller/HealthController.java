@@ -33,7 +33,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/health")
-@Api(tags = "健康养生控制层", description = "健康养生相关接口")
+@Api(value = "养生配置", tags = "健康养生控制层", description = "健康养生相关接口")
 public class HealthController {
 
     @Autowired

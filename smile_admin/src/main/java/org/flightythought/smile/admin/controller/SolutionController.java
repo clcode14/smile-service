@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/solution")
-@Api(value = "解决方案", tags = "解决方案")
+@Api(value = "解决方案管理", tags = "解决方案管理", description = "解决方案管理")
 public class SolutionController {
     private static final Logger LOG = LoggerFactory.getLogger(SolutionController.class);
     @Autowired

@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping("/health")
-@Api(tags = "养身介绍配置控制层", description = "养身介绍配置控制层")
+@Api(value = "爱心养生介绍", tags = "爱心养生介绍", description = "爱心养生介绍")
 public class HealthIntroductionController {
 
     private static final Logger LOG = LoggerFactory.getLogger(HealthIntroductionController.class);

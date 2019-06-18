@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/banner")
-@Api(tags = "轮播图", description = "轮播图接口")
+@Api(value = "轮播图设置", tags = "轮播图", description = "轮播图接口")
 public class BannerController {
 
     private static final Logger LOG = LoggerFactory.getLogger(BannerController.class);

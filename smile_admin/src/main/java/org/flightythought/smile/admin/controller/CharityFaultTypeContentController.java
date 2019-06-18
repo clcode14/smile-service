@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
  * @Description: TODO
  */
 @RestController
-@RequestMapping("charityFault/type")
-@Api(tags = "行善过失类型内容控制层", description = "行善过失类型内容控制层")
+@RequestMapping("/charityFault/type")
+@Api(value = "行善过失配置", tags = "行善过失类型内容控制层", description = "行善过失类型内容控制层")
 public class CharityFaultTypeContentController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CharityFaultTypeContentController.class);

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/commodity")
-@Api(tags = "相关商品控制层", description = "相关商品控制层")
+@Api(value = "商品管理", tags = "相关商品控制层", description = "相关商品控制层")
 public class CommodityController {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommodityController.class);
@@ -79,16 +79,16 @@ public class CommodityController {
             return ResponseBean.error("更新失败", e.getMessage());
         }
     }
-    
+
     @PutMapping("/sell")
     @ApiOperation(value = "售卖/停售商品", notes = "售卖/停售商品")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "commodityId", value = "商品ID"),
-        @ApiImplicitParam(name = "opType", value = "操作类型，0-上架，1-下架")
+            @ApiImplicitParam(name = "commodityId", value = "商品ID"),
+            @ApiImplicitParam(name = "opType", value = "操作类型，0-上架，1-下架")
     })
-    public ResponseBean updateCommodity(Integer commodityId,Integer opType) {
+    public ResponseBean updateCommodity(Integer commodityId, Integer opType) {
         try {
-            commodityService.updateCommodityStatus(commodityId,opType);
+            commodityService.updateCommodityStatus(commodityId, opType);
             return ResponseBean.ok("售卖/停售商品成功");
         } catch (Exception e) {
             LOG.error("售卖/停售商品失败", e);

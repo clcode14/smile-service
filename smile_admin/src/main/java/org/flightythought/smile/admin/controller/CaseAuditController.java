@@ -35,7 +35,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/audit")
-@Api(tags = "案例管理", description = "案例管理相关接口")
+@Api(value = "案例审核", tags = "案例审核", description = "案例审核")
 public class CaseAuditController {
 
     @Autowired

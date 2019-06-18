@@ -1,6 +1,9 @@
 package org.flightythought.smile.admin.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.database.entity.AppVersionEntity;
 import org.flightythought.smile.admin.service.SystemService;
@@ -23,10 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/system")
-@Api(tags = "系统配置控制层", description = "系统配置控制层")
-public class SystemController {
+@Api(value = "版本更新", tags = "版本更新", description = "版本更新")
+public class VersionController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SystemController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VersionController.class);
     @Autowired
     private SystemService systemService;
 
@@ -50,7 +53,7 @@ public class SystemController {
             return ResponseBean.error("上传App失败", e.getMessage());
         }
     }
-    
+
     @GetMapping("/getAppVersion")
     @ApiOperation(value = "获取APP版本信息", notes = "获取APP版本信息")
     public ResponseBean getAppVersion() {
