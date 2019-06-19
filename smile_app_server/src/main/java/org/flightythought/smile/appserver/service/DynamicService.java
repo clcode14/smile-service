@@ -150,4 +150,12 @@ public interface DynamicService {
      * @param messageId 评论ID
      */
     void likeDynamicDetailMessage(Integer messageId);
+    
+    /**
+     * 根据动态明明细ID获取动态明细
+     * 
+     * @param dynamicDetailId
+     * @return
+     */
+    DynamicDetailSimple getDynamicDetail(Integer dynamicDetailId);
 }

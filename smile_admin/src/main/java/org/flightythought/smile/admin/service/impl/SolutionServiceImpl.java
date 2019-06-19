@@ -14,6 +14,7 @@ import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.CommodityEntity;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
+import org.flightythought.smile.admin.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
 import org.flightythought.smile.admin.database.entity.SolutionCommodityEntity;
@@ -385,5 +386,16 @@ public class SolutionServiceImpl implements SolutionService {
                     selectItemOption.setValue(commodityEntity.getName());
                     return selectItemOption;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteSolution(Integer solutionId) {
+        // 删除解决方案
+        solutionRepository.deleteById(solutionId);
+        // 删除相关课程/相关配图/相关机构/相关商品
+        solutionImageRepository.deleteAllBySolutionId(solutionId);
+        solutionCourseRepository.deleteAllBySolutionId(solutionId);
+        solutionOfficeRepository.deleteAllBySolutionId(solutionId);
+        solutionCommodityRepository.deleteAllBySolutionId(solutionId);
     }
 }

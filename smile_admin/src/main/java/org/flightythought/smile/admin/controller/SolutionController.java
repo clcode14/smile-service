@@ -1,28 +1,32 @@
 package org.flightythought.smile.admin.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.bean.SolutionInfo;
 import org.flightythought.smile.admin.database.entity.SolutionEntity;
-import org.flightythought.smile.admin.dto.CourseFollowQueryDTO;
 import org.flightythought.smile.admin.dto.SolutionDTO;
 import org.flightythought.smile.admin.dto.SolutionQueryDTO;
-import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Map;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -124,6 +128,18 @@ public class SolutionController {
         } catch (Exception e) {
             LOG.error("编辑方案失败", e);
             return ResponseBean.error("编辑失败", e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("{id}")
+    @ApiOperation(value = "删除解决方案", notes = "删除解决方案")
+    public ResponseBean deleteSolution(@ApiParam(name = "解决方案ID") @PathVariable Integer id, @ApiIgnore HttpSession session) {
+        try {
+            solutionService.deleteSolution(id);
+            return ResponseBean.ok("操作成功");
+        } catch (Exception e) {
+            LOG.error("操作失败", e);
+            return ResponseBean.error("操作失败", e.getMessage());
         }
     }
 }

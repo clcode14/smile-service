@@ -732,4 +732,10 @@ public class DynamicServiceImpl implements DynamicService {
         }
         dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
     }
+
+    @Override
+    public DynamicDetailSimple getDynamicDetail(Integer dynamicDetailId) {
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+        return getDynamicDetailSimple(dynamicDetailsEntity);
+    }
 }
