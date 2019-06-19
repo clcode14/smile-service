@@ -125,6 +125,18 @@ public class DynamicController {
             return ResponseBean.error(e.getMessage());
         }
     }
+    
+    @GetMapping("/detail/{dynamicDetailId}")
+    @ApiOperation(value = "获取动态明细", notes = "获取动态明细")
+    public ResponseBean getDynamicDetail(@PathVariable("dynamicDetailId") Integer dynamicDetailId) {
+        try {
+            DynamicDetailSimple result = dynamicService.getDynamicDetail(dynamicDetailId);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取动态明细失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
 
     @GetMapping("/message/{dynamicDetailId}")
     @ApiOperation(value = "获取动态明细评论", notes = "获取动态明细评论集合")
