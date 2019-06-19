@@ -84,6 +84,8 @@ public class UserServiceImpl implements UserService {
             if (imagesEntity != null) {
                 String photoUrl = platformUtils.getImageInfo(imagesEntity, domainPort).getUrl();
                 userInfo.setPhoto(photoUrl);
+            } else {
+                userInfo.setPhoto(userEntity.getAvater());
             }
             // 手机号
             userInfo.setMobile(userEntity.getMobile());

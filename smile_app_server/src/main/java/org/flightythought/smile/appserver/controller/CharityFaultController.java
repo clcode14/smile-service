@@ -36,7 +36,7 @@ public class CharityFaultController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取行善过失类型以及内容失败", e);
-            return ResponseBean.error( e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -51,7 +51,7 @@ public class CharityFaultController {
             return ResponseBean.ok("新增成功", result);
         } catch (Exception e) {
             LOG.error("新增行善或过失记录失败", e);
-            return ResponseBean.error( e.getMessage());
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -75,7 +75,19 @@ public class CharityFaultController {
             return ResponseBean.ok("获取成功", result);
         } catch (Exception e) {
             LOG.error("获取失败", e);
-            return ResponseBean.error( e.getMessage());
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @GetMapping("{charityFaultId}")
+    @ApiOperation(value = "获取爱心养生，行善过失明细", notes = "根据记录ID获取爱心养生，行善过失明细")
+    public ResponseBean getCharityFaults(@PathVariable Integer charityFaultId) {
+        try {
+            UserCharityFaultRecord result = charityFaultService.getUserCharityFaultRecord(charityFaultId);
+            return ResponseBean.ok("获取成功", result);
+        } catch (Exception e) {
+            LOG.error("获取失败", e);
+            return ResponseBean.error(e.getMessage());
         }
     }
 
@@ -115,14 +127,13 @@ public class CharityFaultController {
     @ApiOperation(value = "评论爱心养生", notes = "评论爱心养生")
     public ResponseBean addCharityFaultMessage(@RequestBody CharityFaultMessageDTO charityFaultMessageDTO) {
         try {
-             CharityFaultMessageSimple result = charityFaultService.addCharityFaultMessage(charityFaultMessageDTO);
+            CharityFaultMessageSimple result = charityFaultService.addCharityFaultMessage(charityFaultMessageDTO);
             return ResponseBean.ok("评论成功", result);
         } catch (Exception e) {
             LOG.error("评论失败", e);
             return ResponseBean.error(e.getMessage());
         }
     }
-
 
 
     @PostMapping("/message")

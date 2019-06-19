@@ -734,6 +734,7 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
+    @Transactional
     public DynamicDetailSimple getDynamicDetail(Integer dynamicDetailId) {
         DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
         return getDynamicDetailSimple(dynamicDetailsEntity);
