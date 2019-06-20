@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class RoleList {
     /**
-     * 资源唯一性标识
+     * Id
      */
     private String id;
 
@@ -25,7 +25,7 @@ public class RoleList {
     private String label;
 
     /**
-     * 子资源
+     * 权限
      */
     private List<RoleList> children;
 }

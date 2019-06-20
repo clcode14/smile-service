@@ -47,7 +47,7 @@ public class SystemServiceImpl implements SystemService {
         AppVersionEntity appVersionEntity = appVersionRepository.findByCurrent(true);
         if (appVersionEntity != null) {
             appUpdateData.setDescription(appVersionEntity.getDescription());
-            appUpdateData.setUrl(appVersionEntity.getUrl());
+            appUpdateData.setUrl(platformUtils.getOssUrl(appVersionEntity.getKey()));
             appUpdateData.setForceUpdate(appVersionEntity.getForceUpdate());
             appUpdateData.setVersion(appVersionEntity.getVersion());
             appUpdateData.setVersionId(appVersionEntity.getVersionId());

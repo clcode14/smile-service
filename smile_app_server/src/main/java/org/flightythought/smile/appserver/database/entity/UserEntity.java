@@ -147,6 +147,12 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     @Column(name = "sex")
     private Integer sex;
 
+    /**
+     * 推荐人ID
+     */
+    @Column(name = "recommender_id")
+    private Long reommenderId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
