@@ -389,6 +389,7 @@ public class SolutionServiceImpl implements SolutionService {
     }
 
     @Override
+    @Transactional
     public void deleteSolution(Integer solutionId) {
         // 删除解决方案
         solutionRepository.deleteById(solutionId);
