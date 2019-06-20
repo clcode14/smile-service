@@ -47,6 +47,7 @@
         }
         disabled = true; //将按钮置为不可点击
         // 发送短信验证码
+
         btn.innerHTML = nums + '(s)';
         clock = setInterval(doLoop, 1000); //一秒执行一次
     }
@@ -60,7 +61,6 @@
             disabled = false;
             btn.innerHTML = '获取验证码';
             nums = 60; //重置时间
-            disabled = false;
         }
     }
 </script>
