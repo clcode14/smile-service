@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
-import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.bean.SysUserInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.SysRoleEntity;
@@ -43,6 +42,7 @@ public class SysUserServiceImpl implements SysUserService {
             SysUserInfo sysUserInfo = new SysUserInfo();
             sysUserInfo.setId(e.getId());
             sysUserInfo.setLoginName(e.getLoginName());
+            sysUserInfo.setUserName(e.getUserName());
             sysUserInfo.setCreateTime(e.getCreateTime());
             sysUserInfo.setCreateUserName(e.getCreateUserName());
             sysUserInfo.setUpdateTime(e.getUpdateTime());
@@ -98,6 +98,7 @@ public class SysUserServiceImpl implements SysUserService {
         // 删除相关角色
         userRoleRepository.deleteAllByUserId(sysUserId);
         sysUserEntity.setLoginName(sysUserDTO.getLoginName());
+        sysUserEntity.setUserName(sysUserDTO.getUserName());
         sysUserRepository.save(sysUserEntity);
         // 获取课程ID
         List<Integer> roleIds = sysUserDTO.getRoleIds();
@@ -118,6 +119,7 @@ public class SysUserServiceImpl implements SysUserService {
                     SysUserInfo sysUserInfo = new SysUserInfo();
                     sysUserInfo.setId(e.getId());
                     sysUserInfo.setLoginName(e.getLoginName());
+                    sysUserInfo.setUserName(e.getUserName());
                     sysUserInfo.setCreateTime(e.getCreateTime());
                     sysUserInfo.setCreateUserName(e.getCreateUserName());
                     sysUserInfo.setUpdateTime(e.getUpdateTime());
