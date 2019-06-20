@@ -170,4 +170,16 @@ public class SystemController {
             return ResponseBean.error(e.getMessage());
         }
     }
+
+    @GetMapping("/shareLink")
+    @ApiOperation(value = "获取分享链接", notes = "获取分享链接")
+    public ResponseBean getShareLink() {
+        try {
+            String url = systemService.getShareLink();
+            return ResponseBean.ok("生成分享链接成功", url);
+        } catch (Exception e) {
+            LOG.error("生成分享链接失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
 }

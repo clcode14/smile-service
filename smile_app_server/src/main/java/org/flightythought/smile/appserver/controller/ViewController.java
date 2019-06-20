@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import sun.rmi.runtime.Log;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -46,6 +45,7 @@ public class ViewController {
     public ResponseBean register(String phone, String vCode, String token, String recommender) {
         try {
             AppUpdateData result = viewService.register(phone, vCode, token, recommender);
+            result.setUrl("https://fir.im/edm2");
             return ResponseBean.ok("注册成功", result);
         } catch (Exception e) {
             LOG.error("注册失败", e);

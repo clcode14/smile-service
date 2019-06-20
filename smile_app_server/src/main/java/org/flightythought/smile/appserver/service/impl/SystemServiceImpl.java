@@ -6,17 +6,16 @@ import org.flightythought.smile.appserver.bean.NoticeNumber;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.database.entity.AppVersionEntity;
-import org.flightythought.smile.appserver.database.entity.PushDataEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
-import org.flightythought.smile.appserver.database.entity.UserSettingEntity;
+import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.AppVersionRepository;
 import org.flightythought.smile.appserver.database.repository.PushDataRepository;
+import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.flightythought.smile.appserver.database.repository.UserSettingRepository;
 import org.flightythought.smile.appserver.dto.HiddenConfigDTO;
 import org.flightythought.smile.appserver.dto.NoticeQueryDTO;
 import org.flightythought.smile.appserver.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,10 @@ public class SystemServiceImpl implements SystemService {
     private AppVersionRepository appVersionRepository;
     @Autowired
     private PushDataRepository pushDataRepository;
+    @Autowired
+    private SysParameterRepository sysParameterRepository;
+    @Value("${server.servlet.context-path}")
+    private String contentPath;
 
     @Override
     public AppUpdateData updateApp() {
@@ -184,5 +187,13 @@ public class SystemServiceImpl implements SystemService {
         hiddenConfig.setFaultHidden(Boolean.valueOf(faultSettingEntity.getValue()));
         hiddenConfig.setCharityHidden(Boolean.valueOf(charitySettingEntity.getValue()));
         return hiddenConfig;
+    }
+
+    @Override
+    public String getShareLink() {
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        String url = sysParameterEntity.getParameterValue() + contentPath + "/pages/invitationRegistration?username=" + userEntity.getUsername();
+        return url;
     }
 }
