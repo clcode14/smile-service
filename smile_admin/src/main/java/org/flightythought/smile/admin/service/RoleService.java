@@ -1,5 +1,8 @@
 package org.flightythought.smile.admin.service;
 
+import java.util.List;
+
+import org.flightythought.smile.admin.bean.ResourceInfo;
 import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.dto.RoleDTO;
 import org.springframework.data.domain.Page;
@@ -20,4 +23,6 @@ public interface RoleService {
     Page<RoleInfo> getRoles(int pageNumber, int pageSize);
 
     void deleteRole(int roleId);
+
+    List<ResourceInfo> getResource();
 }

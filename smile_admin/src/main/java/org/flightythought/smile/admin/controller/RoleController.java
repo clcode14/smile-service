@@ -2,6 +2,10 @@ package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import java.util.List;
+
+import org.flightythought.smile.admin.bean.ResourceInfo;
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.dto.RoleDTO;
@@ -75,6 +79,18 @@ public class RoleController {
         } catch (Exception e) {
             LOG.error("删除失败", e);
             return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
+    
+    @GetMapping("/getResource")
+    @ApiOperation(value = "获取角色资源", notes = "获取角色资源")
+    public ResponseBean getResource() {
+        try {
+            List<ResourceInfo> result = roleService.getResource();
+            return ResponseBean.ok("获取角色资源成功", result);
+        } catch (Exception e) {
+            LOG.error("获取角色资源失败", e);
+            return ResponseBean.error("获取角色资源失败", e.getMessage());
         }
     }
 }

@@ -1,5 +1,10 @@
 package org.flightythought.smile.admin.service.impl;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.flightythought.smile.admin.bean.ResourceInfo;
 import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.database.entity.SysResourceEntity;
 import org.flightythought.smile.admin.database.entity.SysRoleEntity;
@@ -16,10 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
 
     @Autowired
-    private SysRoleRepository sysRoleRepository;
+    private SysRoleRepository     sysRoleRepository;
     @Autowired
     private SysResourceRepository sysResourceRepository;
 
@@ -88,15 +89,35 @@ public class RoleServiceImpl implements RoleService {
     }
 
     public RoleInfo getRoleInfo(SysRoleEntity sysRoleEntity) {
-        List<String> resource = sysRoleEntity.getResources().stream()
-                .filter(sysResourceEntity -> sysResourceEntity.getResourceType() == 0)
-                .map(SysResourceEntity::getUrl)
-                .collect(Collectors.toList());
+        List<String> resource = sysRoleEntity.getResources().stream().filter(sysResourceEntity -> sysResourceEntity.getResourceType() == 0).map(SysResourceEntity::getUrl)
+            .collect(Collectors.toList());
         RoleInfo roleInfo = new RoleInfo();
         roleInfo.setResource(resource);
         roleInfo.setId(sysRoleEntity.getId());
         roleInfo.setName(sysRoleEntity.getName());
         roleInfo.setRole(sysRoleEntity.getRole());
         return roleInfo;
+    }
+
+    @Override
+    public List<ResourceInfo> getResource() {
+        List<SysResourceEntity> entities = sysResourceRepository.findAll();
+        List<ResourceInfo> resourceInfos = entities.stream().filter(resource -> resource.getParentId() == null).map(resource -> {
+            ResourceInfo resourceInfo = new ResourceInfo();
+            resourceInfo.setId(resource.getUrl());
+            resourceInfo.setLable(resource.getName());
+            List<SysResourceEntity> childEntities = entities.stream().filter(r -> r.getParentId()!=null).filter(r -> r.getParentId().equals(resource.getId())).collect(Collectors.toList());
+            if (childEntities != null && childEntities.size() > 0) {
+                List<ResourceInfo> childResourceInfos = childEntities.stream().map(cr -> {
+                    ResourceInfo childResourceInfo = new ResourceInfo();
+                    childResourceInfo.setId(cr.getUrl());
+                    childResourceInfo.setLable(cr.getName());
+                    return childResourceInfo;
+                }).collect(Collectors.toList());
+                resourceInfo.setChildren(childResourceInfos);
+            }
+            return resourceInfo;
+        }).collect(Collectors.toList());
+        return resourceInfos;
     }
 }
