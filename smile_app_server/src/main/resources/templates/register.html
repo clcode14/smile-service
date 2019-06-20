@@ -47,7 +47,13 @@
         }
         disabled = true; //将按钮置为不可点击
         // 发送短信验证码
-
+        url = '/sms/vCode/'
+        $.ajax({
+           url: '/sms/code',
+           data: {
+               ''
+           }
+        });
         btn.innerHTML = nums + '(s)';
         clock = setInterval(doLoop, 1000); //一秒执行一次
     }

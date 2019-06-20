@@ -115,13 +115,13 @@ public class SystemServiceImpl implements SystemService {
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         Long userId = userEntity.getId();
         // 系统通知数
-        int systemNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_SYSTEM, userId);
+        int systemNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_SYSTEM, userId, false);
         // 点赞通知
-        int likeNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_LIKE, userId);
+        int likeNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_LIKE, userId, false);
         // 粉丝通知
-        int fansNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_FANS, userId);
+        int fansNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_FANS, userId, false);
         // 评论通知
-        int messageNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_MESSAGE, userId);
+        int messageNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_MESSAGE, userId, false);
         NoticeNumber noticeNumber = new NoticeNumber();
         noticeNumber.setSystemNotice(systemNumber);
         noticeNumber.setLikeNotice(likeNumber);
