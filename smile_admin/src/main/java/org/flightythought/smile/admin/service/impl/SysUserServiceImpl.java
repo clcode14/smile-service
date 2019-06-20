@@ -6,11 +6,13 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 
+import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.bean.SysUserInfo;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.database.entity.SysRoleEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.entity.UserRoleEntity;
+import org.flightythought.smile.admin.database.repository.SysRoleRepository;
 import org.flightythought.smile.admin.database.repository.SysUserRepository;
 import org.flightythought.smile.admin.database.repository.UserRoleRepository;
 import org.flightythought.smile.admin.dto.SysUserDTO;
@@ -30,9 +32,12 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Autowired
     private SysUserRepository  sysUserRepository;
-    
+
     @Autowired
     private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private SysRoleRepository  sysRoleRepository;
 
     @Override
     public Page<SysUserInfo> getSysUsers(int pageNumber, int pageSize) {
@@ -114,19 +119,18 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public SysUserInfo findSysUsers(Integer id, HttpSession session) {
-        return sysUserRepository.findById(id)
-                .map(e -> {
-                    SysUserInfo sysUserInfo = new SysUserInfo();
-                    sysUserInfo.setId(e.getId());
-                    sysUserInfo.setLoginName(e.getLoginName());
-                    sysUserInfo.setUserName(e.getUserName());
-                    sysUserInfo.setCreateTime(e.getCreateTime());
-                    sysUserInfo.setCreateUserName(e.getCreateUserName());
-                    sysUserInfo.setUpdateTime(e.getUpdateTime());
-                    sysUserInfo.setUpdateUserName(e.getUpdateUserName());
-                    sysUserInfo.setRoleIds(e.getRoles().stream().map(SysRoleEntity::getId).collect(Collectors.toList()));
-                    return sysUserInfo;
-                }).orElse(null);
+        return sysUserRepository.findById(id).map(e -> {
+            SysUserInfo sysUserInfo = new SysUserInfo();
+            sysUserInfo.setId(e.getId());
+            sysUserInfo.setLoginName(e.getLoginName());
+            sysUserInfo.setUserName(e.getUserName());
+            sysUserInfo.setCreateTime(e.getCreateTime());
+            sysUserInfo.setCreateUserName(e.getCreateUserName());
+            sysUserInfo.setUpdateTime(e.getUpdateTime());
+            sysUserInfo.setUpdateUserName(e.getUpdateUserName());
+            sysUserInfo.setRoleIds(e.getRoles().stream().map(SysRoleEntity::getId).collect(Collectors.toList()));
+            return sysUserInfo;
+        }).orElse(null);
     }
 
     private String passwordEncode(String password) {
@@ -143,6 +147,18 @@ public class SysUserServiceImpl implements SysUserService {
         sysUserRepository.deleteById(id);
         // 删除相关角色
         userRoleRepository.deleteAllByUserId(id);
+    }
+
+    @Override
+    public List<RoleInfo> getRoles() {
+        List<SysRoleEntity> entities = sysRoleRepository.findAll();
+        return entities.stream().map(role -> {
+            RoleInfo roleInfo = new RoleInfo();
+            roleInfo.setId(role.getId());
+            roleInfo.setName(role.getName());
+            roleInfo.setRole(role.getRole());
+            return roleInfo;
+        }).collect(Collectors.toList());
     }
 
 }

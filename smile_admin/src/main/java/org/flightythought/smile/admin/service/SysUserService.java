@@ -21,4 +21,6 @@ public interface SysUserService {
 
     void deleteSysUsers(Integer id, HttpSession session);
 
+    List<RoleInfo> getRoles();
+
 }
