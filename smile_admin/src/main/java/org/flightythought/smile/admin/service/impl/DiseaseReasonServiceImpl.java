@@ -10,6 +10,7 @@ import org.flightythought.smile.admin.dto.DiseaseReasonDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.DiseaseReasonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,6 +46,8 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     private DiseaseReasonToSolutionRepository diseaseReasonToSolutionRepository;
     @Autowired
     private DiseaseReasonTypeRepository diseaseReasonTypeRepository;
+    @Value("html")
+    private String html;
 
     @Override
     public List<SelectItemOption> getDiseaseReasonType() {
@@ -90,7 +93,9 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         // 标题
         diseaseReasonEntity.setTitle(diseaseReasonDTO.getTitle());
         // 内容
-        diseaseReasonEntity.setContent(diseaseReasonDTO.getContent());
+        if (StringUtils.isNotBlank(diseaseReasonDTO.getContent())) {
+            diseaseReasonEntity.setContent(html + diseaseReasonDTO.getContent());
+        }
         // 阅读数
         diseaseReasonEntity.setReadNum(0);
         // 类型
@@ -136,7 +141,9 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
         // 标题
         diseaseReasonEntity.setTitle(diseaseReasonDTO.getTitle());
         // 内容
-        diseaseReasonEntity.setContent(diseaseReasonDTO.getContent());
+        if (StringUtils.isNotBlank(diseaseReasonDTO.getContent())) {
+            diseaseReasonEntity.setContent(html + diseaseReasonDTO.getContent());
+        }
         // 类型
         diseaseReasonEntity.setType(diseaseReasonDTO.getType());
         // 保存疾病原因

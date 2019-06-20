@@ -57,6 +57,8 @@ public class HealthServiceImpl implements HealthService {
     private HealthWayRepository healthWayRepository;
     @Autowired
     private CommonService commonService;
+    @Value("html")
+    private String html;
 
     @Override
     @Transactional
@@ -134,7 +136,9 @@ public class HealthServiceImpl implements HealthService {
         // 背景图片ID
         healthEntity.setBgImageId(healthClassDTO.getBgImageId());
         // 内容描述
-        healthEntity.setContent(healthClassDTO.getContent());
+        if (StringUtils.isNotBlank(healthClassDTO.getContent())) {
+            healthEntity.setContent(html + healthClassDTO.getContent());
+        }
         // 养生名称
         healthEntity.setHealthName(healthClassDTO.getHealthName());
         // 编码
@@ -174,7 +178,9 @@ public class HealthServiceImpl implements HealthService {
         // 背景图片
         healthEntity.setBgImageId(healthClassDTO.getBgImageId());
         // 内容描述
-        healthEntity.setContent(healthClassDTO.getContent());
+        if (StringUtils.isNotBlank(healthClassDTO.getContent())) {
+            healthEntity.setContent(html + healthClassDTO.getContent());
+        }
         // 养生名称
         healthEntity.setHealthName(healthClassDTO.getHealthName());
         // 编码
@@ -220,7 +226,9 @@ public class HealthServiceImpl implements HealthService {
         // 编码
         healthWayEntity.setNumber(healthWayDTO.getNumber());
         // 内容
-        healthWayEntity.setContent(healthWayDTO.getContent());
+        if (StringUtils.isNotBlank(healthWayDTO.getContent())) {
+            healthWayEntity.setContent(html + healthWayDTO.getContent());
+        }
         // 音乐链接
         healthWayEntity.setMusicUrl(healthWayDTO.getMusicUrl());
         // 类型
@@ -275,7 +283,9 @@ public class HealthServiceImpl implements HealthService {
             // 编码
             healthWayEntity.setNumber(healthWayDTO.getNumber());
             // 内容
-            healthWayEntity.setContent(healthWayDTO.getContent());
+            if (StringUtils.isNotBlank(healthWayDTO.getContent())) {
+                healthWayEntity.setContent(html + healthWayDTO.getContent());
+            }
             // 音乐链接
             healthWayEntity.setMusicUrl(healthWayDTO.getMusicUrl());
             // 类型
