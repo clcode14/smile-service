@@ -86,6 +86,13 @@ public class SystemServiceImpl implements SystemService {
             userSettingEntity.setValue(value);
             userSettingEntity.setUpdateUserName(userId + "");
             userSettingEntity = userSettingRepository.save(userSettingEntity);
+        } else {
+            userSettingEntity = new UserSettingEntity();
+            userSettingEntity.setValue(value);
+            userSettingEntity.setUserId(userId);
+            userSettingEntity.setCode(code);
+            userSettingEntity.setCreateUserName(userId + "");
+            userSettingEntity = userSettingRepository.save(userSettingEntity);
         }
         return userSettingEntity;
     }
@@ -169,9 +176,9 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public HiddenConfig saveHiddenConfig(HiddenConfigDTO hiddenConfigDTO) {
-        UserSettingEntity charitySettingEntity =  updateSettingByCode(Constants.CHARITY_HIDDEN, hiddenConfigDTO.getCharityHidden() + "");
-        UserSettingEntity faultSettingEntity = updateSettingByCode(Constants.FAULT_HIDDEN, hiddenConfigDTO.getFaultHidden() + "");
-        UserSettingEntity dynamicSettingEntity = updateSettingByCode(Constants.DYNAMIC_HIDDEN, hiddenConfigDTO.getDynamicHidden() + "");
+        UserSettingEntity charitySettingEntity = updateSettingByCode(hiddenConfigDTO.getCharityHidden() + "", Constants.CHARITY_HIDDEN);
+        UserSettingEntity faultSettingEntity = updateSettingByCode(hiddenConfigDTO.getFaultHidden() + "", Constants.FAULT_HIDDEN);
+        UserSettingEntity dynamicSettingEntity = updateSettingByCode(hiddenConfigDTO.getDynamicHidden() + "", Constants.DYNAMIC_HIDDEN);
         HiddenConfig hiddenConfig = new HiddenConfig();
         hiddenConfig.setDynamicHidden(Boolean.valueOf(dynamicSettingEntity.getValue()));
         hiddenConfig.setFaultHidden(Boolean.valueOf(faultSettingEntity.getValue()));

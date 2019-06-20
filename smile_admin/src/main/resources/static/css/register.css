@@ -1,0 +1,63 @@
+html{
+    margin: 0;
+    font-size:14px;
+}
+body{
+    margin:0;
+    width: 100vw;
+    height:100vh;
+    background: url("../image/invite.png");
+    -moz-background-size:100% 100%;
+    background-size:100% 100%;
+    text-align: center;
+    position: relative;
+}
+.container{
+    position: absolute;
+    top:50%;
+    width: 100%;
+}
+.item-wrap{
+    margin: 0 auto 20px;
+}
+.item-wrap input,.item-wrap .btn{
+    width: 80%;
+    height: 40px;
+    border: 1px solid #2B2B2B;
+    box-shadow: none;
+    padding: 0 10px;
+    border-radius: 30px;
+    color: #C7C7C7;
+    font-size: 1.1em;
+}
+.item-wrap input:focus,.item-wrap .btn:focus{
+    outline: none !important;
+    color: #fff;
+}
+.item-wrap .btn{
+    color: #fff;
+    width: 85%;
+}
+.item-wrap .btn-black{
+    background:#2B2B2B;
+}
+.verifyCode{
+    position: relative;
+}
+.verifyCode span{
+    position: absolute;
+    right: 13%;
+    top: 25%;
+    width: 21%;
+    text-align: center;
+}
+.verifyCode span.line{
+    border-right: 1px solid #333;
+    height: 30px;
+    top: 10%;
+    right: 35%;
+}
+.verifyCode input{
+    /*width: 50%;*/
+    padding-right: 30%;
+}

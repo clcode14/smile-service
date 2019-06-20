@@ -89,7 +89,7 @@ public class SystemController {
     @Deprecated
     public ResponseBean updateCharityFaultHiddenConfig(Boolean charityFaultHidden) {
         try {
-            UserSettingEntity result = systemService.updateSettingByCode(Constants.CHARITY_FAULT_HIDDEN, charityFaultHidden + "");
+            UserSettingEntity result = systemService.updateSettingByCode(charityFaultHidden + "", Constants.CHARITY_FAULT_HIDDEN);
             return ResponseBean.ok("更改成功", result);
         } catch (Exception e) {
             LOG.error("更改当前用户爱心养生隐私设置失败", e);
@@ -115,7 +115,7 @@ public class SystemController {
     @Deprecated
     public ResponseBean updateDynamicHiddenConfig(Boolean dynamicHidden) {
         try {
-            UserSettingEntity result = systemService.updateSettingByCode(Constants.DYNAMIC_HIDDEN, dynamicHidden + "");
+            UserSettingEntity result = systemService.updateSettingByCode(dynamicHidden + "", Constants.DYNAMIC_HIDDEN);
             return ResponseBean.ok("更改成功", result);
         } catch (Exception e) {
             LOG.error("更改当前用户爱心养生隐私设置失败", e);

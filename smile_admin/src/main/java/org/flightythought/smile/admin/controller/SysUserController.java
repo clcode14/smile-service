@@ -1,11 +1,7 @@
 package org.flightythought.smile.admin.controller;
 
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import io.swagger.annotations.*;
 import org.flightythought.smile.admin.bean.ResponseBean;
-import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.bean.SysUserInfo;
 import org.flightythought.smile.admin.dto.SysUserDTO;
 import org.flightythought.smile.admin.service.SysUserService;
@@ -13,20 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/sysUser")
@@ -97,18 +83,6 @@ public class SysUserController {
         } catch (Exception e) {
             LOG.error("编辑失败", e);
             return ResponseBean.error("编辑失败", e.getMessage());
-        }
-    }
-    
-    @GetMapping("/roles")
-    @ApiOperation(value = "获取角色信息", notes = "获取角色信息", position = 1)
-    public ResponseBean getRoles() {
-        try {
-            List<RoleInfo> roleInfos = sysUserService.getRoles();
-            return ResponseBean.ok("返回成功", roleInfos);
-        } catch (Exception e) {
-            LOG.error("获取角色信息失败", e);
-            return ResponseBean.error("获取角色信息失败", e.getMessage());
         }
     }
 }

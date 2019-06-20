@@ -25,16 +25,16 @@ public class CaseInputServiceImpl implements CaseInputService {
     private DiseaseClassDetailRepository diseaseClassDetailRepository;
 
     @Autowired
-    private HealthResultRepository       healthResultRepository;
+    private HealthResultRepository healthResultRepository;
 
     @Autowired
-    private HealthNormTypeRepository     healthNormTypeRepository;
+    private HealthNormTypeRepository healthNormTypeRepository;
 
     @Autowired
-    private HealthRepository             healthRepository;
+    private HealthRepository healthRepository;
 
     @Autowired
-    private SolutionRepository           solutionRepository;
+    private SolutionRepository solutionRepository;
 
     @Override
     public List<SelectItemOption> getDisease() {
