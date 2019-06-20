@@ -41,7 +41,7 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
     private PlatformUtils platformUtils;
     @Autowired
     private CommonService commonService;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

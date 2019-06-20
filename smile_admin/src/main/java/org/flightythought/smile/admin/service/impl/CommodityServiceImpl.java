@@ -53,7 +53,7 @@ public class CommodityServiceImpl implements CommodityService {
     private EntityManager entityManager;
     @Autowired
     private CommonService commonService;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

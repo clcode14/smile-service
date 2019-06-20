@@ -23,7 +23,7 @@ public class HealthIntroductionServiceImpl implements HealthIntroductionService 
     private PlatformUtils platformUtils;
     @Autowired
     private HealthIntroductionRepository healthIntroductionRepository;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

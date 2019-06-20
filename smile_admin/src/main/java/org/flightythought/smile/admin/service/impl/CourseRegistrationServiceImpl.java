@@ -49,7 +49,7 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private CourseTypeRepository courseTypeRepository;
     @Autowired
     private PlatformUtils platformUtils;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

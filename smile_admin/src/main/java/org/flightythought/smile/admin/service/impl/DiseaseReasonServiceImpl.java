@@ -46,7 +46,7 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
     private DiseaseReasonToSolutionRepository diseaseReasonToSolutionRepository;
     @Autowired
     private DiseaseReasonTypeRepository diseaseReasonTypeRepository;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

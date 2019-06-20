@@ -80,7 +80,7 @@ public class SolutionServiceImpl implements SolutionService {
     private CommodityRepository commodityRepository;
     @Autowired
     private PlatformUtils platformUtils;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override

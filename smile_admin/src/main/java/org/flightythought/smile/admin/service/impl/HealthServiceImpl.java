@@ -57,7 +57,7 @@ public class HealthServiceImpl implements HealthService {
     private HealthWayRepository healthWayRepository;
     @Autowired
     private CommonService commonService;
-    @Value("html")
+    @Value("${html}")
     private String html;
 
     @Override
