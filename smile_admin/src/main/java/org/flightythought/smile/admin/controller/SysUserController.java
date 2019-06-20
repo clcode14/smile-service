@@ -2,6 +2,7 @@ package org.flightythought.smile.admin.controller;
 
 import io.swagger.annotations.*;
 import org.flightythought.smile.admin.bean.ResponseBean;
+import org.flightythought.smile.admin.bean.RoleInfo;
 import org.flightythought.smile.admin.bean.SysUserInfo;
 import org.flightythought.smile.admin.dto.SysUserDTO;
 import org.flightythought.smile.admin.service.SysUserService;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -83,6 +86,18 @@ public class SysUserController {
         } catch (Exception e) {
             LOG.error("编辑失败", e);
             return ResponseBean.error("编辑失败", e.getMessage());
+        }
+    }
+    
+    @GetMapping("/getRoles")
+    @ApiOperation(value = "获取关联角色", notes = "获取关联", position = 1)
+    public ResponseBean getRoles() {
+        try {
+            List<RoleInfo> roleInfos = sysUserService.getRoles();
+            return ResponseBean.ok("查询成功",roleInfos);
+        } catch (Exception e) {
+            LOG.error("查询失败", e);
+            return ResponseBean.error("查询失败", e.getMessage());
         }
     }
 }
