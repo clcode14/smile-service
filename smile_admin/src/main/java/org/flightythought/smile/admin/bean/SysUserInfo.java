@@ -25,6 +25,10 @@ public class SysUserInfo {
      * 账号
      */
     private String        loginName;
+    /**
+     * 用户名
+     */
+    private String        userName;
 
     /**
      * 账号创建人
