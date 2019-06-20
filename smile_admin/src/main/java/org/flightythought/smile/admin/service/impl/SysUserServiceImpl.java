@@ -135,12 +135,7 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
-    public List<RoleInfo> getRoles() {
-        return null;
-    }
-
-    @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteSysUsers(Integer id, HttpSession session) {
         //删除账户
         sysUserRepository.deleteById(id);

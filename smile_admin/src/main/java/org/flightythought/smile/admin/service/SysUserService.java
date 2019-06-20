@@ -19,8 +19,6 @@ public interface SysUserService {
 
     SysUserInfo findSysUsers(Integer id, HttpSession session);
 
-    List<RoleInfo> getRoles();
-
     void deleteSysUsers(Integer id, HttpSession session);
 
 }

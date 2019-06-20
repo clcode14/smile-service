@@ -2,23 +2,35 @@ package org.flightythought.smile.admin.bean;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * 角色信息
- * 
- * @author cl47872
- * @version $Id: RoleInfo.java, v 0.1 Jun 20, 2019 1:55:51 AM cl47872 Exp $
+ * Copyright 2019 Flighty-Thought All rights reserved.
+ *
+ * @Author: LiLei
+ * @ClassName RoleInfo
+ * @CreateTime 2019/6/20 1:54
+ * @Description: TODO
  */
 @Data
 public class RoleInfo {
-    
     /**
-     * id
+     * 主键ID
      */
-    private String id;
+    private Integer id;
 
     /**
-     * 名称
+     * 角色标签名
+     */
+    private String role;
+
+    /**
+     * 角色名称
      */
     private String name;
 
+    /**
+     * 资源集合
+     */
+    private List<String> resource;
 }

@@ -55,8 +55,8 @@ public class SysRoleEntity extends BaseEntity {
      * 角色权限下的可访问的资源（根据映射表r_role_resource来映射tb_sys_resource）
      */
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "r_role_resource", joinColumns = {@JoinColumn(name = "role_id", nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "resource_id", nullable = false, updatable = false)})
+    @JoinTable(name = "r_role_resource", joinColumns = {@JoinColumn(name = "role_id")},
+            inverseJoinColumns = {@JoinColumn(name = "resource_id")})
     @OrderBy("id ASC")
     private Set<SysResourceEntity> resources = new HashSet<>(0);
 }
