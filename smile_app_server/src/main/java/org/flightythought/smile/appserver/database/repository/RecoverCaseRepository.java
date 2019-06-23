@@ -16,6 +16,8 @@ public interface RecoverCaseRepository extends JpaRepository<RecoverCaseEntity, 
 
     RecoverCaseEntity findByJourneyIdAndId(Integer journeyId, Integer recoverId);
 
+    List<RecoverCaseEntity> findByJourneyId(Integer journeyId);
+
     @Query("select distinct rc from  RecoverCaseEntity rc " +
             "left join JourneyEntity j " +
             "on rc.journeyId = j.journeyId " +

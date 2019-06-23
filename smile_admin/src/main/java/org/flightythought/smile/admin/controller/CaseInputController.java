@@ -4,20 +4,22 @@ import java.util.List;
 
 import org.flightythought.smile.admin.bean.ResponseBean;
 import org.flightythought.smile.admin.bean.SelectItemOption;
+import org.flightythought.smile.admin.dto.CaseEntryDTO;
 import org.flightythought.smile.admin.service.CaseInputService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * 案例录入
- * 
+ *
  * @author cl47872
  * @version $Id: CaseInputController.java, v 0.1 Jun 20, 2019 1:55:13 PM cl47872 Exp $
  */
@@ -27,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 public class CaseInputController {
 
     @Autowired
-    private CaseInputService    caseInputService;
+    private CaseInputService caseInputService;
 
     private static final Logger LOG = LoggerFactory.getLogger(CaseInputController.class);
 
@@ -88,6 +90,18 @@ public class CaseInputController {
         } catch (Exception e) {
             LOG.error("获取疾病失败", e.getMessage());
             return ResponseBean.error("返回失败", e.getMessage());
+        }
+    }
+
+    @PostMapping("/caseEntry")
+    @ApiOperation(value = "添加案例", notes = "添加案例")
+    public ResponseBean addCase(@RequestBody CaseEntryDTO caseEntryDTO, @ApiIgnore HttpSession session) {
+        try {
+            caseInputService.addCase(caseEntryDTO, session);
+            return ResponseBean.ok("添加成功, 请到案例审核功能进行审核");
+        } catch (Exception e) {
+            LOG.error("添加案例失败", e);
+            return ResponseBean.error("添加失败", e.getMessage());
         }
     }
 }

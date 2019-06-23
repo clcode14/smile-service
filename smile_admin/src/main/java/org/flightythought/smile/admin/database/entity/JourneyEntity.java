@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,7 +24,17 @@ import java.util.List;
 @Table(name = "tb_journey")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class JourneyEntity extends BaseEntity {
+@NamedEntityGraph(name = "journey.Graph", attributeNodes = {
+        @NamedAttributeNode("user"),
+        @NamedAttributeNode("coverImage"),
+        @NamedAttributeNode("journeyNorms"),
+        @NamedAttributeNode("diseaseClassDetails"),
+        @NamedAttributeNode("healthClassDetails"),
+        @NamedAttributeNode("healthResults"),
+        @NamedAttributeNode("medicalReports"),
+        @NamedAttributeNode("courses")
+})
+public class JourneyEntity extends BaseEntity implements Serializable {
     /**
      * 自增主键，养生旅程ID
      */
