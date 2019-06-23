@@ -84,7 +84,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         // 设置拦截忽略文件夹，可以对静态资源放行
-        web.ignoring().antMatchers("/image/**", "/static/**");
+        web.ignoring().antMatchers("/image/**", "/static/**", "/statics/**", "/pages/**");
         web.ignoring().antMatchers("/swagger-ui.html").antMatchers("/webjars/**").antMatchers("/v2/**").antMatchers("/swagger-resources/**");
         web.ignoring().antMatchers("/css/**", "/js/**");
     }

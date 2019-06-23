@@ -6,17 +6,16 @@ import org.flightythought.smile.appserver.bean.NoticeNumber;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.database.entity.AppVersionEntity;
-import org.flightythought.smile.appserver.database.entity.PushDataEntity;
-import org.flightythought.smile.appserver.database.entity.UserEntity;
-import org.flightythought.smile.appserver.database.entity.UserSettingEntity;
+import org.flightythought.smile.appserver.database.entity.*;
 import org.flightythought.smile.appserver.database.repository.AppVersionRepository;
 import org.flightythought.smile.appserver.database.repository.PushDataRepository;
+import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
 import org.flightythought.smile.appserver.database.repository.UserSettingRepository;
 import org.flightythought.smile.appserver.dto.HiddenConfigDTO;
 import org.flightythought.smile.appserver.dto.NoticeQueryDTO;
 import org.flightythought.smile.appserver.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,10 @@ public class SystemServiceImpl implements SystemService {
     private AppVersionRepository appVersionRepository;
     @Autowired
     private PushDataRepository pushDataRepository;
+    @Autowired
+    private SysParameterRepository sysParameterRepository;
+    @Value("${server.servlet.context-path}")
+    private String contentPath;
 
     @Override
     public AppUpdateData updateApp() {
@@ -47,7 +50,7 @@ public class SystemServiceImpl implements SystemService {
         AppVersionEntity appVersionEntity = appVersionRepository.findByCurrent(true);
         if (appVersionEntity != null) {
             appUpdateData.setDescription(appVersionEntity.getDescription());
-            appUpdateData.setUrl(appVersionEntity.getUrl());
+            appUpdateData.setUrl(platformUtils.getOssUrl(appVersionEntity.getKey()));
             appUpdateData.setForceUpdate(appVersionEntity.getForceUpdate());
             appUpdateData.setVersion(appVersionEntity.getVersion());
             appUpdateData.setVersionId(appVersionEntity.getVersionId());
@@ -86,6 +89,13 @@ public class SystemServiceImpl implements SystemService {
             userSettingEntity.setValue(value);
             userSettingEntity.setUpdateUserName(userId + "");
             userSettingEntity = userSettingRepository.save(userSettingEntity);
+        } else {
+            userSettingEntity = new UserSettingEntity();
+            userSettingEntity.setValue(value);
+            userSettingEntity.setUserId(userId);
+            userSettingEntity.setCode(code);
+            userSettingEntity.setCreateUserName(userId + "");
+            userSettingEntity = userSettingRepository.save(userSettingEntity);
         }
         return userSettingEntity;
     }
@@ -108,13 +118,13 @@ public class SystemServiceImpl implements SystemService {
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
         Long userId = userEntity.getId();
         // 系统通知数
-        int systemNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_SYSTEM, userId);
+        int systemNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_SYSTEM, userId, false);
         // 点赞通知
-        int likeNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_LIKE, userId);
+        int likeNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_LIKE, userId, false);
         // 粉丝通知
-        int fansNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_FANS, userId);
+        int fansNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_FANS, userId, false);
         // 评论通知
-        int messageNumber = pushDataRepository.countByTypeAndUserId(Constants.NOTICE_MESSAGE, userId);
+        int messageNumber = pushDataRepository.countByTypeAndUserIdAndRead(Constants.NOTICE_MESSAGE, userId, false);
         NoticeNumber noticeNumber = new NoticeNumber();
         noticeNumber.setSystemNotice(systemNumber);
         noticeNumber.setLikeNotice(likeNumber);
@@ -169,13 +179,21 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public HiddenConfig saveHiddenConfig(HiddenConfigDTO hiddenConfigDTO) {
-        UserSettingEntity charitySettingEntity =  updateSettingByCode(Constants.CHARITY_HIDDEN, hiddenConfigDTO.getCharityHidden() + "");
-        UserSettingEntity faultSettingEntity = updateSettingByCode(Constants.FAULT_HIDDEN, hiddenConfigDTO.getFaultHidden() + "");
-        UserSettingEntity dynamicSettingEntity = updateSettingByCode(Constants.DYNAMIC_HIDDEN, hiddenConfigDTO.getDynamicHidden() + "");
+        UserSettingEntity charitySettingEntity = updateSettingByCode(hiddenConfigDTO.getCharityHidden() + "", Constants.CHARITY_HIDDEN);
+        UserSettingEntity faultSettingEntity = updateSettingByCode(hiddenConfigDTO.getFaultHidden() + "", Constants.FAULT_HIDDEN);
+        UserSettingEntity dynamicSettingEntity = updateSettingByCode(hiddenConfigDTO.getDynamicHidden() + "", Constants.DYNAMIC_HIDDEN);
         HiddenConfig hiddenConfig = new HiddenConfig();
         hiddenConfig.setDynamicHidden(Boolean.valueOf(dynamicSettingEntity.getValue()));
         hiddenConfig.setFaultHidden(Boolean.valueOf(faultSettingEntity.getValue()));
         hiddenConfig.setCharityHidden(Boolean.valueOf(charitySettingEntity.getValue()));
         return hiddenConfig;
+    }
+
+    @Override
+    public String getShareLink() {
+        SysParameterEntity sysParameterEntity = sysParameterRepository.getDomainPortParam();
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        String url = sysParameterEntity.getParameterValue() + contentPath + "/pages/invitationRegistration?username=" + userEntity.getUsername();
+        return url;
     }
 }

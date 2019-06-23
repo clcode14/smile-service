@@ -32,6 +32,16 @@ public class ThirdAuthenticationFilter extends AbstractAuthenticationProcessingF
     public static final String TYPE = "type";
 
     /**
+     * 用户昵称
+     */
+    public static final String NICKNAME = "nickname";
+
+    /**
+     * 用户头像
+     */
+    public static final String AVATER = "avater";
+
+    /**
      * 是否仅 POST 方式
      */
     private boolean postOnly = true;
@@ -52,6 +62,8 @@ public class ThirdAuthenticationFilter extends AbstractAuthenticationProcessingF
         }
         String authId = request.getParameter(AUTH_ID);
         String type = request.getParameter(TYPE);
+        String nickname = request.getParameter(NICKNAME);
+        String avater = request.getParameter(AVATER);
         if (authId == null) {
             authId = "";
         }
@@ -59,8 +71,14 @@ public class ThirdAuthenticationFilter extends AbstractAuthenticationProcessingF
         if (type == null) {
             type = "";
         }
+        if (nickname == null) {
+            nickname = "";
+        }
+        if (avater == null) {
+            authId = "";
+        }
         type = type.trim();
-        ThirdAuthenticationToken authenticationToken = new ThirdAuthenticationToken(authId, type);
+        ThirdAuthenticationToken authenticationToken = new ThirdAuthenticationToken(authId, type, nickname, avater);
         // Allow subclasses to set the "details" property
         authenticationToken.setDetails(authenticationDetailsSource.buildDetails(request));
 

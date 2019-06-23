@@ -1,9 +1,11 @@
 package org.flightythought.smile.admin.database.repository;
 
 import org.flightythought.smile.admin.database.entity.JourneyEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @Description: TODO
  */
 @Repository
-public interface JourneyRepository extends JpaRepository<JourneyEntity, Integer> {
+public interface JourneyRepository extends JpaRepository<JourneyEntity, Integer>, JpaSpecificationExecutor<JourneyEntity> {
     @Transactional
     @Query("update JourneyEntity j set j.audit=true where j.journeyId=?1")
     @Modifying
     void updateCheckStatus(Integer journeyId);
 
+
     JourneyEntity findByJourneyId(Integer journeyId);
+
+    @EntityGraph(value = "journey.Graph", type = EntityGraph.EntityGraphType.FETCH)
+    Page<JourneyEntity> findAll(@Nullable Specification<JourneyEntity> var1, Pageable var2);
 }

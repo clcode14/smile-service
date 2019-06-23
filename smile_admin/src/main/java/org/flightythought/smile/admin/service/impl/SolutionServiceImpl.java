@@ -14,6 +14,7 @@ import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.database.entity.CommodityEntity;
 import org.flightythought.smile.admin.database.entity.CourseRegistrationEntity;
+import org.flightythought.smile.admin.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.OfficeEntity;
 import org.flightythought.smile.admin.database.entity.SolutionCommodityEntity;
@@ -38,6 +39,7 @@ import org.flightythought.smile.admin.dto.SolutionQueryDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -78,6 +80,8 @@ public class SolutionServiceImpl implements SolutionService {
     private CommodityRepository commodityRepository;
     @Autowired
     private PlatformUtils platformUtils;
+    @Value("${html}")
+    private String html;
 
     @Override
     public List<SelectItemOption> getCourseItems() {
@@ -120,7 +124,9 @@ public class SolutionServiceImpl implements SolutionService {
             // 标题
             solutionEntity.setTitle(solutionDTO.getTitle());
             // 内容
-            solutionEntity.setContent(solutionDTO.getContent());
+            if (StringUtils.isNotBlank(solutionDTO.getContent())) {
+                solutionEntity.setContent(html + solutionDTO.getContent());
+            }
             // 机构ID
             // 保存解决方案
             solutionRepository.save(solutionEntity);
@@ -198,7 +204,9 @@ public class SolutionServiceImpl implements SolutionService {
             // 标题
             solutionEntity.setTitle(solutionDTO.getTitle());
             // 内容
-            solutionEntity.setContent(solutionDTO.getContent());
+            if (StringUtils.isNotBlank(solutionDTO.getContent())) {
+                solutionEntity.setContent(html + solutionDTO.getContent());
+            }
             // 机构ID
             // 保存解决方案
             solutionRepository.save(solutionEntity);
@@ -226,6 +234,17 @@ public class SolutionServiceImpl implements SolutionService {
                 solutionOfficeEntities.add(solutionOfficeEntity);
             });
             solutionOfficeRepository.saveAll(solutionOfficeEntities);
+
+            //获取相关商品
+            List<SolutionCommodityEntity> solutionCommodityEntities = Lists.newArrayList();
+            List<Integer> commodityIds = solutionDTO.getCommodityIds();
+            commodityIds.forEach(commodityId -> {
+                SolutionCommodityEntity solutionCommodityEntity = new SolutionCommodityEntity();
+                solutionCommodityEntity.setCommodityId(commodityId);
+                solutionCommodityEntity.setSolutionId(finalSolutionId);
+                solutionCommodityEntities.add(solutionCommodityEntity);
+            });
+            solutionCommodityRepository.saveAll(solutionCommodityEntities);
 
             // 获取解决方案配图
             List<ImageDTO> imageDTOS = solutionDTO.getImages();
@@ -385,5 +404,17 @@ public class SolutionServiceImpl implements SolutionService {
                     selectItemOption.setValue(commodityEntity.getName());
                     return selectItemOption;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteSolution(Integer solutionId) {
+        // 删除解决方案
+        solutionRepository.deleteById(solutionId);
+        // 删除相关课程/相关配图/相关机构/相关商品
+        solutionImageRepository.deleteAllBySolutionId(solutionId);
+        solutionCourseRepository.deleteAllBySolutionId(solutionId);
+        solutionOfficeRepository.deleteAllBySolutionId(solutionId);
+        solutionCommodityRepository.deleteAllBySolutionId(solutionId);
     }
 }

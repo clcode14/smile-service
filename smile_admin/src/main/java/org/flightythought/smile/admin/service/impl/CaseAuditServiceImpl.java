@@ -14,9 +14,12 @@ import org.flightythought.smile.admin.framework.exception.FlightyThoughtExceptio
 import org.flightythought.smile.admin.service.CaseAuditService;
 import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +34,12 @@ import java.util.stream.Collectors;
 @Service
 public class CaseAuditServiceImpl implements CaseAuditService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CaseAuditServiceImpl.class);
+
     @Autowired
     private JourneyRepository journeyRepository;
+    @Autowired
+    private JourneyToSolutionRepository journeyToSolutionRepository;
     @Autowired
     private JourneyToReportRepository journeyToReportRepository;
     @Autowired
@@ -255,11 +262,30 @@ public class CaseAuditServiceImpl implements CaseAuditService {
             HealthOrDiseaseByIdQueryDTO queryDTO = new HealthOrDiseaseByIdQueryDTO();
             queryDTO.setDiseaseDetailIds(diseaseDetailIds);
             queryDTO.setHealthIds(healthIds);
-            List<SolutionEntity> solutionEntities = getSolutions(queryDTO).getContent();
+            List<SolutionEntity> solutionEntities = null;
+            try {
+                solutionEntities = getSolutions(queryDTO).getContent();
+            } catch (FlightyThoughtException e) {
+                LOG.error("找不多关联的解决方案", e);
+                // 查找旅程关联的解决方案
+               List<JourneyToSolutionEntity> journeyToSolutionEntities = journeyToSolutionRepository.findByJourneyId(journeyId);
+               List<Integer> solutionIds = journeyToSolutionEntities.stream().map(JourneyToSolutionEntity::getSolutionId).collect(Collectors.toList());
+               if (solutionIds.size() > 0) {
+                   solutionEntities = solutionRepository.findByIdIn(solutionIds);
+               }
+            }
             // 创建案例集合
             List<RecoverCaseEntity> recoverCaseEntities = new ArrayList<>();
             // 获取养生旅程用户
             UserEntity userEntity = journeyEntity.getUser();
+            if (solutionEntities == null) {
+                // 标记为已审核
+                journeyEntity.setAudit(true);
+                // 不是案例
+                journeyEntity.setRecoverCase(false);
+                journeyRepository.save(journeyEntity);
+                return;
+            }
             solutionEntities.forEach(solutionEntity -> {
                 // 查询该解决方案对应该旅程的用户是否已经被列入为康复人数
                 Integer solutionId = solutionEntity.getId();

@@ -46,4 +46,6 @@ public interface SolutionService {
     List<SelectItemOption> getOfficeItems();
 
     List<SelectItemOption> getCommodities();
+    
+    void deleteSolution(Integer solutionId);
 }

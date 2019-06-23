@@ -14,4 +14,6 @@ import javax.servlet.http.HttpSession;
  */
 public interface LoginService {
     ResponseBean getSMSVerificationCode(String phone, HttpSession session);
+
+    ResponseBean getSMSVerificationCodeByALI(String phone, HttpSession session);
 }

@@ -136,10 +136,22 @@ public class UserEntity extends BaseEntity implements Serializable, UserDetails 
     private LocalDate birthday;
 
     /**
+     * 头像
+     */
+    @Column(name = "avater")
+    private String avater;
+
+    /**
      * 性别 0：男 1：女
      */
     @Column(name = "sex")
     private Integer sex;
+
+    /**
+     * 推荐人ID
+     */
+    @Column(name = "recommender_id")
+    private Long reommenderId;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

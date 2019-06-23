@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
  * @author lilei
  */
 @Repository
-public interface SysUserRepository extends JpaRepository<SysUserEntity, Long> {
+public interface SysUserRepository extends JpaRepository<SysUserEntity, Integer> {
     SysUserEntity findByLoginName(String loginName);
 }

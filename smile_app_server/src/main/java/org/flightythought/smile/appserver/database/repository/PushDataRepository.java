@@ -28,5 +28,5 @@ public interface PushDataRepository extends JpaRepository<PushDataEntity, Long> 
 
     PushDataEntity findById(Integer pushDataId);
 
-    int countByTypeAndUserId(Integer type, Long userId);
+    int countByTypeAndUserIdAndRead(Integer type, Long userId, Boolean read);
 }

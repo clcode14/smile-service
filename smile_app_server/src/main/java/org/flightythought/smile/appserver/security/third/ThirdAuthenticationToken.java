@@ -23,21 +23,29 @@ public class ThirdAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String type;
 
+    private final String nickname;
+
+    private final String avater;
+
     /**
      * 构建一个没有鉴权的 ThirdAuthenticationToken
      */
-    public ThirdAuthenticationToken(Object principal, String type) {
+    public ThirdAuthenticationToken(Object principal, String type, String nickname, String avater) {
         super(null);
         this.principal = principal;
         this.type = type;
+        this.nickname = nickname;
+        this.avater = avater;
     }
 
-    public ThirdAuthenticationToken(Collection<? extends GrantedAuthority> authorities, Object principal, String type) {
+    public ThirdAuthenticationToken(Collection<? extends GrantedAuthority> authorities, Object principal, String type, String nickname, String avater) {
         super(authorities);
         this.principal = principal;
         this.type = type;
-        // must use super, as we override
+        this.nickname = nickname;
+        this.avater = avater;
         super.setAuthenticated(true);
+        // must use super, as we override
     }
 
 
@@ -53,6 +61,14 @@ public class ThirdAuthenticationToken extends AbstractAuthenticationToken {
 
     public String getType() {
         return type;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getAvater() {
+        return avater;
     }
 
     @Override

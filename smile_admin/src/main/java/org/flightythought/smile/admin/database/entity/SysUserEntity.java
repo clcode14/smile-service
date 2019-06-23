@@ -24,7 +24,7 @@ public class SysUserEntity extends BaseEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
     @GenericGenerator(name = "identity", strategy = "identity")
     @Column(name = "id")
-    private int id;
+    private Integer id;
 
     /**
      * 登录名
@@ -111,11 +111,11 @@ public class SysUserEntity extends BaseEntity implements UserDetails {
             , inverseJoinColumns = {@JoinColumn(name = "role_id", nullable = false, updatable = false)})
     private Set<SysRoleEntity> roles = new HashSet<>();
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -195,7 +195,7 @@ public class SysUserEntity extends BaseEntity implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return status;
+        return isStatus();
     }
 
     public void setPassword(String password) {
@@ -211,11 +211,11 @@ public class SysUserEntity extends BaseEntity implements UserDetails {
     }
 
     public boolean getStatus() {
-        return status;
+        return isStatus();
     }
 
     public void setState(boolean status) {
-        this.status = status;
+        this.setStatus(status);
     }
 
     public Integer getLoginLimit() {
@@ -272,5 +272,13 @@ public class SysUserEntity extends BaseEntity implements UserDetails {
 
     public void setDepartment(SysDepartmentEntity department) {
         this.department = department;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 }

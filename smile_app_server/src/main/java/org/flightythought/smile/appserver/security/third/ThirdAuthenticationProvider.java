@@ -48,8 +48,12 @@ public class ThirdAuthenticationProvider implements AuthenticationProvider {
         String authId = (String) authenticationToken.getPrincipal();
         // 获取请求的type
         String type = authenticationToken.getType();
+        // 获取请求的nickname;
+        String nickname = authenticationToken.getNickname();
+        // 获取请求的avater
+        String avater = authenticationToken.getAvater();
         // 检查数据
-        checkData(authId, type);
+        checkData(authId, type, nickname, avater);
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         // 根据登陆登陆类型和authId获取用户
         UserEntity userEntity = userRepository.findByAuthIdAndThirdType(authId, type);
@@ -65,8 +69,11 @@ public class ThirdAuthenticationProvider implements AuthenticationProvider {
             // type
             userEntity.setThirdType(type);
             // 昵称（用户 + 5位随机数）
-            int code = (int) Math.ceil(Math.random() * 90000 + 10000);
-            userEntity.setNickName("用户" + code);
+//            int code = (int) Math.ceil(Math.random() * 90000 + 10000);
+//            userEntity.setNickName("用户" + code);
+            userEntity.setNickName(nickname);
+            // 头像
+            userEntity.setAvater(avater);
             // 登录时间
             userEntity.setLoginTime(LocalDateTime.now());
             // 登录次数
@@ -89,12 +96,12 @@ public class ThirdAuthenticationProvider implements AuthenticationProvider {
         // 缓存token
         redisUtil.set(userEntity.getToken(), userEntity.getUsername(), appProperties.getTokenExpirationTime() * 24 * 60 * 60 * 1000L);
         // 此时鉴权成功后，应当重新 new 一个拥有鉴权的 authenticationResult 返回
-        ThirdAuthenticationToken authenticationResult = new ThirdAuthenticationToken(userEntity.getAuthorities(), userEntity, type);
+        ThirdAuthenticationToken authenticationResult = new ThirdAuthenticationToken(userEntity.getAuthorities(), userEntity, type, nickname, avater);
         authenticationResult.setDetails(authenticationToken.getDetails());
         return authenticationResult;
     }
 
-    private void checkData(String authId, String type) {
+    private void checkData(String authId, String type, String nickname, String avater) {
         if (StringUtils.isBlank(authId)) {
             throw new BadCredentialsException("请传递authId");
         }

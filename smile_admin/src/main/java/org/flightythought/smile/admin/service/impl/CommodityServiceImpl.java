@@ -19,6 +19,7 @@ import org.hibernate.query.internal.NativeQueryImpl;
 import org.hibernate.type.IntegerType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +53,8 @@ public class CommodityServiceImpl implements CommodityService {
     private EntityManager entityManager;
     @Autowired
     private CommonService commonService;
+    @Value("${html}")
+    private String html;
 
     @Override
     @Transactional
@@ -62,6 +65,9 @@ public class CommodityServiceImpl implements CommodityService {
         SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
         // 创建者
         commodityEntity.setCreateUserName(userEntity.getLoginName());
+        if (StringUtils.isNotBlank(commodityEntity.getDescription())) {
+            commodityEntity.setDescription(html + commodityEntity.getDescription());
+        }
         // 保存商品信息
         commodityEntity = commodityRepository.save(commodityEntity);
         // 商品ID
@@ -97,7 +103,9 @@ public class CommodityServiceImpl implements CommodityService {
             // 简介
             commodityEntity.setIntroduce(commodityDTO.getIntroduce());
             // 详情
-            commodityEntity.setDescription(commodityDTO.getDescription());
+            if (StringUtils.isNotBlank(commodityDTO.getDescription())) {
+                commodityEntity.setDescription(html + commodityDTO.getDescription());
+            }
             // 价格
             commodityEntity.setPrice(commodityDTO.getPrice());
             // 运费

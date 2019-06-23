@@ -50,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/image/**", "/static/**", "/login_p", "/logout_p", "/session/invalid");
+        web.ignoring().antMatchers("/image/**", "/static/**", "/statics/**", "/pages/**", "/login_p", "/logout_p", "/session/invalid");
         web.ignoring().antMatchers("/swagger-ui.html").antMatchers("/webjars/**").antMatchers("/v2/**").antMatchers("/swagger-resources/**");
     }
 

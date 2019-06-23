@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>笑美</title>
+
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/statics/css/register.css}">
+    <script src="http://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
+    <script th:src="@{/statics/js/bootbox.all.min.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+    <script th:src="@{/statics/jquery/jquery.min.js}"></script>
+    <script th:src="@{/statics/layui/layui.js}"></script>
+</head>
+<body>
+<div class="container">
+    <div class="item-wrap">
+        <input type="text" placeholder="请输入手机号" id="phone">
+    </div>
+    <div class="item-wrap">
+        <div class="verifyCode">
+            <input type="text" placeholder="请输入验证码" id="verifyCode">
+            <span class="line"></span>
+            <span id="code" onclick="getCode(this)">获取验证码</span>
+        </div>
+    </div>
+    <div class="item-wrap ">
+        <!--<input type="button" class="btn btn-black" value="开启笑美">-->
+        <button class="btn btn-black" onclick="start()">开启笑美</button>
+    </div>
+</div>
+<script th:inline="javascript">
+
+    var btn, clock = '', nums = 60, disabled = false, layer, form, token;
+    layui.use(['layer', 'form'], function () {
+        layer = layui.layer;
+        form = layui.form;
+
+    });
+
+    function getCode(thisBtn) {
+        if (!$('#phone').val()) {
+            layer.msg('请输入手机号');
+            // bootbox.alert('请输入手机号');
+            return;
+        }
+        btn = thisBtn;
+        if (disabled) {
+            return;
+        }
+        disabled = true; //将按钮置为不可点击
+        // 发送短信验证码
+        var url = [[${#servletContext.contextPath}]] + '/sms/vCode/' + $("#phone").val();
+        $.ajax({
+            url: url,
+            type: 'get',
+            dataType: 'json',
+            success: function (res) {
+                token = res.data;
+                console.log("发生验证码成功");
+            }
+        });
+        btn.innerHTML = nums + '(s)';
+        clock = setInterval(doLoop, 1000); //一秒执行一次
+    }
+
+    function doLoop() {
+        nums--;
+        if (nums > 0) {
+            btn.innerHTML = nums + ' (s)';
+        } else {
+            clearInterval(clock); //清除js定时器
+            disabled = false;
+            btn.innerHTML = '获取验证码';
+            nums = 60; //重置时间
+        }
+    }
+
+    function start() {
+        if (!$('#phone').val()) {
+            layer.msg('请输入手机号');
+            return;
+        }
+        if (!$('#verifyCode').val()) {
+            layer.msg('请输入验证码');
+            return;
+        }
+        var recommender = [[${recommender}]];
+        var url = [[${#servletContext.contextPath}]] + '/pages/register';
+        $.ajax({
+            url: url,
+            type: 'post',
+            data: {
+                "recommender": recommender,
+                "phone": $("#phone").val(),
+                "vCode": $("#verifyCode").val(),
+                "token": token
+            },
+            dataType: 'json',
+            error: function (e) {
+                token = '';
+                layer.msg("请重新获取短信验证码");
+            },
+            success: function (res) {
+                if (res.code == 200) {
+                    token = '';
+                    location.href = res.data.url;
+                } else if (res.code == 500) {
+                    layer.msg(res.message);
+                }
+                console.log("注册成功");
+            }
+        });
+    }
+</script>
+</body>
+</html>
