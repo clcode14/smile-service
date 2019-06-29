@@ -200,4 +200,40 @@ public class DynamicController {
             return ResponseBean.error(e.getMessage());
         }
     }
+    
+    @DeleteMapping("/{dynamicId}")
+    @ApiOperation(value = "删除动态", notes = "删除动态")
+    public ResponseBean deleteDynamic(@PathVariable Integer dynamicId) {
+        try {
+            dynamicService.deleteDynamic(dynamicId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/detail/{dynamicDetailId}")
+    @ApiOperation(value = "删除动态明细", notes = "删除动态明细")
+    public ResponseBean deleteDynamicDetail(@PathVariable Integer dynamicDetailId) {
+        try {
+            dynamicService.deleteDynamicDetail(dynamicDetailId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/detailMessage/{dynamicDetailId}")
+    @ApiOperation(value = "删除动态明细评论", notes = "删除动态明细评论")
+    public ResponseBean deleteDynamicDetailMessage(@PathVariable Integer dynamicDetailId) {
+        try {
+            dynamicService.deleteDynamicDetailMessage(dynamicDetailId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
 }
