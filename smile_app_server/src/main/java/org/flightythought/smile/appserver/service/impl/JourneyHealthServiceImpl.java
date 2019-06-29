@@ -445,6 +445,21 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                         recoverCaseEntity.setReadNum(readNum);
                         recoverCaseRepository.save(recoverCaseEntity);
                     }
+                } else {
+                    // 根据journeyId获取全部的案例数据
+                    List<RecoverCaseEntity> recoverCaseEntities = recoverCaseRepository.findByJourneyId(journeyId);
+                    if (recoverCaseEntities != null && recoverCaseEntities.size() > 0) {
+                        recoverCaseEntities.forEach(recoverCaseEntity -> {
+                            Long readNum = recoverCaseEntity.getReadNum();
+                            if (readNum == null) {
+                                readNum = 1L;
+                            } else {
+                                readNum += 1;
+                            }
+                            recoverCaseEntity.setReadNum(readNum);
+                            recoverCaseRepository.save(recoverCaseEntity);
+                        });
+                    }
                 }
                 Integer readNum = journeyEntity.getReadNum();
                 if (readNum == null) {

@@ -35,4 +35,6 @@ public interface SystemService {
     HiddenConfig getHiddenConfig();
 
     HiddenConfig saveHiddenConfig(HiddenConfigDTO hiddenConfig);
+
+    String getShareLink();
 }

@@ -104,4 +104,9 @@ public class LoginServiceImpl implements LoginService {
             return ResponseBean.error("发送短信失败", e.getMessage());
         }
     }
+
+    @Override
+    public ResponseBean getSMSVerificationCodeByALI(String phone, HttpSession session) {
+        return null;
+    }
 }

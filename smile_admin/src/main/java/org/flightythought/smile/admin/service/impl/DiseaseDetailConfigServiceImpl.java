@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.DiseaseClass;
 import org.flightythought.smile.admin.bean.DiseaseClassDetailInfo;
 import org.flightythought.smile.admin.common.PlatformUtils;
@@ -14,6 +15,7 @@ import org.flightythought.smile.admin.service.CommonService;
 import org.flightythought.smile.admin.service.DiseaseDetailConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +41,8 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
     private PlatformUtils platformUtils;
     @Autowired
     private CommonService commonService;
+    @Value("${html}")
+    private String html;
 
     @Override
     public List<DiseaseClass> getDiseaseClass() {
@@ -134,7 +138,9 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
             diseaseClassDetailEntity.setIconId(diseaseClassDetailDTO.getIcon().getImageId());
         }
         // 疾病小类描述
-        diseaseClassDetailEntity.setContent(diseaseClassDetailDTO.getContent());
+        if (StringUtils.isNotBlank(diseaseClassDetailDTO.getContent())) {
+            diseaseClassDetailEntity.setContent(html + diseaseClassDetailDTO.getContent());
+        }
         // 创建者
         diseaseClassDetailEntity.setCreateUserName(sysUserEntity.getLoginName());
         // 创建时间
@@ -183,7 +189,9 @@ public class DiseaseDetailConfigServiceImpl implements DiseaseDetailConfigServic
             diseaseClassDetailEntity.setIconId(diseaseClassDetailDTO.getIcon().getImageId());
         }
         // 疾病小类描述
-        diseaseClassDetailEntity.setContent(diseaseClassDetailDTO.getContent());
+        if (StringUtils.isNotBlank(diseaseClassDetailDTO.getContent())) {
+            diseaseClassDetailEntity.setContent(html + diseaseClassDetailDTO.getContent());
+        }
         // 修改者
         diseaseClassDetailEntity.setUpdateUserName(sysUserEntity.getLoginName());
         // 修改时间

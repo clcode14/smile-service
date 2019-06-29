@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.flightythought.smile.admin.bean.CourseInfo;
 import org.flightythought.smile.admin.bean.CourseTypeInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
@@ -27,6 +28,7 @@ import org.flightythought.smile.admin.dto.CourseRegistrationDTO;
 import org.flightythought.smile.admin.dto.ImageDTO;
 import org.flightythought.smile.admin.service.CourseRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +49,8 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
     private CourseTypeRepository courseTypeRepository;
     @Autowired
     private PlatformUtils platformUtils;
+    @Value("${html}")
+    private String html;
 
     @Override
     @Transactional
@@ -77,7 +81,9 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         // 地址
         courseRegistrationEntity.setAddress(courseRegistrationDTO.getAddress());
         // 描述
-        courseRegistrationEntity.setDescription(courseRegistrationDTO.getDescription());
+        if (StringUtils.isNotBlank(courseRegistrationDTO.getDescription())) {
+            courseRegistrationEntity.setDescription(html + courseRegistrationDTO.getDescription());
+        }
         // 价格
         courseRegistrationEntity.setPrice(courseRegistrationDTO.getPrice());
         // 课程类型ID
