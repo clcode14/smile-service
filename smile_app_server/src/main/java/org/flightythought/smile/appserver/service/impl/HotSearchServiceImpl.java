@@ -22,7 +22,7 @@ public class HotSearchServiceImpl implements HotSearchService {
             HotSearchInfo hotSearchInfo = new HotSearchInfo();
             hotSearchInfo.setId(e.getId());
             hotSearchInfo.setCode(e.getCode());
-            hotSearchInfo.setDescription(e.getDescription());
+            hotSearchInfo.setDisplay(e.getDescription());
             return hotSearchInfo;
         }).collect(Collectors.toList());
     }

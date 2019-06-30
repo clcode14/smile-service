@@ -21,10 +21,10 @@ public class HotSearchInfo {
      * 编码
      */
     private String code;
-    
+
     /**
      * 描述
      */
-    private String description;
+    private String display;
 
 }
