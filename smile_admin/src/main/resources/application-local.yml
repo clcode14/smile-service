@@ -1,17 +1,19 @@
 server:
-  port: 8086
+  port: 8087
   servlet:
-    context-path: /smile-appserver
+    context-path: /smile-admin
+    session:
+      timeout: 30m
 
 spring:
   application:
-    name: smile-appserver
+    name: smile-admin
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 500MB
   mvc:
-    # 资源映射路径为/image/**，你想在url访问的请求路径
+    # 资源映射路径为/static/**，你想在url访问的请求路径
     static-path-pattern: /static/**
   # 资源映射地址，图片存放的真实路径
   resources:
@@ -19,9 +21,9 @@ spring:
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://47.102.126.36:3306/smile_test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-    username: root
-    password: lt2015196
+    url: jdbc:mysql://localhost:3306/smile?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    username: szyh
+    password: password$1
     tomcat:
       max-active: 20
       max-idle: 8
@@ -34,28 +36,11 @@ spring:
       ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  redis:
-    #    Redis数据库索引（默认为0）
-    database: 0
-    #    Redis测试服务器
-    host: r-uf69bed609594094.redis.rds.aliyuncs.com
-    #    Redis服务器连接端口
-    port: 6379
-    #    Redis服务器连接密码
-    password: xmJK1459
-
 
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-
-#自定义参数
-app-config:
-  tokenKey: 190312Smile_dev
-  codeKey: 190312Smile_dev
-  # Token失效时间90天
-  tokenExpirationTime: 90
 
 ali-oss:
   #  查看你的bucketname的endpoint地址，如：http://oss-cn-shenzhen.aliyuncs.com
@@ -67,6 +52,3 @@ ali-oss:
   #  你的accessKeySecret
   accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
 
-jpush:
-  masterSecret: aa9222fdde926e1e21a00b8f
-  appKey: 8834def6f6cc21907d942b4b
