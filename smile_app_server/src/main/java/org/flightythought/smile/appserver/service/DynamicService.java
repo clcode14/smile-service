@@ -158,4 +158,25 @@ public interface DynamicService {
      * @return
      */
     DynamicDetailSimple getDynamicDetail(Integer dynamicDetailId);
+    
+    /**
+     * 根据动态ID删除动态
+     * 
+     * @param dynamicId
+     */
+    void deleteDynamic(Integer dynamicId);
+    
+    /**
+     * 根据动态明细ID删除动态明细
+     * 
+     * @param dynamicDetailId
+     */
+    void deleteDynamicDetail(Integer dynamicDetailId);
+    
+    /**
+     * 根据动态明细ID删除动态明细评论
+     * 
+     * @param dynamicDetailId
+     */
+    void deleteDynamicDetailMessage(Integer dynamicDetailId);
 }

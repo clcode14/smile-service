@@ -1,14 +1,50 @@
 package org.flightythought.smile.appserver.service.impl;
 
-import org.flightythought.smile.appserver.bean.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+
+import org.flightythought.smile.appserver.bean.DynamicDetailMessageSimple;
+import org.flightythought.smile.appserver.bean.DynamicDetailSimple;
+import org.flightythought.smile.appserver.bean.DynamicSimple;
+import org.flightythought.smile.appserver.bean.FileInfo;
+import org.flightythought.smile.appserver.bean.LikeData;
+import org.flightythought.smile.appserver.bean.PushMessage;
+import org.flightythought.smile.appserver.bean.UserInfo;
 import org.flightythought.smile.appserver.common.Constants;
 import org.flightythought.smile.appserver.common.PushCodeEnum;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.JPushUtils;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.database.entity.*;
-import org.flightythought.smile.appserver.database.repository.*;
-import org.flightythought.smile.appserver.dto.*;
+import org.flightythought.smile.appserver.database.entity.DynamicDetailMessageEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicDetailsEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicDetailsFilesEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicEntity;
+import org.flightythought.smile.appserver.database.entity.DynamicFilesEntity;
+import org.flightythought.smile.appserver.database.entity.FilesEntity;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.entity.UserToDynamicDetailLikeEntity;
+import org.flightythought.smile.appserver.database.entity.UserToMessageLikeEntity;
+import org.flightythought.smile.appserver.database.repository.DynamicDetailMessageRepository;
+import org.flightythought.smile.appserver.database.repository.DynamicDetailsFilesRepository;
+import org.flightythought.smile.appserver.database.repository.DynamicDetailsRepository;
+import org.flightythought.smile.appserver.database.repository.DynamicFilesRepository;
+import org.flightythought.smile.appserver.database.repository.DynamicRepository;
+import org.flightythought.smile.appserver.database.repository.FilesRepository;
+import org.flightythought.smile.appserver.database.repository.UserRepository;
+import org.flightythought.smile.appserver.database.repository.UserToDynamicDetailLikeRepository;
+import org.flightythought.smile.appserver.database.repository.UserToMessageLikeRepository;
+import org.flightythought.smile.appserver.dto.AddDynamicDTO;
+import org.flightythought.smile.appserver.dto.AddDynamicDetailDTO;
+import org.flightythought.smile.appserver.dto.DynamicDetailMessageDTO;
+import org.flightythought.smile.appserver.dto.DynamicDetailMessageQueryDTO;
+import org.flightythought.smile.appserver.dto.DynamicDetailQueryDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
+import org.flightythought.smile.appserver.dto.UserIdQueryDTO;
 import org.flightythought.smile.appserver.service.DynamicService;
 import org.flightythought.smile.appserver.service.UserService;
 import org.hibernate.query.internal.NativeQueryImpl;
@@ -23,42 +59,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 @Service
 public class DynamicServiceImpl implements DynamicService {
 
     @Autowired
-    private PlatformUtils platformUtils;
+    private PlatformUtils                     platformUtils;
     @Autowired
-    private EntityManager entityManager;
+    private EntityManager                     entityManager;
     @Autowired
-    private DynamicRepository dynamicRepository;
+    private DynamicRepository                 dynamicRepository;
     @Autowired
-    private DynamicFilesRepository dynamicFilesRepository;
+    private DynamicFilesRepository            dynamicFilesRepository;
     @Autowired
-    private DynamicDetailsRepository dynamicDetailsRepository;
+    private DynamicDetailsRepository          dynamicDetailsRepository;
     @Autowired
-    private DynamicDetailsFilesRepository dynamicDetailsFilesRepository;
+    private DynamicDetailsFilesRepository     dynamicDetailsFilesRepository;
     @Autowired
-    private DynamicDetailMessageRepository dynamicDetailMessageRepository;
+    private DynamicDetailMessageRepository    dynamicDetailMessageRepository;
     @Autowired
-    private UserService userService;
+    private UserService                       userService;
     @Autowired
     private UserToDynamicDetailLikeRepository userToDynamicDetailLikeRepository;
     @Autowired
-    private UserToMessageLikeRepository userToMessageLikeRepository;
+    private UserToMessageLikeRepository       userToMessageLikeRepository;
     @Autowired
-    private JPushUtils jPushUtils;
+    private JPushUtils                        jPushUtils;
     @Autowired
-    private FilesRepository filesRepository;
+    private FilesRepository                   filesRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository                    userRepository;
 
     @Override
     @Transactional
@@ -172,11 +201,7 @@ public class DynamicServiceImpl implements DynamicService {
         }
         // 组装SQL语句
         String totalSql = "SELECT COUNT(*) as total FROM (";
-        String sql = "SELECT\n" +
-                "  d.`dynamic_id`\n" +
-                "FROM\n" +
-                "  `tb_dynamic` d\n" +
-                "WHERE 1 = 1 ";
+        String sql = "SELECT\n" + "  d.`dynamic_id`\n" + "FROM\n" + "  `tb_dynamic` d\n" + "WHERE 1 = 1 ";
         if (userId != null) {
             sql += " AND d.`user_id` = " + userId;
         }
@@ -212,10 +237,7 @@ public class DynamicServiceImpl implements DynamicService {
             pageable = PageRequest.of(0, total);
         }
         // 查询结果
-        List<Integer> dynamicIds = entityManager.createNativeQuery(sql)
-                .unwrap(NativeQueryImpl.class)
-                .addScalar("dynamic_id", IntegerType.INSTANCE)
-                .list();
+        List<Integer> dynamicIds = entityManager.createNativeQuery(sql).unwrap(NativeQueryImpl.class).addScalar("dynamic_id", IntegerType.INSTANCE).list();
         List<DynamicEntity> dynamicEntities = dynamicRepository.findByDynamicIdIn(dynamicIds);
         return new PageImpl<>(dynamicEntities, pageable, total);
     }
@@ -312,7 +334,7 @@ public class DynamicServiceImpl implements DynamicService {
             // 判断当前用户是否点赞
             List<UserToDynamicDetailLikeEntity> likeEntities = userToDynamicDetailLikeRepository.findByUserIdAndDynamicDetailIdIn(userEntity.getId(), dynamicDetailIds);
             Map<Integer, UserToDynamicDetailLikeEntity> likeEntityMap = likeEntities.stream()
-                    .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
+                .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
             List<DynamicDetailSimple> dynamicDetailSimples = dynamicDetailsEntities.stream().map(dynamicDetailsEntity -> {
                 DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
                 // 动态明细ID
@@ -494,7 +516,7 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicDetailsEntity.setMessageNum(dynamicDetailsEntity.getMessageNum() == null ? 1 : dynamicDetailsEntity.getMessageNum() + 1);
         dynamicDetailsRepository.save(dynamicDetailsEntity);
         // 自己评论自己不推送
-//        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
+        //        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
         // 评论信息推送
         PushMessage<DynamicDetailMessageSimple> pushMessage = new PushMessage<>();
         // 封装评论用户
@@ -515,7 +537,7 @@ public class DynamicServiceImpl implements DynamicService {
         pushMessage.setMessage("您有一条新评论");
         pushMessage.setType(Constants.NOTICE_MESSAGE);
         jPushUtils.pushData(pushMessage, dynamicDetailMessageDTO.getToUserId());
-//        }
+        //        }
         return dynamicDetailMessageEntity;
     }
 
@@ -553,7 +575,8 @@ public class DynamicServiceImpl implements DynamicService {
             }
         }
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
-        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId, pageable);
+        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId,
+            pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -575,7 +598,8 @@ public class DynamicServiceImpl implements DynamicService {
         }
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
         Integer messageId = dynamicDetailMessageQueryDTO.getMessageId();
-        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(dynamicDetailId, messageId, pageable);
+        Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(dynamicDetailId,
+            messageId, pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -592,7 +616,8 @@ public class DynamicServiceImpl implements DynamicService {
         List<Integer> messageIds = dynamicDetailMessageEntities.stream().map(DynamicDetailMessageEntity::getId).collect(Collectors.toList());
         // 获取用户点赞的信息集合
         List<UserToMessageLikeEntity> userToMessageLikeEntities = userToMessageLikeRepository.findByUserIdAndMessageIdIn(userId, messageIds);
-        Map<Integer, UserToMessageLikeEntity> likeEntityMap = userToMessageLikeEntities.stream().collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
+        Map<Integer, UserToMessageLikeEntity> likeEntityMap = userToMessageLikeEntities.stream()
+            .collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
         dynamicDetailMessageEntities.forEach(dynamicDetailMessageEntity -> {
             DynamicDetailMessageSimple dynamicDetailMessageSimple = new DynamicDetailMessageSimple();
             result.add(dynamicDetailMessageSimple);
@@ -665,7 +690,7 @@ public class DynamicServiceImpl implements DynamicService {
             likeEntity.setDynamicDetailId(dynamicDetailId);
             userToDynamicDetailLikeRepository.save(likeEntity);
             // 点赞自己发布的不推送
-//            if (userId != dynamicDetailsEntity.getUserId()) {
+            //            if (userId != dynamicDetailsEntity.getUserId()) {
             // 评论点赞推送
             // 点赞用户
             UserInfo userInfo = userService.getUserInfo(userId);
@@ -680,7 +705,7 @@ public class DynamicServiceImpl implements DynamicService {
             pushMessage.setTitle("您发表的动态有用户点赞");
             pushMessage.setMessage("您发表的动态有用户点赞");
             jPushUtils.pushData(pushMessage, dynamicDetailsEntity.getUserId());
-//            }
+            //            }
         }
         dynamicDetailsRepository.save(dynamicDetailsEntity);
     }
@@ -709,7 +734,7 @@ public class DynamicServiceImpl implements DynamicService {
             likeEntity.setMessageId(messageId);
             userToMessageLikeRepository.save(likeEntity);
             // 点赞自己发布的不推送
-//            if (userId != dynamicDetailMessageEntity.getFromUserId()) {
+            //            if (userId != dynamicDetailMessageEntity.getFromUserId()) {
             // 动态明细评论信息推送
             // 获取点赞用户
             UserInfo userInfo = userService.getUserInfo(userId);
@@ -728,7 +753,7 @@ public class DynamicServiceImpl implements DynamicService {
             pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE_LIKE.getMessage());
             pushMessage.setData(likeData);
             jPushUtils.pushData(pushMessage, dynamicDetailMessageEntity.getFromUserId());
-//            }
+            //            }
         }
         dynamicDetailMessageRepository.save(dynamicDetailMessageEntity);
     }
@@ -738,5 +763,32 @@ public class DynamicServiceImpl implements DynamicService {
     public DynamicDetailSimple getDynamicDetail(Integer dynamicDetailId) {
         DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
         return getDynamicDetailSimple(dynamicDetailsEntity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDynamic(Integer dynamicId) {
+        DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicId);
+        if (dynamicEntity != null) {
+            dynamicRepository.delete(dynamicEntity);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteDynamicDetail(Integer dynamicDetailId) {
+        DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+        if (dynamicDetailsEntity != null) {
+            dynamicDetailsRepository.delete(dynamicDetailsEntity);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteDynamicDetailMessage(Integer dynamicDetailId) {
+        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
+        detailMessageEntities.forEach(message -> {
+            dynamicDetailMessageRepository.delete(message);
+        });
     }
 }
