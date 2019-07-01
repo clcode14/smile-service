@@ -420,26 +420,29 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicDetailsEntity.setHidden(addDynamicDetailDTO.getHidden() == null ? false : addDynamicDetailDTO.getHidden());
         // 创建者
         dynamicDetailsEntity.setCreateUserName(userId + "");
-        // 保存动态明细
-        dynamicDetailsEntity = dynamicDetailsRepository.save(dynamicDetailsEntity);
-        // 保存文件信息
-        List<DynamicDetailsFilesEntity> dynamicDetailsFilesEntities = new ArrayList<>();
+        // 文件
         List<Integer> fileIds = addDynamicDetailDTO.getFileIds();
-        if (fileIds != null && fileIds.size() > 0) {
-            Integer dynamicDetailId = dynamicDetailsEntity.getDynamicDetailId();
-            fileIds.forEach(fileId -> {
-                DynamicDetailsFilesEntity dynamicDetailsFilesEntity = new DynamicDetailsFilesEntity();
-                // 发布动态明细ID
-                dynamicDetailsFilesEntity.setDynamicDetailId(dynamicDetailId);
-                // 文件ID
-                dynamicDetailsFilesEntity.setFileId(fileId);
-                dynamicDetailsFilesEntities.add(dynamicDetailsFilesEntity);
-            });
-            // 保存文件信息
-            dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
-        }
         List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
         dynamicDetailsEntity.setFiles(filesEntities);
+        // 保存动态明细
+        dynamicDetailsEntity = dynamicDetailsRepository.save(dynamicDetailsEntity);
+//        List<DynamicDetailsFilesEntity> dynamicDetailsFilesEntities = new ArrayList<>();
+//        List<Integer> fileIds = addDynamicDetailDTO.getFileIds();
+//        if (fileIds != null && fileIds.size() > 0) {
+//            Integer dynamicDetailId = dynamicDetailsEntity.getDynamicDetailId();
+//            fileIds.forEach(fileId -> {
+//                DynamicDetailsFilesEntity dynamicDetailsFilesEntity = new DynamicDetailsFilesEntity();
+//                // 发布动态明细ID
+//                dynamicDetailsFilesEntity.setDynamicDetailId(dynamicDetailId);
+//                // 文件ID
+//                dynamicDetailsFilesEntity.setFileId(fileId);
+//                dynamicDetailsFilesEntities.add(dynamicDetailsFilesEntity);
+//            });
+//            // 保存文件信息
+//            dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
+//        }
+//        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
+//        dynamicDetailsEntity.setFiles(filesEntities);
         return getDynamicDetailSimple(dynamicDetailsEntity);
     }
 
