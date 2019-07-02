@@ -17,4 +17,6 @@ public interface DynamicDetailMessageRepository extends JpaRepository<DynamicDet
     Page<DynamicDetailMessageEntity> findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(Integer dynamicDetailId,Integer parentId, Pageable pageable);
 
     DynamicDetailMessageEntity findById(Integer messageId);
+
+    List<DynamicDetailMessageEntity> findByDynamicDetailId(Integer dynamicDetailId);
 }

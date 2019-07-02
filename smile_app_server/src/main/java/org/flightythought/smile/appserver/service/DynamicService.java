@@ -176,7 +176,7 @@ public interface DynamicService {
     /**
      * 根据动态明细ID删除动态明细评论
      * 
-     * @param dynamicDetailId
+     * @param messageId
      */
-    void deleteDynamicDetailMessage(Integer dynamicDetailId);
+    void deleteDynamicDetailMessage(Integer messageId);
 }
