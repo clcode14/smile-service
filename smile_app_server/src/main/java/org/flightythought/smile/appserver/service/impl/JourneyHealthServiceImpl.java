@@ -706,11 +706,21 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         long total;
         if (pageSize == null || pageSize == 0 || pageNumber == null || pageNumber == 0) {
             journeyNoteEntities = journeyNoteRepository.findByJourneyId(journeyId);
+            journeyNoteEntities.sort((note1, note2) -> {
+                if (note1.getNoteDate().isAfter(note2.getNoteDate())) {
+                    return -1;
+                } else if (note1.getNoteDate().isEqual(note2.getNoteDate())) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            });
             pageRequest = PageRequest.of(0, journeyNoteEntities.size());
             total = (long) journeyNoteEntities.size();
         } else {
             pageRequest = PageRequest.of(pageNumber - 1, pageSize);
-            Page<JourneyNoteEntity> journeyNoteEntityPage = journeyNoteRepository.findByJourneyId(journeyId, pageRequest);
+//            Page<JourneyNoteEntity> journeyNoteEntityPage = journeyNoteRepository.findByJourneyId(journeyId, pageRequest);
+            Page<JourneyNoteEntity> journeyNoteEntityPage = journeyNoteRepository.findByJourneyIdOrderByNoteDateDesc(journeyId, pageRequest);
             journeyNoteEntities = journeyNoteEntityPage.getContent();
             total = journeyNoteEntityPage.getTotalElements();
         }

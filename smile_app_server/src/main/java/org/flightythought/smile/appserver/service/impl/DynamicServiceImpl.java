@@ -63,31 +63,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class DynamicServiceImpl implements DynamicService {
 
     @Autowired
-    private PlatformUtils                     platformUtils;
+    private PlatformUtils platformUtils;
     @Autowired
-    private EntityManager                     entityManager;
+    private EntityManager entityManager;
     @Autowired
-    private DynamicRepository                 dynamicRepository;
+    private DynamicRepository dynamicRepository;
     @Autowired
-    private DynamicFilesRepository            dynamicFilesRepository;
+    private DynamicFilesRepository dynamicFilesRepository;
     @Autowired
-    private DynamicDetailsRepository          dynamicDetailsRepository;
+    private DynamicDetailsRepository dynamicDetailsRepository;
     @Autowired
-    private DynamicDetailsFilesRepository     dynamicDetailsFilesRepository;
+    private DynamicDetailsFilesRepository dynamicDetailsFilesRepository;
     @Autowired
-    private DynamicDetailMessageRepository    dynamicDetailMessageRepository;
+    private DynamicDetailMessageRepository dynamicDetailMessageRepository;
     @Autowired
-    private UserService                       userService;
+    private UserService userService;
     @Autowired
     private UserToDynamicDetailLikeRepository userToDynamicDetailLikeRepository;
     @Autowired
-    private UserToMessageLikeRepository       userToMessageLikeRepository;
+    private UserToMessageLikeRepository userToMessageLikeRepository;
     @Autowired
-    private JPushUtils                        jPushUtils;
+    private JPushUtils jPushUtils;
     @Autowired
-    private FilesRepository                   filesRepository;
+    private FilesRepository filesRepository;
     @Autowired
-    private UserRepository                    userRepository;
+    private UserRepository userRepository;
 
     @Override
     @Transactional
@@ -334,7 +334,7 @@ public class DynamicServiceImpl implements DynamicService {
             // 判断当前用户是否点赞
             List<UserToDynamicDetailLikeEntity> likeEntities = userToDynamicDetailLikeRepository.findByUserIdAndDynamicDetailIdIn(userEntity.getId(), dynamicDetailIds);
             Map<Integer, UserToDynamicDetailLikeEntity> likeEntityMap = likeEntities.stream()
-                .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
+                    .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
             List<DynamicDetailSimple> dynamicDetailSimples = dynamicDetailsEntities.stream().map(dynamicDetailsEntity -> {
                 DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
                 // 动态明细ID
@@ -579,7 +579,7 @@ public class DynamicServiceImpl implements DynamicService {
         }
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
         Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId,
-            pageable);
+                pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -602,7 +602,7 @@ public class DynamicServiceImpl implements DynamicService {
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
         Integer messageId = dynamicDetailMessageQueryDTO.getMessageId();
         Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(dynamicDetailId,
-            messageId, pageable);
+                messageId, pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -620,7 +620,7 @@ public class DynamicServiceImpl implements DynamicService {
         // 获取用户点赞的信息集合
         List<UserToMessageLikeEntity> userToMessageLikeEntities = userToMessageLikeRepository.findByUserIdAndMessageIdIn(userId, messageIds);
         Map<Integer, UserToMessageLikeEntity> likeEntityMap = userToMessageLikeEntities.stream()
-            .collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
+                .collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
         dynamicDetailMessageEntities.forEach(dynamicDetailMessageEntity -> {
             DynamicDetailMessageSimple dynamicDetailMessageSimple = new DynamicDetailMessageSimple();
             result.add(dynamicDetailMessageSimple);
@@ -789,7 +789,10 @@ public class DynamicServiceImpl implements DynamicService {
     @Override
     @Transactional
     public void deleteDynamicDetailMessage(Integer dynamicDetailId) {
-        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
+        // 除了第一个评论，其他删除
+//        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
+        // 删除所有评论
+        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailId(dynamicDetailId);
         detailMessageEntities.forEach(message -> {
             dynamicDetailMessageRepository.delete(message);
         });
