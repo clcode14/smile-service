@@ -3,6 +3,8 @@ package org.flightythought.smile.admin.bean;
 import lombok.Data;
 import org.flightythought.smile.admin.database.entity.BaseEntity;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -48,4 +50,9 @@ public class HealthWay extends BaseEntity {
      * 类型
      */
     private Integer type;
+
+    /**
+     * 音乐
+     */
+    private List<FileInfo> music;
 }
