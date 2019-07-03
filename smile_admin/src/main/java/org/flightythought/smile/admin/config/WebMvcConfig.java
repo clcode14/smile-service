@@ -3,6 +3,8 @@ package org.flightythought.smile.admin.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.filter.FormContentFilter;
+import org.springframework.web.filter.HttpPutFormContentFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -59,4 +61,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 //跨域允许时间
                 .maxAge(3600);
     }
+
+
 }

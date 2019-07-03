@@ -129,7 +129,7 @@ public class DynamicServiceImpl implements DynamicService {
             });
         }
         if (dynamicFilesEntities.size() > 0) {
-            dynamicFilesRepository.saveAll(dynamicFilesEntities);
+//            dynamicFilesRepository.saveAll(dynamicFilesEntities);
         }
         // 查询文件
         List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
@@ -420,29 +420,26 @@ public class DynamicServiceImpl implements DynamicService {
         dynamicDetailsEntity.setHidden(addDynamicDetailDTO.getHidden() == null ? false : addDynamicDetailDTO.getHidden());
         // 创建者
         dynamicDetailsEntity.setCreateUserName(userId + "");
-        // 文件
-        List<Integer> fileIds = addDynamicDetailDTO.getFileIds();
-        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
-        dynamicDetailsEntity.setFiles(filesEntities);
         // 保存动态明细
         dynamicDetailsEntity = dynamicDetailsRepository.save(dynamicDetailsEntity);
-//        List<DynamicDetailsFilesEntity> dynamicDetailsFilesEntities = new ArrayList<>();
-//        List<Integer> fileIds = addDynamicDetailDTO.getFileIds();
-//        if (fileIds != null && fileIds.size() > 0) {
-//            Integer dynamicDetailId = dynamicDetailsEntity.getDynamicDetailId();
-//            fileIds.forEach(fileId -> {
-//                DynamicDetailsFilesEntity dynamicDetailsFilesEntity = new DynamicDetailsFilesEntity();
-//                // 发布动态明细ID
-//                dynamicDetailsFilesEntity.setDynamicDetailId(dynamicDetailId);
-//                // 文件ID
-//                dynamicDetailsFilesEntity.setFileId(fileId);
-//                dynamicDetailsFilesEntities.add(dynamicDetailsFilesEntity);
-//            });
-//            // 保存文件信息
+        // 保存文件信息
+        List<DynamicDetailsFilesEntity> dynamicDetailsFilesEntities = new ArrayList<>();
+        List<Integer> fileIds = addDynamicDetailDTO.getFileIds();
+        if (fileIds != null && fileIds.size() > 0) {
+            Integer dynamicDetailId = dynamicDetailsEntity.getDynamicDetailId();
+            fileIds.forEach(fileId -> {
+                DynamicDetailsFilesEntity dynamicDetailsFilesEntity = new DynamicDetailsFilesEntity();
+                // 发布动态明细ID
+                dynamicDetailsFilesEntity.setDynamicDetailId(dynamicDetailId);
+                // 文件ID
+                dynamicDetailsFilesEntity.setFileId(fileId);
+                dynamicDetailsFilesEntities.add(dynamicDetailsFilesEntity);
+            });
+            // 保存文件信息
 //            dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
-//        }
-//        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
-//        dynamicDetailsEntity.setFiles(filesEntities);
+        }
+        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
+        dynamicDetailsEntity.setFiles(filesEntities);
         return getDynamicDetailSimple(dynamicDetailsEntity);
     }
 
@@ -456,6 +453,7 @@ public class DynamicServiceImpl implements DynamicService {
     @Override
     public DynamicDetailSimple getDynamicDetailSimple(DynamicDetailsEntity dynamicDetailsEntity) {
         if (dynamicDetailsEntity != null) {
+            String domainPort = platformUtils.getDomainPort();
             DynamicDetailSimple dynamicDetailSimple = new DynamicDetailSimple();
             // 动态明细ID
             dynamicDetailSimple.setDynamicDetailId(dynamicDetailsEntity.getDynamicDetailId());
@@ -480,7 +478,12 @@ public class DynamicServiceImpl implements DynamicService {
             dynamicDetailSimple.setHidden(dynamicDetailsEntity.getHidden());
             // 创建时间
             dynamicDetailSimple.setCreateTime(dynamicDetailsEntity.getCreateTime());
-
+            // 文件
+            List<FilesEntity> filesEntities = dynamicDetailsEntity.getFiles();
+            if (filesEntities != null) {
+               List<FileInfo> fileInfo =  filesEntities.stream().map(file->platformUtils.getFileInfo(file, domainPort)).collect(Collectors.toList());
+               dynamicDetailSimple.setFiles(fileInfo);
+            }
             return dynamicDetailSimple;
         }
         return null;
@@ -769,7 +772,7 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDynamic(Integer dynamicId) {
         DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicId);
         if (dynamicEntity != null) {
@@ -778,23 +781,33 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDynamicDetail(Integer dynamicDetailId) {
         DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
         if (dynamicDetailsEntity != null) {
+            // 明细删除减小明细统计个数
+            DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicDetailsEntity.getDynamicId());
+            dynamicEntity.setReadNum(dynamicEntity.getReadNum() - 1);
+            dynamicRepository.save(dynamicEntity);
             dynamicDetailsRepository.delete(dynamicDetailsEntity);
         }
     }
 
     @Override
-    @Transactional
-    public void deleteDynamicDetailMessage(Integer dynamicDetailId) {
-        // 除了第一个评论，其他删除
-//        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
-        // 删除所有评论
-        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailId(dynamicDetailId);
-        detailMessageEntities.forEach(message -> {
-            dynamicDetailMessageRepository.delete(message);
-        });
+    public void deleteDynamicDetailMessage(Integer messageId) {
+        DynamicDetailMessageEntity dynamicDetailMessageEntity = dynamicDetailMessageRepository.findById(messageId);
+        if (dynamicDetailMessageEntity != null) {
+            Integer dynamicDetailId = dynamicDetailMessageEntity.getDynamicDetailId();
+            dynamicDetailMessageRepository.delete(dynamicDetailMessageEntity);
+            // 更新message个数
+            DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+            List<DynamicDetailMessageEntity> list = dynamicDetailMessageRepository.findByDynamicDetailId(dynamicDetailId);
+            int count = 0;
+            if (list != null) {
+                count = list.size();
+            }
+            dynamicDetailsEntity.setMessageNum(count);
+            dynamicDetailsRepository.save(dynamicDetailsEntity);
+        }
     }
 }

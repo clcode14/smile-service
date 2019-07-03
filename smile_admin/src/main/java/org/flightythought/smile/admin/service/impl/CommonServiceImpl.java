@@ -3,13 +3,17 @@ package org.flightythought.smile.admin.service.impl;
 import com.aliyun.oss.OSSClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.flightythought.smile.admin.bean.FileInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.bean.SelectItemOption;
 import org.flightythought.smile.admin.common.GlobalConstant;
+import org.flightythought.smile.admin.common.PlatformUtils;
 import org.flightythought.smile.admin.config.ALiOSSConfig;
+import org.flightythought.smile.admin.database.entity.FilesEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysParameterEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
+import org.flightythought.smile.admin.database.repository.FilesRepository;
 import org.flightythought.smile.admin.database.repository.ImagesRepository;
 import org.flightythought.smile.admin.database.repository.SolutionRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
@@ -50,6 +54,10 @@ public class CommonServiceImpl implements CommonService {
     private ALiOSSConfig aLiOSSConfig;
     @Autowired
     private SolutionRepository solutionRepository;
+    @Autowired
+    private FilesRepository filesRepository;
+    @Autowired
+    private PlatformUtils platformUtils;
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonServiceImpl.class);
 
@@ -252,6 +260,148 @@ public class CommonServiceImpl implements CommonService {
                 imagesRepository.delete(imagesEntity);
             }
         }
+    }
+
+    @Override
+    public FileInfo uploadFile(MultipartFile multipartFile, String type, HttpSession session) throws FlightyThoughtException {
+        List<MultipartFile> multipartFiles = new ArrayList<>();
+        multipartFiles.add(multipartFile);
+        List<FileInfo> fileInfos = uploadFiles(multipartFiles, type, session);
+        if (fileInfos != null && fileInfos.size() > 0) {
+            return fileInfos.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<FileInfo> uploadFiles(List<MultipartFile> files, String type, HttpSession session) throws FlightyThoughtException {
+        String fileType = "";
+        if (type != null) {
+            switch (type) {
+                case "1": {
+                    fileType = "dynamic";
+                    break;
+                }
+                case "2": {
+                    fileType = "dynamic_detail";
+                    break;
+                }
+                case "3": {
+                    fileType = "music";
+                    break;
+                }
+                default:
+                    fileType = "";
+            }
+        }
+        // 获取当前登陆用户
+        SysUserEntity userEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
+        List<FilesEntity> filesEntities = new ArrayList<>();
+        SysParameterEntity domainPortEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = domainPortEntity.getParameterValue();
+        String imagePath = "", userPath;
+        if (ossStatus) {
+            if (!"".equals(fileType)) {
+                userPath = fileType + "/" + userEntity.getId();
+            } else {
+                userPath = userEntity.getId() + "";
+            }
+        } else {
+            if (!"".equals(fileType)) {
+                userPath = File.separator + fileType + File.separator + userEntity.getId();
+            } else {
+                userPath = File.separator + userEntity.getId();
+            }
+        }
+        if (!ossStatus) {
+            // 获取系统参数
+            SysParameterEntity sysParameterEntity = sysParameterRepository.getFilePathParam();
+            if (sysParameterEntity == null) {
+                throw new FlightyThoughtException("请设置上传文件路径系统参数");
+            } else {
+                imagePath = sysParameterEntity.getParameterValue();
+                File file = new File(imagePath + userPath);
+                if (!file.exists()) {
+                    file.mkdirs();
+                }
+            }
+        }
+
+        if (files == null || files.size() == 0) {
+            throw new FlightyThoughtException("请选择要上传的图片");
+        }
+        for (MultipartFile multipartFile : files) {
+            if (multipartFile != null) {
+                FilesEntity filesEntity = new FilesEntity();
+                // 上传者
+                filesEntity.setCreateUserName(userEntity.getId() + "");
+                // 图片大小
+                filesEntity.setSize(multipartFile.getSize());
+                // 文件类型
+                filesEntity.setFileType(multipartFile.getContentType());
+                // 上传封面图片到服务器
+                // 获取原始图片名称
+                String imageName = multipartFile.getOriginalFilename();
+                // 新建文件
+                if (imageName != null) {
+                    if (!ossStatus) {
+                        String path = userPath + File.separator + System.currentTimeMillis() + imageName.substring(imageName.lastIndexOf("."));
+                        // 图片名称
+                        filesEntity.setFileName(imageName);
+                        // 图片路径
+                        filesEntity.setPath(path);
+                        File coverPictureFile = new File(imagePath + path);
+                        try {
+                            // 创建文件输出流
+                            FileOutputStream fileOutputStream = new FileOutputStream(coverPictureFile);
+                            // 复制文件
+                            IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
+                            fileOutputStream.flush();
+                            fileOutputStream.close();
+                            filesEntities.add(filesEntity);
+                        } catch (IOException e) {
+                            LOG.error("上传图片失败", e);
+                            throw new FlightyThoughtException("上传图片失败", e);
+                        }
+                    } else {
+                        // OSS 对象存储
+                        // 1. 获取文件后缀名
+                        String suffix = getSuffix(multipartFile);
+                        // 2. 获取OSS参数信息
+                        String endpoint = aLiOSSConfig.getEndpoint();
+                        String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                        String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                        String bucketName = aLiOSSConfig.getBucketName();
+                        // 创建OSSClient实例
+                        OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                        // 文件KEY
+                        String fileKey = userPath + "/" + System.currentTimeMillis() + "." + suffix;
+                        // 上传文件
+                        try {
+                            ossClient.putObject(bucketName, fileKey, multipartFile.getInputStream());
+                            // 设置URL过期时间为100年
+                            Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+
+                            // 生成URL
+                            URL url = ossClient.generatePresignedUrl(bucketName, fileKey, expiration);
+                            // 保存数据对象
+                            filesEntity.setOssKey(fileKey);
+                            filesEntity.setOssUrl(url.toString());
+                            filesEntities.add(filesEntity);
+                        } catch (IOException e) {
+                            LOG.error("上传图片失败", e);
+                            throw new FlightyThoughtException("上传图片失败", e);
+                        } finally {
+                            ossClient.shutdown();
+                        }
+                    }
+                }
+            }
+        }
+        filesEntities = filesRepository.saveAll(filesEntities);
+        List<FileInfo> result = new ArrayList<>();
+        filesEntities.forEach(filesEntity -> result.add(platformUtils.getFileInfo(filesEntity, domainPort)));
+        return result;
     }
 
     @Override

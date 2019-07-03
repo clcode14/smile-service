@@ -1,8 +1,10 @@
 package org.flightythought.smile.admin.common;
 
 import com.aliyun.oss.OSSClient;
+import org.flightythought.smile.admin.bean.FileInfo;
 import org.flightythought.smile.admin.bean.ImageInfo;
 import org.flightythought.smile.admin.config.ALiOSSConfig;
+import org.flightythought.smile.admin.database.entity.FilesEntity;
 import org.flightythought.smile.admin.database.entity.ImagesEntity;
 import org.flightythought.smile.admin.database.entity.SysUserEntity;
 import org.flightythought.smile.admin.database.entity.UserEntity;
@@ -77,6 +79,43 @@ public class PlatformUtils {
             imageInfo.setId(imagesEntity.getId());
             imageInfo.setSize(imagesEntity.getSize());
             return imageInfo;
+        }
+        return null;
+    }
+    public FileInfo getFileInfo(FilesEntity filesEntity, String domainPort) {
+        if (filesEntity != null) {
+            FileInfo fileInfo = new FileInfo();
+            // 文件ID
+            fileInfo.setId(filesEntity.getId());
+            // 文件名称
+            fileInfo.setName(filesEntity.getFileName());
+            // 创建时间
+            fileInfo.setCreateTime(filesEntity.getCreateTime());
+            // 资源URL
+            if (!ossStatus) {
+                fileInfo.setUrl(getStaticUrlByPath(filesEntity.getPath(), domainPort));
+            } else {
+                // 获取url
+                // 2. 获取OSS参数信息
+                String endpoint = aLiOSSConfig.getEndpoint();
+                String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                String bucketName = aLiOSSConfig.getBucketName();
+                // 创建OSSClient实例
+                OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                // 设置URL过期时间为100年
+                Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+                // 生成URL
+                URL url = ossClient.generatePresignedUrl(bucketName, filesEntity.getOssKey(), expiration);
+                fileInfo.setUrl(url.toString());
+            }
+            // 文件大小
+            fileInfo.setSize(filesEntity.getSize());
+            // 文件类型
+            fileInfo.setFileType(filesEntity.getFileType());
+            // OSS KEY
+            fileInfo.setOssKey(filesEntity.getOssKey());
+            return fileInfo;
         }
         return null;
     }

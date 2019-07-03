@@ -1,5 +1,6 @@
 package org.flightythought.smile.admin.service;
 
+import org.flightythought.smile.admin.bean.FileInfo;
 import org.flightythought.smile.admin.bean.HealthClassInfo;
 import org.flightythought.smile.admin.bean.HealthWay;
 import org.flightythought.smile.admin.database.entity.HealthEntity;
@@ -7,8 +8,11 @@ import org.flightythought.smile.admin.database.entity.HealthWayEntity;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
 import org.flightythought.smile.admin.dto.HealthWayDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,4 +42,12 @@ public interface HealthService {
     HealthWayEntity modifyHealthWay(HealthWayDTO healthWayDTO);
 
     void deleteHealthWay(Integer healthWayId);
+
+    FileInfo uploadFile(MultipartFile file, String musicName, HttpSession session);
+
+    List<FileInfo> getAllMusicFile();
+
+    Page<FileInfo> getMusics(Integer pageNumber, Integer pageSize, String musicName);
+
+    void deleteFile(Integer fileId);
 }
