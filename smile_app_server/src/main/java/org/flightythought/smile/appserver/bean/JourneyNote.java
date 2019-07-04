@@ -62,5 +62,10 @@ public class JourneyNote {
      */
     private List<JourneyNoteNorm> journeyNoteNorms;
 
+    /**
+     * User信息
+     */
+    private UserInfo userInfo;
+
 
 }
