@@ -267,25 +267,30 @@ public class HealthServiceImpl implements HealthService {
             }
             if (healthWayDTO.getType() == 2) {
                 // 类型2 快、中、慢 三种音乐
-                for (int i = 0; i < filesEntities.size(); i++) {
-                    FilesEntity filesEntity = filesEntities.get(i);
-                    HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
-                    healthWayMusicEntity.setFileId(filesEntity.getId());
-                    healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
-                    String name = null;
-                    switch (i) {
-                        case 0:
-                            name = "快速";
-                            break;
-                        case 1:
-                            name = "中速";
-                            break;
-                        case 2:
-                            name = "慢速";
-                            break;
+                List<Integer> musicFileIds = healthWayDTO.getMusicFileIds();
+                for (int i = 0; i < musicFileIds.size(); i++) {
+                    for (FilesEntity filesEntity : filesEntities) {
+                        if (filesEntity.getId().intValue() == musicFileIds.get(i).intValue()) {
+                            HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                            healthWayMusicEntity.setFileId(filesEntity.getId());
+                            healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                            healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                            String name = null;
+                            switch (i) {
+                                case 0:
+                                    name = "快速";
+                                    break;
+                                case 1:
+                                    name = "中速";
+                                    break;
+                                case 2:
+                                    name = "慢速";
+                                    break;
+                            }
+                            healthWayMusicEntity.setName(name);
+                            healthWayMusicEntities.add(healthWayMusicEntity);
+                        }
                     }
-                    healthWayMusicEntity.setName(name);
-                    healthWayMusicEntities.add(healthWayMusicEntity);
                 }
             }
             if (healthWayDTO.getType() == 3) {
@@ -303,7 +308,11 @@ public class HealthServiceImpl implements HealthService {
 
         // 创建者
         healthWayEntity.setCreateUserName(userEntity.getLoginName());
-        return healthWayRepository.save(healthWayEntity);
+        healthWayEntity = healthWayRepository.save(healthWayEntity);
+        HealthWayEntity finalHealthWayEntity = healthWayEntity;
+        healthWayMusicEntities.forEach(healthWayMusicEntity -> healthWayMusicEntity.setHealthWayId(finalHealthWayEntity.getHealthWayId()));
+        healthWayMusicRepository.saveAll(healthWayMusicEntities);
+        return healthWayEntity;
     }
 
     @Override
@@ -355,9 +364,11 @@ public class HealthServiceImpl implements HealthService {
             SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
             // 养生方式名称
             healthWayEntity.setWayName(healthWayDTO.getWayName());
-            if (!healthWayEntity.getBgImage().equals(healthWayDTO.getBgImageId())) {
-                // 删除原来的背景图片
-                commonService.deleteImage(healthWayEntity.getBgImageId());
+            if (healthWayEntity.getBgImage() != null) {
+                if (!healthWayEntity.getBgImageId().equals(healthWayDTO.getBgImageId())) {
+                    // 删除原来的背景图片
+                    commonService.deleteImage(healthWayEntity.getBgImageId());
+                }
             }
             // 背景图片
             healthWayEntity.setBgImageId(healthWayDTO.getBgImageId());
@@ -381,29 +392,35 @@ public class HealthServiceImpl implements HealthService {
                     healthWayMusicEntity.setFileId(filesEntity.getId());
                     healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
                     healthWayMusicEntity.setName(filesEntity.getFileName());
+                    healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
                     healthWayMusicEntities.add(healthWayMusicEntity);
                 }
                 if (healthWayDTO.getType() == 2) {
                     // 类型2 快、中、慢 三种音乐
-                    for (int i = 0; i < filesEntities.size(); i++) {
-                        FilesEntity filesEntity = filesEntities.get(i);
-                        HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
-                        healthWayMusicEntity.setFileId(filesEntity.getId());
-                        healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
-                        String name = null;
-                        switch (i) {
-                            case 0:
-                                name = "快速";
-                                break;
-                            case 1:
-                                name = "中速";
-                                break;
-                            case 2:
-                                name = "慢速";
-                                break;
+                    List<Integer> musicFileIds = healthWayDTO.getMusicFileIds();
+                    for (int i = 0; i < musicFileIds.size(); i++) {
+                        for (FilesEntity filesEntity : filesEntities) {
+                            if (filesEntity.getId().intValue() == musicFileIds.get(i).intValue()) {
+                                HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                                healthWayMusicEntity.setFileId(filesEntity.getId());
+                                healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                                healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                                String name = null;
+                                switch (i) {
+                                    case 0:
+                                        name = "快速";
+                                        break;
+                                    case 1:
+                                        name = "中速";
+                                        break;
+                                    case 2:
+                                        name = "慢速";
+                                        break;
+                                }
+                                healthWayMusicEntity.setName(name);
+                                healthWayMusicEntities.add(healthWayMusicEntity);
+                            }
                         }
-                        healthWayMusicEntity.setName(name);
-                        healthWayMusicEntities.add(healthWayMusicEntity);
                     }
                 }
                 if (healthWayDTO.getType() == 3) {
@@ -413,10 +430,15 @@ public class HealthServiceImpl implements HealthService {
                         healthWayMusicEntity.setFileId(filesEntity.getId());
                         healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
                         healthWayMusicEntity.setName(filesEntity.getFileName());
+                        healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
                         healthWayMusicEntities.add(healthWayMusicEntity);
                     }
                 }
                 healthWayEntity.setMusicEntities(healthWayMusicEntities);
+                // 删除音乐
+                healthWayMusicRepository.deleteAllByHealthWayId(healthWayDTO.getHealthWayId());
+                // 保存音乐
+                healthWayMusicRepository.saveAll(healthWayMusicEntities);
             }
             // 修改者
             healthWayEntity.setUpdateUserName(userEntity.getLoginName());

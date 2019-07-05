@@ -223,9 +223,6 @@ public class DynamicServiceImpl implements DynamicService {
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
-        if (total == 0) {
-            throw new FlightyThoughtException("未查询到动态");
-        }
         // 是否存在分页查询
         Integer pageNumber = pageFilterDTO.getPageNumber();
         Integer pageSize = pageFilterDTO.getPageSize();
@@ -236,6 +233,10 @@ public class DynamicServiceImpl implements DynamicService {
         } else {
             pageable = PageRequest.of(0, total);
         }
+        if (total == 0) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
         // 查询结果
         List<Integer> dynamicIds = entityManager.createNativeQuery(sql).unwrap(NativeQueryImpl.class).addScalar("dynamic_id", IntegerType.INSTANCE).list();
         List<DynamicEntity> dynamicEntities = dynamicRepository.findByDynamicIdIn(dynamicIds);

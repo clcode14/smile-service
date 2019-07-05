@@ -36,4 +36,6 @@ public interface JourneyHealthService {
     List<DiseaseClassDetailSimple> getDiseaseByJourneyId(Integer journeyId);
 
     void deleteJourneyById(Integer journeyId);
+
+    JourneyNote getJourneyNote(Long noteId);
 }

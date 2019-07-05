@@ -18,4 +18,6 @@ import java.util.List;
 public interface HealthWayMusicRepository extends JpaRepository<HealthWayMusicEntity, Integer> {
 
     List<HealthWayMusicEntity> findByHealthWayId(Integer healthWayId);
+
+    void deleteAllByHealthWayId(Integer healthWayId);
 }

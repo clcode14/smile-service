@@ -83,6 +83,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
     private DiseaseService diseaseService;
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private ImagesRepository imagesRepository;
 
     @Value("${static-url}")
     private String staticUrl;
@@ -689,6 +691,16 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         // 养生旅程日记+1
         journeyEntity.setNoteNum(journeyEntity.getNoteNum() + 1);
         journeyRepository.save(journeyEntity);
+        // 根据图片ID获取图片
+        List<ImagesEntity> imagesEntities = imagesRepository.findByIdIn(imageIds);
+        if (imagesEntities != null) {
+            String domainPort = platformUtils.getDomainPort();
+            for (ImagesEntity imagesEntity : imagesEntities) {
+                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
+                imagesEntity.setOssUrl(imageInfo.getUrl());
+            }
+        }
+        journeyNoteEntity.setImages(imagesEntities);
         return journeyNoteEntity;
     }
 
@@ -724,6 +736,10 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             journeyNoteEntities = journeyNoteEntityPage.getContent();
             total = journeyNoteEntityPage.getTotalElements();
         }
+        // 获取养生旅程
+        JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyId);
+        // 获取创建用户
+        UserInfo userInfo = userService.getUserInfo(journeyEntity.getUserId());
         if (journeyNoteEntities.size() > 0) {
             // 获取体检指标
             List<HealthNormTypeEntity> healthNormTypeEntities = healthNormTypeRepository.findAll();
@@ -733,6 +749,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.MEDIUM);
             journeyNoteEntities.forEach(journeyNoteEntity -> {
                 JourneyNote journeyNote = new JourneyNote();
+                // 创建用户
+                journeyNote.setUserInfo(userInfo);
                 // 养生旅程ID
                 journeyNote.setJourneyId(journeyNoteEntity.getJourneyId());
                 // 封面图片URL
@@ -774,6 +792,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                         HealthNormTypeEntity healthNormTypeEntity = healthNormTypeEntityMap.get(journeyNoteNormEntity.getNormTypeId());
                         if (healthNormTypeEntity != null) {
                             journeyNorm.setNormName(healthNormTypeEntity.getNormName());
+                            // 单位
+                            journeyNorm.setUnit(healthNormTypeEntity.getUnit());
                         }
                         // 养生旅程ID
                         journeyNorm.setJourneyId(journeyNoteEntity.getJourneyId());
@@ -1018,5 +1038,81 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         } else {
             throw new FlightyThoughtException("非自身创建的养生旅程不能删除");
         }
+    }
+
+    @Override
+    @Transactional
+    public JourneyNote getJourneyNote(Long noteId) {
+        // 获取日记
+        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.getOne(noteId);
+        // 获取养生旅程
+        JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyNoteEntity.getJourneyId());
+        // 创建用户
+        UserInfo userInfo = userService.getUserInfo(journeyEntity.getUserId());
+        // 创建返回对象
+        // 获取体检指标
+        List<HealthNormTypeEntity> healthNormTypeEntities = healthNormTypeRepository.findAll();
+        Map<Integer, HealthNormTypeEntity> healthNormTypeEntityMap = new HashMap<>();
+        healthNormTypeEntities.forEach(healthNormTypeEntity -> healthNormTypeEntityMap.put(healthNormTypeEntity.getNormTypeId(), healthNormTypeEntity));
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.MEDIUM);
+        String domainPort = platformUtils.getDomainPort();
+        JourneyNote journeyNote = new JourneyNote();
+        // 创建用户
+        journeyNote.setUserInfo(userInfo);
+        // 养生旅程ID
+        journeyNote.setJourneyId(journeyNoteEntity.getJourneyId());
+        // 封面图片URL
+        ImagesEntity coverImage = journeyNoteEntity.getCoverImage();
+        if (coverImage != null) {
+            String coverImageUrl = platformUtils.getImageInfo(coverImage, domainPort).getUrl();
+            journeyNote.setCoverImageUrl(coverImageUrl);
+        }
+        // 日记内容
+        journeyNote.setContent(journeyNoteEntity.getContent());
+        // 是否发布到朋友圈
+        journeyNote.setCircleOfFriends(journeyNoteEntity.getCircleOfFriends());
+        // 日记时间
+        journeyNote.setNoteDate(journeyNoteEntity.getNoteDate());
+        // 日记时间
+        String noteDateStr = formatter.format(journeyNoteEntity.getNoteDate());
+        journeyNote.setNoteDateStr(noteDateStr);
+        // 图片
+        List<ImagesEntity> imagesEntities = journeyNoteEntity.getImages();
+        if (imagesEntities != null) {
+            List<ImageInfo> imageInfos = new ArrayList<>();
+            imagesEntities.forEach(imagesEntity -> {
+                ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
+                imageInfos.add(imageInfo);
+            });
+            journeyNote.setImages(imageInfos);
+        }
+        // 体检指标
+        List<JourneyNoteNormEntity> journeyNoteNormEntities = journeyNoteEntity.getJourneyNoteNorms();
+        if (journeyNoteNormEntities != null) {
+            List<JourneyNoteNorm> journeyNorms = new ArrayList<>();
+            journeyNoteNormEntities.forEach(journeyNoteNormEntity -> {
+                JourneyNoteNorm journeyNorm = new JourneyNoteNorm();
+                // 自增主键
+                journeyNorm.setId(journeyNoteNormEntity.getId());
+                // 体检指标类型ID
+                journeyNorm.setNormTypeId(journeyNoteNormEntity.getNormTypeId());
+                // 指标名称
+                HealthNormTypeEntity healthNormTypeEntity = healthNormTypeEntityMap.get(journeyNoteNormEntity.getNormTypeId());
+                if (healthNormTypeEntity != null) {
+                    journeyNorm.setNormName(healthNormTypeEntity.getNormName());
+                    // 单位
+                    journeyNorm.setUnit(healthNormTypeEntity.getUnit());
+                }
+                // 养生旅程ID
+                journeyNorm.setJourneyId(journeyNoteEntity.getJourneyId());
+                // 数值1
+                journeyNorm.setValue1(journeyNoteNormEntity.getValue1());
+                // 数值2
+                journeyNorm.setValue2(journeyNoteNormEntity.getValue2());
+                journeyNorms.add(journeyNorm);
+            });
+            journeyNote.setJourneyNoteNorms(journeyNorms);
+        }
+        return journeyNote;
     }
 }

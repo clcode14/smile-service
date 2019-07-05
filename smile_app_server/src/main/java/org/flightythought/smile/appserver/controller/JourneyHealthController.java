@@ -172,6 +172,18 @@ public class JourneyHealthController {
         }
     }
 
+    @ApiOperation(value = "根据日记ID获取日记详情", notes = "根据日记ID获取日记详情")
+    @GetMapping("/note/{noteId}")
+    public ResponseBean getJourneyNote(@PathVariable Long noteId) {
+        try {
+            JourneyNote journeyNote = journeyHealthService.getJourneyNote(noteId);
+            return ResponseBean.ok("获取日记详情成功", journeyNote);
+        } catch (Exception e) {
+            LOG.error("获取日记详情失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
     @ApiOperation(value = "获取养生成果", notes = "获取养生成果选项用于结束养生旅程所用")
     @PostMapping("/healthResultStatus")
     public ResponseBean getJourneyHealthResultStatus(@RequestBody PageFilterDTO pageFilterDTO) {
