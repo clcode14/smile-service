@@ -666,7 +666,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 journeyNoteToImageEntity.setNoteId(noteId);
                 imageEntities.add(journeyNoteToImageEntity);
             });
-            journeyNoteToImageRepository.saveAll(imageEntities);
+//            journeyNoteToImageRepository.saveAll(imageEntities);
         }
         // 新增日记指标
         List<JourneyNoteNormDTO> journeyNoteNormDTOS = journeyNoteDTO.getNorms();
@@ -749,6 +749,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.MEDIUM);
             journeyNoteEntities.forEach(journeyNoteEntity -> {
                 JourneyNote journeyNote = new JourneyNote();
+                // 日记ID
+                journeyNote.setNoteId(journeyNoteEntity.getId());
                 // 创建用户
                 journeyNote.setUserInfo(userInfo);
                 // 养生旅程ID
@@ -1042,9 +1044,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
 
     @Override
     @Transactional
-    public JourneyNote getJourneyNote(Long noteId) {
+    public JourneyNote getJourneyNote(Integer noteId) {
         // 获取日记
-        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.getOne(noteId);
+        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.findById(noteId);
         // 获取养生旅程
         JourneyEntity journeyEntity = journeyRepository.findByJourneyId(journeyNoteEntity.getJourneyId());
         // 创建用户
@@ -1057,6 +1059,8 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.MEDIUM);
         String domainPort = platformUtils.getDomainPort();
         JourneyNote journeyNote = new JourneyNote();
+        // 日记ID
+        journeyNote.setNoteId(journeyNoteEntity.getId());
         // 创建用户
         journeyNote.setUserInfo(userInfo);
         // 养生旅程ID

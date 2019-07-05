@@ -174,7 +174,7 @@ public class JourneyHealthController {
 
     @ApiOperation(value = "根据日记ID获取日记详情", notes = "根据日记ID获取日记详情")
     @GetMapping("/note/{noteId}")
-    public ResponseBean getJourneyNote(@PathVariable Long noteId) {
+    public ResponseBean getJourneyNote(@PathVariable Integer noteId) {
         try {
             JourneyNote journeyNote = journeyHealthService.getJourneyNote(noteId);
             return ResponseBean.ok("获取日记详情成功", journeyNote);

@@ -37,5 +37,5 @@ public interface JourneyHealthService {
 
     void deleteJourneyById(Integer journeyId);
 
-    JourneyNote getJourneyNote(Long noteId);
+    JourneyNote getJourneyNote(Integer noteId);
 }

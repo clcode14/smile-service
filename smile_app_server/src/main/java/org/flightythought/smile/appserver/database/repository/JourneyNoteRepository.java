@@ -20,6 +20,8 @@ import java.util.List;
 @Repository
 public interface JourneyNoteRepository extends JpaRepository<JourneyNoteEntity, Long> {
 
+    JourneyNoteEntity findById(Integer id);
+
     List<JourneyNoteEntity> findByJourneyId(Integer journeyId);
 
     Page<JourneyNoteEntity> findByJourneyId(Integer journeyId, Pageable pageable);

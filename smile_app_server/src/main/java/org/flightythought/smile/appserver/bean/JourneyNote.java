@@ -26,6 +26,11 @@ public class JourneyNote {
     private Integer journeyId;
 
     /**
+     * 日记ID
+     */
+    private Integer noteId;
+
+    /**
      * 封面图片URL
      */
     private String coverImageUrl;
