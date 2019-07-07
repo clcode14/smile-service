@@ -25,6 +25,6 @@ public interface RecoverCaseRepository extends JpaRepository<RecoverCaseEntity, 
             "on rc.solutionId = s.id " +
             "where rc.title like %:name% " +
             "or j.journeyName like %:name% " +
-            "or s.title like %:name%")
+            "or s.title like %:name% group by rc.journeyId")
     Page<RecoverCaseEntity> searchRecoverCase(@Param("name") String name, Pageable pageable);
 }

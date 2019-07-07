@@ -37,6 +37,10 @@ public interface UserService {
      */
     UserInfo updateUserInfoDetails(UserInfoDTO userInfoDTO);
 
+    UserInfo updateUserNickName(String nickname);
+
+    UserInfo updateUserPhoto(Integer imageId);
+
     void followUser(Long userId);
 
     void cancelFollowUser(Long userId);
