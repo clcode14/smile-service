@@ -70,6 +70,30 @@ public class UserController {
         }
     }
 
+    @PostMapping("/userNickName")
+    @ApiOperation(value = "修改用户昵称", notes = "修改用户昵称")
+    public ResponseBean updateUserNickName(String nickName) {
+        try {
+            UserInfo result = userService.updateUserNickName(nickName);
+            return ResponseBean.ok("修改成功", result);
+        } catch (Exception e) {
+            LOG.error("修改用户昵称失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/userPhoto")
+    @ApiOperation(value = "修改用户头像", notes = "修改用户头像")
+    public ResponseBean updateUserPhoto(Integer imageId) {
+        try {
+            UserInfo result = userService.updateUserPhoto(imageId);
+            return ResponseBean.ok("修改成功", result);
+        } catch (Exception e) {
+            LOG.error("修改用户头像失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
     @PostMapping("followUser")
     @ApiOperation(value = "关注用户", notes = "关注用户")
     public ResponseBean followUser(Long userId) {
