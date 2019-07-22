@@ -46,8 +46,8 @@ ali-oss:
   #  查看你的bucketname的endpoint地址，如：http://oss-cn-shenzhen.aliyuncs.com
   endpoint: http://oss-cn-shanghai.aliyuncs.com
   #  你的bucketName
-  bucketName: flighty-thought-oss-demo
+  bucketName: xm-demo
   #  你的accessKeyId
-  accessKeyId: LTAICSkNdBY7Z0KK
+  accessKeyId: LTAINBhEkImrr67k
   #  你的accessKeySecret
-  accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
+  accessKeySecret: Y6HmSO33Jm4COWBMBuN7e7SbV7dFRu
