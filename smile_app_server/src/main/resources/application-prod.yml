@@ -19,9 +19,9 @@ spring:
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://rm-uf6bj20553igh785aco.mysql.rds.aliyuncs.com:3306/xm_demo?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-    username: xm_demo
-    password: xmJK1004
+    url: jdbc:mysql://rm-uf6bj20553igh785aco.mysql.rds.aliyuncs.com:3306/xm_prod?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    username: xm_prod
+    password: xmJK0414
     tomcat:
       max-active: 20
       max-idle: 8

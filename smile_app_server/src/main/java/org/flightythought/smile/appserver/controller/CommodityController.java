@@ -6,10 +6,13 @@ import org.flightythought.smile.appserver.bean.CommoditySimple;
 import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.dto.CommodityQueryDTO;
 import org.flightythought.smile.appserver.service.CommodityService;
+import org.flightythought.smile.appserver.vo.CommoditySimpleVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +41,12 @@ public class CommodityController {
     public ResponseBean getCommodities(@RequestBody CommodityQueryDTO commodityQueryDTO) {
         try {
             Page<CommoditySimple> result = commodityService.getCommofities(commodityQueryDTO);
-            return ResponseBean.ok("获取成功", result);
+            Page<CommoditySimpleVo> voResult = result.map(entity -> {
+                CommoditySimpleVo vo = new CommoditySimpleVo();
+                BeanUtils.copyProperties(entity, vo);
+                return vo;
+            });
+            return ResponseBean.ok("获取成功", voResult);
         } catch (Exception e) {
             LOG.error("获取相关商品失败", e);
             return ResponseBean.error(e.getMessage());
