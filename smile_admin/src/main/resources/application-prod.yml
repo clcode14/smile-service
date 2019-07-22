@@ -37,16 +37,16 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
 
 ali-oss:
   #  查看你的bucketname的endpoint地址，如：http://oss-cn-shenzhen.aliyuncs.com
   endpoint: http://oss-cn-shanghai.aliyuncs.com
   #  你的bucketName
-  bucketName: xm-demo
+  bucketName: xm-prod
   #  你的accessKeyId
   accessKeyId: LTAINBhEkImrr67k
   #  你的accessKeySecret
