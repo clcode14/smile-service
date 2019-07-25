@@ -26,6 +26,7 @@ import org.flightythought.smile.admin.database.repository.CourseTypeRepository;
 import org.flightythought.smile.admin.database.repository.SysParameterRepository;
 import org.flightythought.smile.admin.dto.CourseRegistrationDTO;
 import org.flightythought.smile.admin.dto.ImageDTO;
+import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
 import org.flightythought.smile.admin.service.CourseRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,13 +73,25 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
             courseRegistrationEntity.setUpdateUserName(sysUserEntity.getLoginName());
         }
         // 课程标题
+        if (StringUtils.isBlank(courseRegistrationDTO.getTitle())) {
+            throw new FlightyThoughtException("请填写课程标题");
+        }
         courseRegistrationEntity.setTitle(courseRegistrationDTO.getTitle());
+        if (StringUtils.isBlank(courseRegistrationDTO.getStartTime())) {
+            throw new FlightyThoughtException("请选择课程开始时间");
+        }
         LocalDateTime startTime = LocalDateTime.parse(courseRegistrationDTO.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         // 开始时间
         courseRegistrationEntity.setStartTime(startTime);
         // 报名人数
+        if (courseRegistrationDTO.getMembers() == null) {
+            throw new FlightyThoughtException("请填写课程报名人数");
+        }
         courseRegistrationEntity.setMembers(courseRegistrationDTO.getMembers());
         // 地址
+        if (StringUtils.isBlank(courseRegistrationDTO.getAddress())) {
+            throw new FlightyThoughtException("请填写活动地址");
+        }
         courseRegistrationEntity.setAddress(courseRegistrationDTO.getAddress());
         // 描述
         if (StringUtils.isNotBlank(courseRegistrationDTO.getDescription())) {
@@ -87,6 +100,9 @@ public class CourseRegistrationServiceImpl implements CourseRegistrationService 
         // 价格
         courseRegistrationEntity.setPrice(courseRegistrationDTO.getPrice());
         // 课程类型ID
+        if (courseRegistrationDTO.getTypeId() == null) {
+            throw new FlightyThoughtException("请选择课程类型");
+        }
         courseRegistrationEntity.setTypeId(courseRegistrationDTO.getTypeId());
         ImageDTO coverImage = courseRegistrationDTO.getCoverImage();
         if (coverImage != null) {

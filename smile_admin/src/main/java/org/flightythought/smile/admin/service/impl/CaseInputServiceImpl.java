@@ -19,6 +19,7 @@ import org.flightythought.smile.admin.service.CaseInputService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 
@@ -109,6 +110,7 @@ public class CaseInputServiceImpl implements CaseInputService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addCase(CaseEntryDTO caseEntryDTO, HttpSession session) {
         SysUserEntity sysUserEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
         // 新增用户
@@ -139,9 +141,18 @@ public class CaseInputServiceImpl implements CaseInputService {
         // 是否结束
         journeyEntity.setFinished(true);
         // 开始时间
+        if (caseEntryDTO.getStartTime() == null) {
+            throw new FlightyThoughtException("请选择案例的开始时间");
+        }
         journeyEntity.setStartTime(caseEntryDTO.getStartTime());
         // 结束时间
+        if (caseEntryDTO.getEndTime() == null) {
+            throw new FlightyThoughtException("请选择案例的结束时间");
+        }
         journeyEntity.setEndTime(caseEntryDTO.getEndTime());
+        if (StringUtils.isBlank(caseEntryDTO.getTitle())) {
+            throw new FlightyThoughtException("请输入案例标题");
+        }
         // 养生旅程名称
         journeyEntity.setJourneyName(caseEntryDTO.getTitle());
         // 养生旅程概述
@@ -156,6 +167,9 @@ public class CaseInputServiceImpl implements CaseInputService {
 
         // 体检指标
         List<HealthNormDTO> healthNormDTOS = caseEntryDTO.getNorm();
+        if (healthNormDTOS == null && healthNormDTOS.size() == 0) {
+            throw new FlightyThoughtException("请选择至少一种体检指标");
+        }
         JourneyEntity finalJourneyEntity = journeyEntity;
         List<JourneyNormEntity> journeyNormEntities = healthNormDTOS.stream().map(healthNormDTO -> {
             JourneyNormEntity journeyNormEntity = new JourneyNormEntity();
@@ -171,6 +185,9 @@ public class CaseInputServiceImpl implements CaseInputService {
 
         // 疾病
         List<DiseaseResultDTO> diseaseResultDTOS = caseEntryDTO.getDisease();
+        if (diseaseResultDTOS == null || diseaseResultDTOS.size() == 0) {
+            throw new FlightyThoughtException("请选择至少一种疾病");
+        }
         List<JourneyDiseaseEntity> journeyDiseaseEntities = diseaseResultDTOS.stream().map(diseaseResultDTO -> {
             JourneyDiseaseEntity journeyDiseaseEntity = new JourneyDiseaseEntity();
             journeyDiseaseEntity.setJourneyId(finalJourneyEntity.getJourneyId());
@@ -192,7 +209,9 @@ public class CaseInputServiceImpl implements CaseInputService {
 
         // 解决方案
         List<Integer> solutionIds = caseEntryDTO.getSolutionIds();
-        if (solutionIds != null && solutionIds.size() > 0) {
+        if (solutionIds == null || solutionIds.size() == 0) {
+            throw new FlightyThoughtException("请选择至少一条解决方案");
+        } else {
             for (Integer solutionId : solutionIds) {
                 JourneyToSolutionEntity journeyToSolutionEntity = new JourneyToSolutionEntity();
                 journeyToSolutionEntity.setJourneyId(finalJourneyEntity.getJourneyId());
@@ -203,11 +222,17 @@ public class CaseInputServiceImpl implements CaseInputService {
 
         // 日记
         List<NoteDTO> noteDTOS = caseEntryDTO.getNotes();
+        if (noteDTOS == null || noteDTOS.size() == 0) {
+            throw new FlightyThoughtException("请添加至少一篇日记");
+        }
         for (NoteDTO noteDTO : noteDTOS) {
             // 养生日记
             JourneyNoteEntity journeyNoteEntity = new JourneyNoteEntity();
             journeyNoteEntity.setCoverImageId(noteDTO.getCoverImageId());
             journeyNoteEntity.setContent(noteDTO.getContent());
+            if (noteDTO.getNoteTime() == null) {
+                throw new FlightyThoughtException("请确认日记的时间都已填写");
+            }
             journeyNoteEntity.setNoteDate(noteDTO.getNoteTime());
             journeyNoteEntity.setJourneyId(finalJourneyEntity.getJourneyId());
             // 保存日记
