@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface RecoverCaseRepository extends JpaRepository<RecoverCaseEntity, Long> {
-    List<RecoverCaseEntity> findByIdIn(List<Integer> recoverIds);
+    List<RecoverCaseEntity> findByIdInOrderByCreateTimeDesc(List<Integer> recoverIds);
 
     RecoverCaseEntity findByJourneyIdAndId(Integer journeyId, Integer recoverId);
 
