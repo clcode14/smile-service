@@ -1,9 +1,11 @@
 package org.flightythought.smile.appserver.service.impl;
 
+import org.flightythought.smile.appserver.bean.FileInfo;
 import org.flightythought.smile.appserver.bean.HealthWaySimple;
 import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
 import org.flightythought.smile.appserver.common.utils.PlatformUtils;
 import org.flightythought.smile.appserver.database.entity.*;
+import org.flightythought.smile.appserver.database.repository.FilesRepository;
 import org.flightythought.smile.appserver.database.repository.HealthWayMusicRepository;
 import org.flightythought.smile.appserver.database.repository.HealthWayRepository;
 import org.flightythought.smile.appserver.database.repository.HealthWayValueRepository;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class HealthWayServiceImpl implements HealthWayService {
@@ -36,6 +39,8 @@ public class HealthWayServiceImpl implements HealthWayService {
     private HealthWayMusicRepository healthWayMusicRepository;
     @Autowired
     private HealthWayValueRepository healthWayValueRepository;
+    @Autowired
+    private FilesRepository filesRepository;
 
 
     @Override
@@ -107,7 +112,25 @@ public class HealthWayServiceImpl implements HealthWayService {
 
     @Override
     public List<HealthWayMusicEntity> getHealthWayMusics(Integer healthWayId) {
-        return healthWayMusicRepository.findByHealthWayId(healthWayId);
+        // 获取音乐实体
+        List<HealthWayMusicEntity> healthWayMusicEntities = healthWayMusicRepository.findByHealthWayId(healthWayId);
+        // 根据文件ID获取对应的音乐文件
+        List<Integer> fileIds = healthWayMusicEntities.stream().map(HealthWayMusicEntity::getFileId).collect(Collectors.toList());
+        // 获取音乐文件集合
+        List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
+        // 获取音乐文件
+        if (filesEntities != null) {
+            String domainPort = platformUtils.getDomainPort();
+            List<FileInfo> fileInfos = filesEntities.stream().map(filesEntity -> platformUtils.getFileInfo(filesEntity, domainPort)).collect(Collectors.toList());
+            for (HealthWayMusicEntity healthWayMusicEntity : healthWayMusicEntities) {
+                for (FileInfo fileInfo : fileInfos) {
+                    if (healthWayMusicEntity.getFileId().intValue() == fileInfo.getId().intValue()){
+                        healthWayMusicEntity.setUrl(fileInfo.getUrl());
+                    }
+                }
+            }
+        }
+        return healthWayMusicEntities;
     }
 
     @Override

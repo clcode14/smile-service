@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -22,9 +22,8 @@ import javax.persistence.*;
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class HealthWayEntity extends BaseEntity {
-
     /**
-     * 养生方式ID
+     * 养生小类ID
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "identity")
@@ -33,34 +32,34 @@ public class HealthWayEntity extends BaseEntity {
     private Integer healthWayId;
 
     /**
-     * 编码
-     */
-    @Column(name = "number")
-    private String number;
-    /**
-     * 名称
+     * 养生方式名称
      */
     @Column(name = "way_name")
     private String wayName;
 
     /**
-     * 背景图片
+     * 背景图
      */
     @Column(name = "bg_image")
-    private Integer bgImage;
+    private Integer bgImageId;
 
     /**
-     * 图片
+     * 背景图片
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bg_image", insertable = false, updatable = false)
-    private ImagesEntity images;
+    private ImagesEntity bgImage;
 
     /**
-     * 内容描述
+     * 编码
      */
-    @Column(name = "content")
-    @Type(type = "text")
+    @Column(name = "number")
+    private String number;
+
+    /**
+     * 内容
+     */
+    @Column(name = "content", columnDefinition = "text")
     private String content;
 
     /**
@@ -70,9 +69,15 @@ public class HealthWayEntity extends BaseEntity {
     private String musicUrl;
 
     /**
-     * 类型
+     * 养生方式类型
      */
     @Column(name = "type")
     private Integer type;
 
+    /**
+     * 音乐链接
+     */
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "health_way_id", insertable = false, updatable = false)
+    private List<HealthWayMusicEntity> musicEntities;
 }

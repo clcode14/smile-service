@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
  *
@@ -31,8 +33,12 @@ public class HealthWayDTO {
     private String content;
 
     @ApiModelProperty(value = "音乐链接")
+    @Deprecated
     private String musicUrl;
 
     @ApiModelProperty(value = "类型，参数值待定")
     private Integer type;
+
+    @ApiModelProperty(value = "音乐文件ID集合")
+    private List<Integer> musicFileIds;
 }

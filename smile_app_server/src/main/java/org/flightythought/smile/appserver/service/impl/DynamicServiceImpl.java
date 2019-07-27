@@ -63,31 +63,31 @@ import org.springframework.transaction.annotation.Transactional;
 public class DynamicServiceImpl implements DynamicService {
 
     @Autowired
-    private PlatformUtils                     platformUtils;
+    private PlatformUtils platformUtils;
     @Autowired
-    private EntityManager                     entityManager;
+    private EntityManager entityManager;
     @Autowired
-    private DynamicRepository                 dynamicRepository;
+    private DynamicRepository dynamicRepository;
     @Autowired
-    private DynamicFilesRepository            dynamicFilesRepository;
+    private DynamicFilesRepository dynamicFilesRepository;
     @Autowired
-    private DynamicDetailsRepository          dynamicDetailsRepository;
+    private DynamicDetailsRepository dynamicDetailsRepository;
     @Autowired
-    private DynamicDetailsFilesRepository     dynamicDetailsFilesRepository;
+    private DynamicDetailsFilesRepository dynamicDetailsFilesRepository;
     @Autowired
-    private DynamicDetailMessageRepository    dynamicDetailMessageRepository;
+    private DynamicDetailMessageRepository dynamicDetailMessageRepository;
     @Autowired
-    private UserService                       userService;
+    private UserService userService;
     @Autowired
     private UserToDynamicDetailLikeRepository userToDynamicDetailLikeRepository;
     @Autowired
-    private UserToMessageLikeRepository       userToMessageLikeRepository;
+    private UserToMessageLikeRepository userToMessageLikeRepository;
     @Autowired
-    private JPushUtils                        jPushUtils;
+    private JPushUtils jPushUtils;
     @Autowired
-    private FilesRepository                   filesRepository;
+    private FilesRepository filesRepository;
     @Autowired
-    private UserRepository                    userRepository;
+    private UserRepository userRepository;
 
     @Override
     @Transactional
@@ -129,7 +129,7 @@ public class DynamicServiceImpl implements DynamicService {
             });
         }
         if (dynamicFilesEntities.size() > 0) {
-            dynamicFilesRepository.saveAll(dynamicFilesEntities);
+//            dynamicFilesRepository.saveAll(dynamicFilesEntities);
         }
         // 查询文件
         List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
@@ -223,9 +223,6 @@ public class DynamicServiceImpl implements DynamicService {
         totalSql += sql + ") T";
         // 获取ToTal总数
         Integer total = (Integer) entityManager.createNativeQuery(totalSql).unwrap(NativeQueryImpl.class).addScalar("total", IntegerType.INSTANCE).getSingleResult();
-        if (total == 0) {
-            throw new FlightyThoughtException("未查询到动态");
-        }
         // 是否存在分页查询
         Integer pageNumber = pageFilterDTO.getPageNumber();
         Integer pageSize = pageFilterDTO.getPageSize();
@@ -236,6 +233,10 @@ public class DynamicServiceImpl implements DynamicService {
         } else {
             pageable = PageRequest.of(0, total);
         }
+        if (total == 0) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
         // 查询结果
         List<Integer> dynamicIds = entityManager.createNativeQuery(sql).unwrap(NativeQueryImpl.class).addScalar("dynamic_id", IntegerType.INSTANCE).list();
         List<DynamicEntity> dynamicEntities = dynamicRepository.findByDynamicIdIn(dynamicIds);
@@ -334,7 +335,7 @@ public class DynamicServiceImpl implements DynamicService {
             // 判断当前用户是否点赞
             List<UserToDynamicDetailLikeEntity> likeEntities = userToDynamicDetailLikeRepository.findByUserIdAndDynamicDetailIdIn(userEntity.getId(), dynamicDetailIds);
             Map<Integer, UserToDynamicDetailLikeEntity> likeEntityMap = likeEntities.stream()
-                .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
+                    .collect(Collectors.toMap(UserToDynamicDetailLikeEntity::getDynamicDetailId, Function.identity()));
             List<DynamicDetailSimple> dynamicDetailSimples = dynamicDetailsEntities.stream().map(dynamicDetailsEntity -> {
                 DynamicDetailSimple dynamicDetailSimple = getDynamicDetailSimple(dynamicDetailsEntity);
                 // 动态明细ID
@@ -436,7 +437,7 @@ public class DynamicServiceImpl implements DynamicService {
                 dynamicDetailsFilesEntities.add(dynamicDetailsFilesEntity);
             });
             // 保存文件信息
-            dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
+//            dynamicDetailsFilesRepository.saveAll(dynamicDetailsFilesEntities);
         }
         List<FilesEntity> filesEntities = filesRepository.findByIdIn(fileIds);
         dynamicDetailsEntity.setFiles(filesEntities);
@@ -453,6 +454,7 @@ public class DynamicServiceImpl implements DynamicService {
     @Override
     public DynamicDetailSimple getDynamicDetailSimple(DynamicDetailsEntity dynamicDetailsEntity) {
         if (dynamicDetailsEntity != null) {
+            String domainPort = platformUtils.getDomainPort();
             DynamicDetailSimple dynamicDetailSimple = new DynamicDetailSimple();
             // 动态明细ID
             dynamicDetailSimple.setDynamicDetailId(dynamicDetailsEntity.getDynamicDetailId());
@@ -477,7 +479,12 @@ public class DynamicServiceImpl implements DynamicService {
             dynamicDetailSimple.setHidden(dynamicDetailsEntity.getHidden());
             // 创建时间
             dynamicDetailSimple.setCreateTime(dynamicDetailsEntity.getCreateTime());
-
+            // 文件
+            List<FilesEntity> filesEntities = dynamicDetailsEntity.getFiles();
+            if (filesEntities != null) {
+               List<FileInfo> fileInfo =  filesEntities.stream().map(file->platformUtils.getFileInfo(file, domainPort)).collect(Collectors.toList());
+               dynamicDetailSimple.setFiles(fileInfo);
+            }
             return dynamicDetailSimple;
         }
         return null;
@@ -576,7 +583,7 @@ public class DynamicServiceImpl implements DynamicService {
         }
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
         Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId,
-            pageable);
+                pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -599,7 +606,7 @@ public class DynamicServiceImpl implements DynamicService {
         Pageable pageable = PageRequest.of(dynamicDetailMessageQueryDTO.getPageNumber() - 1, dynamicDetailMessageQueryDTO.getPageSize());
         Integer messageId = dynamicDetailMessageQueryDTO.getMessageId();
         Page<DynamicDetailMessageEntity> dynamicDetailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdOrderByCreateTimeDesc(dynamicDetailId,
-            messageId, pageable);
+                messageId, pageable);
         List<DynamicDetailMessageSimple> result = new ArrayList<>();
         getDynamicDetailMessageSimple(dynamicDetailMessageEntities.getContent(), result);
         return new PageImpl<>(result, dynamicDetailMessageEntities.getPageable(), dynamicDetailMessageEntities.getTotalElements());
@@ -617,7 +624,7 @@ public class DynamicServiceImpl implements DynamicService {
         // 获取用户点赞的信息集合
         List<UserToMessageLikeEntity> userToMessageLikeEntities = userToMessageLikeRepository.findByUserIdAndMessageIdIn(userId, messageIds);
         Map<Integer, UserToMessageLikeEntity> likeEntityMap = userToMessageLikeEntities.stream()
-            .collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
+                .collect(Collectors.toMap(UserToMessageLikeEntity::getMessageId, Function.identity()));
         dynamicDetailMessageEntities.forEach(dynamicDetailMessageEntity -> {
             DynamicDetailMessageSimple dynamicDetailMessageSimple = new DynamicDetailMessageSimple();
             result.add(dynamicDetailMessageSimple);
@@ -766,7 +773,7 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDynamic(Integer dynamicId) {
         DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicId);
         if (dynamicEntity != null) {
@@ -775,20 +782,33 @@ public class DynamicServiceImpl implements DynamicService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDynamicDetail(Integer dynamicDetailId) {
         DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
         if (dynamicDetailsEntity != null) {
+            // 明细删除减小明细统计个数
+            DynamicEntity dynamicEntity = dynamicRepository.findByDynamicId(dynamicDetailsEntity.getDynamicId());
+            dynamicEntity.setReadNum(dynamicEntity.getReadNum() - 1);
+            dynamicRepository.save(dynamicEntity);
             dynamicDetailsRepository.delete(dynamicDetailsEntity);
         }
     }
 
     @Override
-    @Transactional
-    public void deleteDynamicDetailMessage(Integer dynamicDetailId) {
-        List<DynamicDetailMessageEntity> detailMessageEntities = dynamicDetailMessageRepository.findByDynamicDetailIdAndParentIdIsNullOrderByCreateTimeDesc(dynamicDetailId);
-        detailMessageEntities.forEach(message -> {
-            dynamicDetailMessageRepository.delete(message);
-        });
+    public void deleteDynamicDetailMessage(Integer messageId) {
+        DynamicDetailMessageEntity dynamicDetailMessageEntity = dynamicDetailMessageRepository.findById(messageId);
+        if (dynamicDetailMessageEntity != null) {
+            Integer dynamicDetailId = dynamicDetailMessageEntity.getDynamicDetailId();
+            dynamicDetailMessageRepository.delete(dynamicDetailMessageEntity);
+            // 更新message个数
+            DynamicDetailsEntity dynamicDetailsEntity = dynamicDetailsRepository.findByDynamicDetailId(dynamicDetailId);
+            List<DynamicDetailMessageEntity> list = dynamicDetailMessageRepository.findByDynamicDetailId(dynamicDetailId);
+            int count = 0;
+            if (list != null) {
+                count = list.size();
+            }
+            dynamicDetailsEntity.setMessageNum(count);
+            dynamicDetailsRepository.save(dynamicDetailsEntity);
+        }
     }
 }

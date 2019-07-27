@@ -26,6 +26,11 @@ public class JourneyNote {
     private Integer journeyId;
 
     /**
+     * 日记ID
+     */
+    private Integer noteId;
+
+    /**
      * 封面图片URL
      */
     private String coverImageUrl;
@@ -61,6 +66,11 @@ public class JourneyNote {
      * 体检指标
      */
     private List<JourneyNoteNorm> journeyNoteNorms;
+
+    /**
+     * User信息
+     */
+    private UserInfo userInfo;
 
 
 }

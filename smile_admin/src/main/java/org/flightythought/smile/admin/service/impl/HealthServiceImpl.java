@@ -1,17 +1,14 @@
 package org.flightythought.smile.admin.service.impl;
 
+import com.aliyun.oss.OSSClient;
 import org.apache.commons.lang3.StringUtils;
-import org.flightythought.smile.admin.bean.HealthClassInfo;
-import org.flightythought.smile.admin.bean.HealthWay;
-import org.flightythought.smile.admin.bean.ImageInfo;
-import org.flightythought.smile.admin.bean.SolutionInfo;
+import org.apache.poi.util.IOUtils;
+import org.flightythought.smile.admin.bean.*;
 import org.flightythought.smile.admin.common.GlobalConstant;
 import org.flightythought.smile.admin.common.PlatformUtils;
+import org.flightythought.smile.admin.config.ALiOSSConfig;
 import org.flightythought.smile.admin.database.entity.*;
-import org.flightythought.smile.admin.database.repository.HealthRepository;
-import org.flightythought.smile.admin.database.repository.HealthToSolutionRepository;
-import org.flightythought.smile.admin.database.repository.HealthWayRepository;
-import org.flightythought.smile.admin.database.repository.SysParameterRepository;
+import org.flightythought.smile.admin.database.repository.*;
 import org.flightythought.smile.admin.dto.HealthClassDTO;
 import org.flightythought.smile.admin.dto.HealthWayDTO;
 import org.flightythought.smile.admin.framework.exception.FlightyThoughtException;
@@ -21,18 +18,25 @@ import org.flightythought.smile.admin.service.SolutionService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.flightythought.smile.admin.service.impl.CommonServiceImpl.getSuffix;
 
 /**
  * Copyright 2019 Flighty-Thought All rights reserved.
@@ -59,6 +63,21 @@ public class HealthServiceImpl implements HealthService {
     private CommonService commonService;
     @Value("${html}")
     private String html;
+
+    @Value("${static-url}")
+    private String staticUrl;
+    @Value("${server.servlet.context-path}")
+    private String contentPath;
+    @Value("${oss-status}")
+    private Boolean ossStatus;
+    @Autowired
+    private FilesRepository filesRepository;
+    @Autowired
+    private ALiOSSConfig aLiOSSConfig;
+    @Autowired
+    private SysParameterRepository sysParameterRepository;
+    @Autowired
+    private HealthWayMusicRepository healthWayMusicRepository;
 
     @Override
     @Transactional
@@ -216,13 +235,14 @@ public class HealthServiceImpl implements HealthService {
     }
 
     @Override
+    @Transactional
     public HealthWayEntity addHealthWay(HealthWayDTO healthWayDTO) {
         SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
         HealthWayEntity healthWayEntity = new HealthWayEntity();
         // 养生方式名称
         healthWayEntity.setWayName(healthWayDTO.getWayName());
         // 背景图片
-        healthWayEntity.setBgImage(healthWayDTO.getBgImageId());
+        healthWayEntity.setBgImageId(healthWayDTO.getBgImageId());
         // 编码
         healthWayEntity.setNumber(healthWayDTO.getNumber());
         // 内容
@@ -233,9 +253,66 @@ public class HealthServiceImpl implements HealthService {
         healthWayEntity.setMusicUrl(healthWayDTO.getMusicUrl());
         // 类型
         healthWayEntity.setType(healthWayDTO.getType());
+        List<HealthWayMusicEntity> healthWayMusicEntities = new ArrayList<>();
+        List<FilesEntity> filesEntities = filesRepository.findByIdIn(healthWayDTO.getMusicFileIds());
+        if (filesEntities != null && filesEntities.size() > 0) {
+            if (healthWayDTO.getType() == 1) {
+                // 类型1 只有一个音乐
+                FilesEntity filesEntity = filesEntities.get(0);
+                HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                healthWayMusicEntity.setFileId(filesEntity.getId());
+                healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                healthWayMusicEntity.setName(filesEntity.getFileName());
+                healthWayMusicEntities.add(healthWayMusicEntity);
+            }
+            if (healthWayDTO.getType() == 2) {
+                // 类型2 快、中、慢 三种音乐
+                List<Integer> musicFileIds = healthWayDTO.getMusicFileIds();
+                for (int i = 0; i < musicFileIds.size(); i++) {
+                    for (FilesEntity filesEntity : filesEntities) {
+                        if (filesEntity.getId().intValue() == musicFileIds.get(i).intValue()) {
+                            HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                            healthWayMusicEntity.setFileId(filesEntity.getId());
+                            healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                            healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                            String name = null;
+                            switch (i) {
+                                case 0:
+                                    name = "快速";
+                                    break;
+                                case 1:
+                                    name = "中速";
+                                    break;
+                                case 2:
+                                    name = "慢速";
+                                    break;
+                            }
+                            healthWayMusicEntity.setName(name);
+                            healthWayMusicEntities.add(healthWayMusicEntity);
+                        }
+                    }
+                }
+            }
+            if (healthWayDTO.getType() == 3) {
+                // 类型3 多种音乐
+                for (FilesEntity filesEntity : filesEntities) {
+                    HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                    healthWayMusicEntity.setFileId(filesEntity.getId());
+                    healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                    healthWayMusicEntity.setName(filesEntity.getFileName());
+                    healthWayMusicEntities.add(healthWayMusicEntity);
+                }
+            }
+            healthWayEntity.setMusicEntities(healthWayMusicEntities);
+        }
+
         // 创建者
         healthWayEntity.setCreateUserName(userEntity.getLoginName());
-        return healthWayRepository.save(healthWayEntity);
+        healthWayEntity = healthWayRepository.save(healthWayEntity);
+        HealthWayEntity finalHealthWayEntity = healthWayEntity;
+        healthWayMusicEntities.forEach(healthWayMusicEntity -> healthWayMusicEntity.setHealthWayId(finalHealthWayEntity.getHealthWayId()));
+        healthWayMusicRepository.saveAll(healthWayMusicEntities);
+        return healthWayEntity;
     }
 
     @Override
@@ -256,10 +333,17 @@ public class HealthServiceImpl implements HealthService {
             HealthWay healthWay = new HealthWay();
             BeanUtils.copyProperties(healthWayEntity, healthWay);
             // 背景图
-            ImagesEntity imagesEntity = healthWayEntity.getImages();
+            ImagesEntity imagesEntity = healthWayEntity.getBgImage();
             if (imagesEntity != null) {
                 ImageInfo imageInfo = platformUtils.getImageInfo(imagesEntity, domainPort);
                 healthWay.setBgImage(imageInfo);
+            }
+            // 音乐
+            List<HealthWayMusicEntity> healthWayMusicEntities = healthWayEntity.getMusicEntities();
+            if (healthWayMusicEntities != null) {
+                List<FilesEntity> filesEntities = healthWayMusicEntities.stream().map(HealthWayMusicEntity::getMusicFile).collect(Collectors.toList());
+                List<FileInfo> fileInfos = filesEntities.stream().map(filesEntity -> platformUtils.getFileInfo(filesEntity, domainPort)).collect(Collectors.toList());
+                healthWay.setMusic(fileInfos);
             }
             return healthWay;
         }).collect(Collectors.toList());
@@ -267,19 +351,27 @@ public class HealthServiceImpl implements HealthService {
     }
 
     @Override
+    @Transactional
     public HealthWayEntity modifyHealthWay(HealthWayDTO healthWayDTO) {
         // 获取养生方式
         HealthWayEntity healthWayEntity = healthWayRepository.findByHealthWayId(healthWayDTO.getHealthWayId());
+        // 删除关联音乐
+        List<HealthWayMusicEntity> musicEntities = healthWayMusicRepository.findByHealthWayId(healthWayEntity.getHealthWayId());
+        if (musicEntities != null && musicEntities.size() > 0) {
+            healthWayMusicRepository.deleteAll(musicEntities);
+        }
         if (healthWayEntity != null) {
             SysUserEntity userEntity = platformUtils.getCurrentLoginUser();
             // 养生方式名称
             healthWayEntity.setWayName(healthWayDTO.getWayName());
-            if (!healthWayEntity.getBgImage().equals(healthWayDTO.getBgImageId())) {
-                // 删除原来的背景图片
-                commonService.deleteImage(healthWayEntity.getBgImage());
+            if (healthWayEntity.getBgImage() != null) {
+                if (!healthWayEntity.getBgImageId().equals(healthWayDTO.getBgImageId())) {
+                    // 删除原来的背景图片
+                    commonService.deleteImage(healthWayEntity.getBgImageId());
+                }
             }
             // 背景图片
-            healthWayEntity.setBgImage(healthWayDTO.getBgImageId());
+            healthWayEntity.setBgImageId(healthWayDTO.getBgImageId());
             // 编码
             healthWayEntity.setNumber(healthWayDTO.getNumber());
             // 内容
@@ -290,6 +382,64 @@ public class HealthServiceImpl implements HealthService {
             healthWayEntity.setMusicUrl(healthWayDTO.getMusicUrl());
             // 类型
             healthWayEntity.setType(healthWayDTO.getType());
+            List<HealthWayMusicEntity> healthWayMusicEntities = new ArrayList<>();
+            List<FilesEntity> filesEntities = filesRepository.findByIdIn(healthWayDTO.getMusicFileIds());
+            if (filesEntities != null && filesEntities.size() > 0) {
+                if (healthWayDTO.getType() == 1) {
+                    // 类型1 只有一个音乐
+                    FilesEntity filesEntity = filesEntities.get(0);
+                    HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                    healthWayMusicEntity.setFileId(filesEntity.getId());
+                    healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                    healthWayMusicEntity.setName(filesEntity.getFileName());
+                    healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                    healthWayMusicEntities.add(healthWayMusicEntity);
+                }
+                if (healthWayDTO.getType() == 2) {
+                    // 类型2 快、中、慢 三种音乐
+                    List<Integer> musicFileIds = healthWayDTO.getMusicFileIds();
+                    for (int i = 0; i < musicFileIds.size(); i++) {
+                        for (FilesEntity filesEntity : filesEntities) {
+                            if (filesEntity.getId().intValue() == musicFileIds.get(i).intValue()) {
+                                HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                                healthWayMusicEntity.setFileId(filesEntity.getId());
+                                healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                                healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                                String name = null;
+                                switch (i) {
+                                    case 0:
+                                        name = "快速";
+                                        break;
+                                    case 1:
+                                        name = "中速";
+                                        break;
+                                    case 2:
+                                        name = "慢速";
+                                        break;
+                                }
+                                healthWayMusicEntity.setName(name);
+                                healthWayMusicEntities.add(healthWayMusicEntity);
+                            }
+                        }
+                    }
+                }
+                if (healthWayDTO.getType() == 3) {
+                    // 类型3 多种音乐
+                    for (FilesEntity filesEntity : filesEntities) {
+                        HealthWayMusicEntity healthWayMusicEntity = new HealthWayMusicEntity();
+                        healthWayMusicEntity.setFileId(filesEntity.getId());
+                        healthWayMusicEntity.setUrl(filesEntity.getOssUrl());
+                        healthWayMusicEntity.setName(filesEntity.getFileName());
+                        healthWayMusicEntity.setHealthWayId(healthWayDTO.getHealthWayId());
+                        healthWayMusicEntities.add(healthWayMusicEntity);
+                    }
+                }
+                healthWayEntity.setMusicEntities(healthWayMusicEntities);
+                // 删除音乐
+                healthWayMusicRepository.deleteAllByHealthWayId(healthWayDTO.getHealthWayId());
+                // 保存音乐
+                healthWayMusicRepository.saveAll(healthWayMusicEntities);
+            }
             // 修改者
             healthWayEntity.setUpdateUserName(userEntity.getLoginName());
             healthWayRepository.save(healthWayEntity);
@@ -304,9 +454,170 @@ public class HealthServiceImpl implements HealthService {
         if (healthWayEntity != null) {
             // 删除背景图片
             if (healthWayEntity.getBgImage() != null) {
-                commonService.deleteImage(healthWayEntity.getBgImage());
+                commonService.deleteImage(healthWayEntity.getBgImageId());
             }
             healthWayRepository.delete(healthWayEntity);
+        }
+    }
+
+    @Override
+    public FileInfo uploadFile(MultipartFile multipartFile, String musicName, HttpSession session) {
+        String fileType = "music";
+        // 获取当前登陆用户
+        SysUserEntity userEntity = (SysUserEntity) session.getAttribute(GlobalConstant.USER_SESSION);
+        SysParameterEntity domainPortEntity = sysParameterRepository.getDomainPortParam();
+        String domainPort = domainPortEntity.getParameterValue();
+        String imagePath = "", userPath;
+        if (ossStatus) {
+            userPath = fileType + "/" + userEntity.getId();
+        } else {
+            userPath = File.separator + fileType + File.separator + userEntity.getId();
+        }
+        if (!ossStatus) {
+            // 获取系统参数
+            SysParameterEntity sysParameterEntity = sysParameterRepository.getFilePathParam();
+            if (sysParameterEntity == null) {
+                throw new FlightyThoughtException("请设置上传文件路径系统参数");
+            } else {
+                imagePath = sysParameterEntity.getParameterValue();
+                File file = new File(imagePath + userPath);
+                if (!file.exists()) {
+                    file.mkdirs();
+                }
+            }
+        }
+
+        if (multipartFile != null) {
+            FilesEntity filesEntity = new FilesEntity();
+            // 上传者
+            filesEntity.setCreateUserName(userEntity.getLoginName());
+            // module
+            filesEntity.setModule("3");
+            // 图片大小
+            filesEntity.setSize(multipartFile.getSize());
+            // 文件类型
+            filesEntity.setFileType(multipartFile.getContentType());
+            // 上传封面图片到服务器
+            // 获取原始图片名称
+            String filename = multipartFile.getOriginalFilename();
+            // 新建文件
+            if (filename != null) {
+                // 音乐名称
+                filesEntity.setFileName(musicName);
+                if (!ossStatus) {
+                    String path = userPath + File.separator + System.currentTimeMillis() + filename.substring(filename.lastIndexOf("."));
+                    // 音乐路径
+                    filesEntity.setPath(path);
+                    File coverPictureFile = new File(imagePath + path);
+                    try {
+                        // 创建文件输出流
+                        FileOutputStream fileOutputStream = new FileOutputStream(coverPictureFile);
+                        // 复制文件
+                        IOUtils.copy(multipartFile.getInputStream(), fileOutputStream);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    } catch (IOException e) {
+                        throw new FlightyThoughtException("上传图片失败", e);
+                    }
+                } else {
+                    // OSS 对象存储
+                    // 1. 获取文件后缀名
+                    String suffix = getSuffix(multipartFile);
+                    // 2. 获取OSS参数信息
+                    String endpoint = aLiOSSConfig.getEndpoint();
+                    String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                    String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                    String bucketName = aLiOSSConfig.getBucketName();
+                    // 创建OSSClient实例
+                    OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                    // 文件KEY
+                    String fileKey = userPath + "/" + System.currentTimeMillis() + "." + suffix;
+                    // 上传文件
+                    try {
+                        ossClient.putObject(bucketName, fileKey, multipartFile.getInputStream());
+                        // 设置URL过期时间为100年
+                        Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000 * 24 * 365 * 100);
+
+                        // 生成URL
+                        URL url = ossClient.generatePresignedUrl(bucketName, fileKey, expiration);
+                        // 保存数据对象
+                        filesEntity.setOssKey(fileKey);
+                        filesEntity.setOssUrl(url.toString());
+                    } catch (IOException e) {
+                        throw new FlightyThoughtException("上传图片失败", e);
+                    } finally {
+                        ossClient.shutdown();
+                    }
+                }
+            }
+            filesEntity = filesRepository.save(filesEntity);
+            return platformUtils.getFileInfo(filesEntity, domainPort);
+        }
+        return null;
+    }
+
+    @Override
+    public List<FileInfo> getAllMusicFile() {
+        List<FilesEntity> filesEntities = filesRepository.findByModule("3");
+        if (filesEntities != null) {
+            String domainPort = platformUtils.getDomainPort();
+            return filesEntities.stream().map(filesEntity -> platformUtils.getFileInfo(filesEntity, domainPort)).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Page<FileInfo> getMusics(Integer pageNumber, Integer pageSize, String musicName) {
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize, sort);
+        Specification<FilesEntity> specification = (root, query, criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.conjunction();
+            // 音乐名称
+            if (StringUtils.isNotBlank(musicName)) {
+                predicate.getExpressions().add(criteriaBuilder.like(root.get("fileName"), musicName));
+            }
+            predicate.getExpressions().add(criteriaBuilder.equal(root.get("module"), "3"));
+            return predicate;
+        };
+        Page<FilesEntity> filesEntities = filesRepository.findAll(specification, pageRequest);
+        String domainPort = platformUtils.getDomainPort();
+        List<FileInfo> fileInfos = filesEntities.stream().map(filesEntity -> platformUtils.getFileInfo(filesEntity, domainPort)).collect(Collectors.toList());
+        return new PageImpl<>(fileInfos, pageRequest, filesEntities.getTotalElements());
+    }
+
+    @Override
+    public void deleteFile(Integer fileId) {
+        if (fileId != null) {
+            // 根据imageId获取图片对象
+            FilesEntity filesEntity = filesRepository.findById(fileId);
+            if (filesEntity != null) {
+                if (ossStatus) {
+                    // OSS 对象存储
+                    String endpoint = aLiOSSConfig.getEndpoint();
+                    String accessKeyId = aLiOSSConfig.getAccessKeyId();
+                    String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+                    String bucketName = aLiOSSConfig.getBucketName();
+                    // 创建OSSClient实例
+                    OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+                    // objectName
+                    String objectName = filesEntity.getOssKey();
+                    if (StringUtils.isNotBlank(objectName)) {
+                        boolean found = ossClient.doesObjectExist(bucketName, objectName);
+                        if (found) {
+                            ossClient.deleteObject(bucketName, objectName);
+                        }
+                    }
+                    ossClient.shutdown();
+                } else {
+                    // 删除文件
+                    String path = sysParameterRepository.getFilePathParam().getParameterValue() + filesEntity.getPath();
+                    File file = new File(path);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                }
+                filesRepository.delete(filesEntity);
+            }
         }
     }
 }

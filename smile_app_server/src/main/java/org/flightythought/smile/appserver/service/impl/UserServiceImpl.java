@@ -125,6 +125,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserInfo updateUserInfoDetails(UserInfoDTO userInfoDTO) {
         // 获取当前登陆用户
         UserEntity userEntity = platformUtils.getCurrentLoginUser();
@@ -143,6 +144,28 @@ public class UserServiceImpl implements UserService {
         userEntity.setBodyWeight(userInfoDTO.getWeight());
         // 性别
         userEntity.setSex(userInfoDTO.getSex());
+        userEntity = userRepository.save(userEntity);
+        return getUserInfo(userEntity);
+    }
+
+    @Override
+    @Transactional
+    public UserInfo updateUserNickName(String nickname) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        userEntity = userRepository.getOne(userEntity.getId());
+        userEntity.setNickName(nickname);
+        userEntity = userRepository.save(userEntity);
+        return getUserInfo(userEntity);
+    }
+
+    @Override
+    @Transactional
+    public UserInfo updateUserPhoto(Integer imageId) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        userEntity = userRepository.getOne(userEntity.getId());
+        userEntity.setPhoto(imageId);
         userEntity = userRepository.save(userEntity);
         return getUserInfo(userEntity);
     }

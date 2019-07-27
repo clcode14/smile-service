@@ -10,6 +10,11 @@ public class JourneyNoteNorm {
     private Integer id;
 
     /**
+     * 单位
+     */
+    private String unit;
+
+    /**
      * 体检指标类型ID
      */
     private Integer normTypeId;

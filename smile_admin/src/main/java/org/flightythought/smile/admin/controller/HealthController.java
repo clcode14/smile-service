@@ -1,9 +1,7 @@
 package org.flightythought.smile.admin.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
+import org.flightythought.smile.admin.bean.FileInfo;
 import org.flightythought.smile.admin.bean.HealthClassInfo;
 import org.flightythought.smile.admin.bean.HealthWay;
 import org.flightythought.smile.admin.bean.ResponseBean;
@@ -17,9 +15,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -152,6 +152,57 @@ public class HealthController {
         } catch (Exception e) {
             LOG.error("删除养生方式失败", e);
             return ResponseBean.error("删除养生方式失败", e.getMessage());
+        }
+    }
+
+    @ApiOperation(value = "上传文件", notes = "文件上传")
+    @PostMapping("/uploadFile")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "musicName", value = "音乐名称")
+    })
+    public ResponseBean uploadFile(@ApiParam(value = "上传的文件") MultipartFile file, String musicName, @ApiIgnore HttpSession session) {
+        try {
+            FileInfo result = healthService.uploadFile(file, musicName, session);
+            return ResponseBean.ok("上传文件成功", result);
+        } catch (Exception e) {
+            LOG.error("上传文件失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @GetMapping("/musicList")
+    @ApiOperation(value = "查询音乐列表", notes = "查询音乐列表")
+    public ResponseBean getMusicFiles(Integer pageNumber, Integer pageSize, String musicName) {
+        if (pageNumber == null || pageNumber == 0 || pageSize == null || pageSize == 0) {
+            // 获取全部音乐
+            try {
+                List<FileInfo> result = healthService.getAllMusicFile();
+                return ResponseBean.ok("获取成功", result);
+            } catch (Exception e) {
+                LOG.error("获取音乐列表失败", e);
+                return ResponseBean.error(e.getMessage());
+            }
+        } else {
+            // 查询音乐
+            try {
+                Page<FileInfo> result = healthService.getMusics(pageNumber, pageSize, musicName);
+                return ResponseBean.ok("查询成功", result);
+            } catch (Exception e) {
+                LOG.error("查询音乐列表失败", e);
+                return ResponseBean.error(e.getMessage());
+            }
+        }
+    }
+
+    @ApiOperation(value = "删除图片", notes = "删除图片")
+    @DeleteMapping("/deleteFile/{fileId}")
+    public ResponseBean deleteFile(@PathVariable Integer fileId) {
+        try {
+            healthService.deleteFile(fileId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
         }
     }
 }

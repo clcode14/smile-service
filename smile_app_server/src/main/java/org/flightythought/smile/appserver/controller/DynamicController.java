@@ -225,11 +225,11 @@ public class DynamicController {
         }
     }
     
-    @DeleteMapping("/detailMessage/{dynamicDetailId}")
+    @DeleteMapping("/detailMessage/{messageId}")
     @ApiOperation(value = "删除动态明细评论", notes = "删除动态明细评论")
-    public ResponseBean deleteDynamicDetailMessage(@PathVariable Integer dynamicDetailId) {
+    public ResponseBean deleteDynamicDetailMessage(@PathVariable Integer messageId) {
         try {
-            dynamicService.deleteDynamicDetailMessage(dynamicDetailId);
+            dynamicService.deleteDynamicDetailMessage(messageId);
             return ResponseBean.ok("删除成功");
         } catch (Exception e) {
             LOG.error("删除失败", e);
