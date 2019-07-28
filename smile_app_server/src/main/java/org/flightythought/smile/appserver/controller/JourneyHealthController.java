@@ -1,25 +1,52 @@
 package org.flightythought.smile.appserver.controller;
 
-import io.swagger.annotations.*;
-import org.flightythought.smile.appserver.bean.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
+import org.flightythought.smile.appserver.bean.FileInfo;
+import org.flightythought.smile.appserver.bean.HealthJourney;
+import org.flightythought.smile.appserver.bean.HealthJourneySimple;
+import org.flightythought.smile.appserver.bean.JourneyNote;
+import org.flightythought.smile.appserver.bean.JourneyNoteMessageSimple;
+import org.flightythought.smile.appserver.bean.ResponseBean;
 import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
-import org.flightythought.smile.appserver.dto.*;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteMessageEntity;
+import org.flightythought.smile.appserver.dto.HealthJourneyEndDTO;
+import org.flightythought.smile.appserver.dto.HealthJourneyQueryDTO;
+import org.flightythought.smile.appserver.dto.HealthJourneyStartDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteMessageDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteMessageQueryDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteQueryDTO;
+import org.flightythought.smile.appserver.dto.JourneyQueryDTO;
+import org.flightythought.smile.appserver.dto.MyJourneyQueryDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
 import org.flightythought.smile.appserver.service.JourneyHealthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @RequestMapping("/auth/journey")
@@ -220,9 +247,76 @@ public class JourneyHealthController {
         }
     }
 
-//    @ApiOperation(value = "删除养生旅程", notes = "删除养生旅程，会删除该旅程关联的全部信息，同时会删除服务器上的上传文件")
-//    @DeleteMapping("/deleteJourney/{journeyId}")
-//    public ResponseBean deleteHealthJourney(@PathVariable(value = "journeyId") Integer journeyId) {
-//        return null;
-//    }
+    @ApiOperation(value = "删除养生旅程", notes = "删除养生旅程，会删除该旅程关联的全部信息，同时会删除服务器上的上传文件")
+    @DeleteMapping("/deleteJourney/{journeyId}")
+    public ResponseBean deleteHealthJourney(@PathVariable(value = "journeyId") Integer journeyId) {
+        try {
+            journeyHealthService.deleteJourneyById(journeyId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
+    
+    @ApiOperation(value = "删除养生旅程日记", notes = "删除养生旅程日记")
+    @DeleteMapping("/deleteJourneyNote/{noteId}")
+    public ResponseBean deleteJourneyNote(@PathVariable(value = "noteId") Integer noteId) {
+        try {
+            journeyHealthService.deleteJourneyNoteById(noteId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
+    
+    @PostMapping("/addNoteMessage")
+    @ApiOperation(value = "评论养生日记", notes = "评论养生日记和回复评论，如果是回复评论则需要传递被回复的评论主键ID，即parentId")
+    public ResponseBean addJourneyNoteMessage(@RequestBody JourneyNoteMessageDTO journeyNoteMessageDTO) {
+        try {
+            JourneyNoteMessageEntity journeyNoteMessageEntity = journeyHealthService.addJourneyNoteMessage(journeyNoteMessageDTO);
+            return ResponseBean.ok("评论成功", journeyNoteMessageEntity);
+        } catch (Exception e) {
+            LOG.error("评论失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/messageDetail")
+    @ApiOperation(value = "根据养生日记ID，获取详情评论信息", notes = "根据养生日记ID，获取详情评论信息")
+    public ResponseBean getJourneyNoteMessageInfo(@RequestBody JourneyNoteMessageQueryDTO journeyNoteMessageQueryDTO) {
+        try {
+            Page<JourneyNoteMessageSimple> result = journeyHealthService.getJourneyNoteMessageInfo(journeyNoteMessageQueryDTO);
+            return ResponseBean.ok("返回成功", result);
+        } catch (Exception e) {
+            LOG.error("获取养生日记评论失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/likeJourneyNote")
+    @ApiOperation(value = "养生日记点赞或取消点赞", notes = "用户点赞或取消点赞养生日记")
+    @ApiImplicitParams(@ApiImplicitParam(value = "动态明细ID", name = "dynamicDetailId"))
+    public ResponseBean likeJourneyNote(Integer journeyNoteId) {
+        try {
+            journeyHealthService.likeJourneyNote(journeyNoteId);
+            return ResponseBean.ok("操作成功");
+        } catch (Exception e) {
+            LOG.error("操作失败", e);
+            return ResponseBean.error(e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/noteMessage/{messageId}")
+    @ApiOperation(value = "删除养生日记评论", notes = "删除养生日记评论")
+    public ResponseBean deleteJourneyNoteMessage(@PathVariable Integer messageId) {
+        try {
+            journeyHealthService.deleteJourneyNoteMessage(messageId);
+            return ResponseBean.ok("删除成功");
+        } catch (Exception e) {
+            LOG.error("删除失败", e);
+            return ResponseBean.error("删除失败", e.getMessage());
+        }
+    }
 }

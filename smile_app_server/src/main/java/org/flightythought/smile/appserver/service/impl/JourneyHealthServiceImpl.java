@@ -1,25 +1,6 @@
 package org.flightythought.smile.appserver.service.impl;
 
-import com.aliyun.oss.OSSClient;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.flightythought.smile.appserver.bean.*;
-import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
-import org.flightythought.smile.appserver.common.utils.PlatformUtils;
-import org.flightythought.smile.appserver.config.ALiOSSConfig;
-import org.flightythought.smile.appserver.database.entity.*;
-import org.flightythought.smile.appserver.database.repository.*;
-import org.flightythought.smile.appserver.dto.*;
-import org.flightythought.smile.appserver.service.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+import static org.flightythought.smile.appserver.service.impl.CommonServiceImpl.getSuffix;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,72 +10,180 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.flightythought.smile.appserver.service.impl.CommonServiceImpl.getSuffix;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.flightythought.smile.appserver.bean.CommoditySimple;
+import org.flightythought.smile.appserver.bean.CourseSimple;
+import org.flightythought.smile.appserver.bean.DiseaseClassDetailSimple;
+import org.flightythought.smile.appserver.bean.FileInfo;
+import org.flightythought.smile.appserver.bean.HealthClass;
+import org.flightythought.smile.appserver.bean.HealthJourney;
+import org.flightythought.smile.appserver.bean.HealthJourneySimple;
+import org.flightythought.smile.appserver.bean.HealthResultSimple;
+import org.flightythought.smile.appserver.bean.ImageInfo;
+import org.flightythought.smile.appserver.bean.JourneyNorm;
+import org.flightythought.smile.appserver.bean.JourneyNote;
+import org.flightythought.smile.appserver.bean.JourneyNoteMessageSimple;
+import org.flightythought.smile.appserver.bean.JourneyNoteNorm;
+import org.flightythought.smile.appserver.bean.JourneyNoteSimple;
+import org.flightythought.smile.appserver.bean.LikeData;
+import org.flightythought.smile.appserver.bean.PushMessage;
+import org.flightythought.smile.appserver.bean.UserInfo;
+import org.flightythought.smile.appserver.common.Constants;
+import org.flightythought.smile.appserver.common.PushCodeEnum;
+import org.flightythought.smile.appserver.common.exception.FlightyThoughtException;
+import org.flightythought.smile.appserver.common.utils.JPushUtils;
+import org.flightythought.smile.appserver.common.utils.PlatformUtils;
+import org.flightythought.smile.appserver.config.ALiOSSConfig;
+import org.flightythought.smile.appserver.database.entity.CommodityEntity;
+import org.flightythought.smile.appserver.database.entity.CourseRegistrationEntity;
+import org.flightythought.smile.appserver.database.entity.DiseaseClassDetailEntity;
+import org.flightythought.smile.appserver.database.entity.HealthEntity;
+import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
+import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
+import org.flightythought.smile.appserver.database.entity.ImagesEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyDiseaseEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyHealthEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNormEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteMessageEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteNormEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteToImageEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyToCommodityEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyToCourseEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyToReportEntity;
+import org.flightythought.smile.appserver.database.entity.MedicalReportEntity;
+import org.flightythought.smile.appserver.database.entity.RecoverCaseEntity;
+import org.flightythought.smile.appserver.database.entity.SysParameterEntity;
+import org.flightythought.smile.appserver.database.entity.UserEntity;
+import org.flightythought.smile.appserver.database.entity.UserToJourneyNoteLikeEntity;
+import org.flightythought.smile.appserver.database.repository.DiseaseClassDetailRepository;
+import org.flightythought.smile.appserver.database.repository.HealthNormTypeRepository;
+import org.flightythought.smile.appserver.database.repository.HealthResultRepository;
+import org.flightythought.smile.appserver.database.repository.ImagesRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyDiseaseRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyHealthRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyNormRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyNoteMessageRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyNoteNormRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyNoteRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyNoteToImageRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyToCommodityRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyToCourseRepository;
+import org.flightythought.smile.appserver.database.repository.JourneyToReportRepository;
+import org.flightythought.smile.appserver.database.repository.MedicalReportRepository;
+import org.flightythought.smile.appserver.database.repository.RecoverCaseRepository;
+import org.flightythought.smile.appserver.database.repository.SysParameterRepository;
+import org.flightythought.smile.appserver.database.repository.UserFollowCourseRepository;
+import org.flightythought.smile.appserver.database.repository.UserRepository;
+import org.flightythought.smile.appserver.database.repository.UserToJourneyNoteLikeRepository;
+import org.flightythought.smile.appserver.dto.DiseaseAndHealthResult;
+import org.flightythought.smile.appserver.dto.FileImageDTO;
+import org.flightythought.smile.appserver.dto.HealthJourneyEndDTO;
+import org.flightythought.smile.appserver.dto.HealthJourneyStartDTO;
+import org.flightythought.smile.appserver.dto.HealthNormTypeDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteMessageDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteMessageQueryDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteNormDTO;
+import org.flightythought.smile.appserver.dto.JourneyNoteQueryDTO;
+import org.flightythought.smile.appserver.dto.PageFilterDTO;
+import org.flightythought.smile.appserver.service.CommodityService;
+import org.flightythought.smile.appserver.service.CourseService;
+import org.flightythought.smile.appserver.service.DiseaseService;
+import org.flightythought.smile.appserver.service.JourneyHealthService;
+import org.flightythought.smile.appserver.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.aliyun.oss.OSSClient;
 
 @Service
 public class JourneyHealthServiceImpl implements JourneyHealthService {
 
     @Autowired
-    private HealthNormTypeRepository healthNormTypeRepository;
+    private HealthNormTypeRepository        healthNormTypeRepository;
     @Autowired
-    private PlatformUtils platformUtils;
+    private PlatformUtils                   platformUtils;
     @Autowired
-    private SysParameterRepository sysParameterRepository;
+    private SysParameterRepository          sysParameterRepository;
     @Autowired
-    private MedicalReportRepository medicalReportRepository;
+    private MedicalReportRepository         medicalReportRepository;
     @Autowired
-    private JourneyRepository journeyRepository;
+    private JourneyRepository               journeyRepository;
     @Autowired
-    private JourneyNormRepository journeyNormRepository;
+    private JourneyNormRepository           journeyNormRepository;
     @Autowired
-    private JourneyToReportRepository journeyToReportRepository;
+    private JourneyToReportRepository       journeyToReportRepository;
     @Autowired
-    private JourneyDiseaseRepository journeyDiseaseRepository;
+    private JourneyDiseaseRepository        journeyDiseaseRepository;
     @Autowired
-    private JourneyNoteRepository journeyNoteRepository;
+    private JourneyNoteRepository           journeyNoteRepository;
     @Autowired
-    private JourneyNoteToImageRepository journeyNoteToImageRepository;
+    private JourneyNoteToImageRepository    journeyNoteToImageRepository;
     @Autowired
-    private JourneyNoteNormRepository journeyNoteNormRepository;
+    private JourneyNoteNormRepository       journeyNoteNormRepository;
     @Autowired
-    private JourneyHealthRepository journeyHealthRepository;
+    private JourneyHealthRepository         journeyHealthRepository;
     @Autowired
-    private JourneyToCourseRepository journeyToCourseRepository;
+    private JourneyToCourseRepository       journeyToCourseRepository;
     @Autowired
-    private HealthResultRepository healthResultRepository;
+    private HealthResultRepository          healthResultRepository;
     @Autowired
-    private UserFollowCourseRepository userFollowCourseRepository;
+    private UserFollowCourseRepository      userFollowCourseRepository;
     @Autowired
-    private RecoverCaseRepository recoverCaseRepository;
+    private RecoverCaseRepository           recoverCaseRepository;
     @Autowired
-    private JourneyToCommodityRepository journeyToCommodityRepository;
+    private JourneyToCommodityRepository    journeyToCommodityRepository;
     @Autowired
-    private DiseaseClassDetailRepository diseaseClassDetailRepository;
+    private DiseaseClassDetailRepository    diseaseClassDetailRepository;
     @Autowired
-    private CommodityService commodityService;
+    private JourneyNoteMessageRepository    journeyNoteMessageRepository;
     @Autowired
-    private UserService userService;
+    private UserToJourneyNoteLikeRepository userToJourneyNoteLikeRepository;
     @Autowired
-    private ALiOSSConfig aLiOSSConfig;
+    private CommodityService                commodityService;
     @Autowired
-    private DiseaseService diseaseService;
+    private UserService                     userService;
     @Autowired
-    private CourseService courseService;
+    private ALiOSSConfig                    aLiOSSConfig;
     @Autowired
-    private ImagesRepository imagesRepository;
+    private DiseaseService                  diseaseService;
+    @Autowired
+    private CourseService                   courseService;
+    @Autowired
+    private ImagesRepository                imagesRepository;
+    @Autowired
+    private UserRepository                  userRepository;
+    @Autowired
+    private JPushUtils                      jPushUtils;
 
     @Value("${static-url}")
-    private String staticUrl;
+    private String                          staticUrl;
     @Value("${server.servlet.context-path}")
-    private String contentPath;
+    private String                          contentPath;
     @Value("${oss-status}")
-    private Boolean ossStatus;
+    private Boolean                         ossStatus;
 
-
-    private static final Logger LOG = LoggerFactory.getLogger(JourneyHealthServiceImpl.class);
+    private static final Logger             LOG = LoggerFactory.getLogger(JourneyHealthServiceImpl.class);
 
     @Override
     public List<HealthNormTypeEntity> getHealthNormTypes() {
@@ -651,6 +740,12 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
         journeyNoteEntity.setCircleOfFriends(journeyNoteDTO.getCircleOfFriends());
         // 创建者
         journeyNoteEntity.setCreateUserName(userEntity.getId() + "");
+        // 用户ID
+        journeyNoteEntity.setUserId(userEntity.getId());
+        // 评论个数
+        journeyNoteEntity.setMessageNum(0);
+        // 点赞个数
+        journeyNoteEntity.setLikeNum(0);
         // 养生日记时间
         journeyNoteEntity.setNoteDate(LocalDateTime.now());
         // 保存养生日记
@@ -666,7 +761,7 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                 journeyNoteToImageEntity.setNoteId(noteId);
                 imageEntities.add(journeyNoteToImageEntity);
             });
-//            journeyNoteToImageRepository.saveAll(imageEntities);
+            //            journeyNoteToImageRepository.saveAll(imageEntities);
         }
         // 新增日记指标
         List<JourneyNoteNormDTO> journeyNoteNormDTOS = journeyNoteDTO.getNorms();
@@ -1024,9 +1119,9 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
                             }
                         }
                     }
-                    // 日记配图删除
                 });
             }
+            journeyRepository.delete(journeyEntity);
         } else {
             throw new FlightyThoughtException("非自身创建的养生旅程不能删除");
         }
@@ -1108,5 +1203,222 @@ public class JourneyHealthServiceImpl implements JourneyHealthService {
             journeyNote.setJourneyNoteNorms(journeyNorms);
         }
         return journeyNote;
+    }
+
+    @Override
+    public JourneyNoteMessageEntity addJourneyNoteMessage(JourneyNoteMessageDTO journeyNoteMessageDTO) {
+        // 获取当前登录用户
+        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.findById(journeyNoteMessageDTO.getJourneyNoteId());
+        if (journeyNoteEntity == null) {
+            throw new FlightyThoughtException("没有找到评论的养生日记");
+        }
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        JourneyNoteMessageEntity journeyNoteMessageEntity = new JourneyNoteMessageEntity();
+        // 养生日记ID
+        journeyNoteMessageEntity.setJourneyNoteId(journeyNoteMessageDTO.getJourneyNoteId());
+        // 评论内容
+        journeyNoteMessageEntity.setMessage(journeyNoteMessageDTO.getMessage());
+        // 父级ID
+        journeyNoteMessageEntity.setParentId(journeyNoteMessageDTO.getParentId());
+        // 创建者用户ID
+        journeyNoteMessageEntity.setFromUserId(journeyNoteMessageDTO.getFromUserId());
+        // 发送给用户ID
+        journeyNoteMessageEntity.setToUserId(journeyNoteMessageDTO.getToUserId());
+        // 接受者用户是否查看
+        journeyNoteMessageEntity.setRead(false);
+        // 标志类型
+        journeyNoteMessageEntity.setFlagType(journeyNoteMessageDTO.getFlagType());
+        // 创建者
+        journeyNoteMessageEntity.setCreateUserName(userEntity.getId() + "");
+        // 保存
+        journeyNoteMessageEntity = journeyNoteMessageRepository.save(journeyNoteMessageEntity);
+        // 评论数+1
+        journeyNoteEntity.setMessageNum(journeyNoteEntity.getMessageNum() == null ? 1 : journeyNoteEntity.getMessageNum() + 1);
+        journeyNoteRepository.save(journeyNoteEntity);
+        // 自己评论自己不推送
+        //        if (!userEntity.getId().equals(dynamicDetailMessageDTO.getToUserId()) && !dynamicDetailMessageDTO.getFromUserId().equals(dynamicDetailMessageDTO.getToUserId())) {
+        // 评论信息推送
+        PushMessage<JourneyNoteMessageSimple> pushMessage = new PushMessage<>();
+        // 封装评论用户
+        JourneyNoteMessageEntity noteMessageEntity = new JourneyNoteMessageEntity();
+        BeanUtils.copyProperties(journeyNoteMessageEntity, noteMessageEntity);
+        UserEntity fromUser = userRepository.getOne(noteMessageEntity.getFromUserId());
+        UserEntity toUser = userRepository.getOne(noteMessageEntity.getToUserId());
+        noteMessageEntity.setFromUser(fromUser);
+        noteMessageEntity.setToUser(toUser);
+        List<JourneyNoteMessageEntity> journeyNoteMessageEntities = new ArrayList<>();
+        journeyNoteMessageEntities.add(noteMessageEntity);
+        List<JourneyNoteMessageSimple> journeyNoteMessageSimples = new ArrayList<>();
+        getJourneyNoteMessageSimple(journeyNoteMessageEntities, journeyNoteMessageSimples);
+        JourneyNoteMessageSimple journeyNoteMessageSimple = journeyNoteMessageSimples.get(0);
+        pushMessage.setData(journeyNoteMessageSimple);
+        pushMessage.setCode(PushCodeEnum.DYNAMIC_MESSAGE.getMessage());
+        pushMessage.setTitle("您有一条新评论");
+        pushMessage.setMessage("您有一条新评论");
+        pushMessage.setType(Constants.NOTICE_MESSAGE);
+        jPushUtils.pushData(pushMessage, journeyNoteMessageDTO.getToUserId());
+        //        }
+        return journeyNoteMessageEntity;
+    }
+
+    public void getJourneyNoteMessageSimple(List<JourneyNoteMessageEntity> journeyNoteMessageEntities, List<JourneyNoteMessageSimple> result) {
+        if (journeyNoteMessageEntities == null || journeyNoteMessageEntities.size() == 0) {
+            return;
+        }
+        // 获取用户点赞的信息集合
+        journeyNoteMessageEntities.forEach(journeyNoteMessageEntity -> {
+            JourneyNoteMessageSimple journeyNoteMessageSimple = new JourneyNoteMessageSimple();
+            result.add(journeyNoteMessageSimple);
+            // 主键ID
+            journeyNoteMessageSimple.setId(journeyNoteMessageEntity.getId());
+            // 动态明细ID
+            journeyNoteMessageSimple.setJourneyNoteId(journeyNoteMessageEntity.getJourneyNoteId());
+            // 评论内容
+            journeyNoteMessageSimple.setMessage(journeyNoteMessageEntity.getMessage());
+            // 父级ID
+            journeyNoteMessageSimple.setParentId(journeyNoteMessageEntity.getParentId());
+            // 发送者
+            UserEntity fromUserEntity = journeyNoteMessageEntity.getFromUser();
+            if (fromUserEntity != null) {
+                UserInfo fromUser = userService.getUserInfo(fromUserEntity);
+                journeyNoteMessageSimple.setFromUser(fromUser);
+            }
+            // 接收者
+            UserEntity toUserEntity = journeyNoteMessageEntity.getToUser();
+            if (toUserEntity != null) {
+                UserInfo toUser = userService.getUserInfo(toUserEntity);
+                journeyNoteMessageSimple.setToUser(toUser);
+            }
+            // 接收者是否阅读
+            journeyNoteMessageSimple.setRead(journeyNoteMessageEntity.getRead());
+            // flagType
+            journeyNoteMessageSimple.setFlagType(journeyNoteMessageEntity.getFlagType());
+            // 创建时间
+            journeyNoteMessageSimple.setCreateTime(journeyNoteMessageEntity.getCreateTime());
+            // 判断是否有子集
+            List<JourneyNoteMessageEntity> childMessageEntities = journeyNoteMessageEntity.getChildMessage();
+            if (childMessageEntities != null && childMessageEntities.size() > 0) {
+                List<JourneyNoteMessageSimple> child = new ArrayList<>();
+                journeyNoteMessageSimple.setChildMessage(child);
+                getJourneyNoteMessageSimple(childMessageEntities, child);
+            }
+        });
+    }
+
+    @Override
+    public Page<JourneyNoteMessageSimple> getJourneyNoteMessageInfo(JourneyNoteMessageQueryDTO journeyNoteMessageQueryDTO) {
+        // 获取当前登陆用户
+        Integer journeyNoteId = journeyNoteMessageQueryDTO.getJourneyNoteId();
+        Pageable pageable = PageRequest.of(journeyNoteMessageQueryDTO.getPageNumber() - 1, journeyNoteMessageQueryDTO.getPageSize());
+        Integer messageId = journeyNoteMessageQueryDTO.getMessageId();
+        Page<JourneyNoteMessageEntity> journeyNoteMessageEntities = journeyNoteMessageRepository.findByJourneyNoteIdAndParentIdOrderByCreateTimeDesc(journeyNoteId, messageId,
+            pageable);
+        List<JourneyNoteMessageSimple> result = new ArrayList<>();
+        getJourneyNoteMessageSimple(journeyNoteMessageEntities.getContent(), result);
+        return new PageImpl<>(result, journeyNoteMessageEntities.getPageable(), journeyNoteMessageEntities.getTotalElements());
+    }
+
+    @Override
+    public void likeJourneyNote(Integer journeyNoteId) {
+        // 获取当前登陆用户
+        UserEntity userEntity = platformUtils.getCurrentLoginUser();
+        long userId = userEntity.getId();
+        // 获取动态明细
+        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.findById(journeyNoteId);
+        if (journeyNoteEntity == null) {
+            throw new FlightyThoughtException("没有找到对应的养生日记");
+        }
+        // 查询判断当前用户有没有点赞
+        UserToJourneyNoteLikeEntity likeEntity = userToJourneyNoteLikeRepository.findByUserIdAndJourneyNoteId(userId, journeyNoteId);
+        if (likeEntity != null) {
+            // 取消点赞
+            journeyNoteEntity.setLikeNum(journeyNoteEntity.getLikeNum() - 1);
+            userToJourneyNoteLikeRepository.delete(likeEntity);
+        } else {
+            // 点赞
+            // 点赞数 + 1
+            journeyNoteEntity.setLikeNum(journeyNoteEntity.getLikeNum() == null ? 1 : journeyNoteEntity.getLikeNum() + 1);
+            likeEntity = new UserToJourneyNoteLikeEntity();
+            likeEntity.setUserId(userId);
+            likeEntity.setJourneyNoteId(journeyNoteId);
+            userToJourneyNoteLikeRepository.save(likeEntity);
+            // 点赞自己发布的不推送
+            //            if (userId != dynamicDetailsEntity.getUserId()) {
+            // 评论点赞推送
+            // 点赞用户
+            UserInfo userInfo = userService.getUserInfo(userId);
+            JourneyNoteSimple dynamicDetailSimple = getJourneyNoteSimple(journeyNoteEntity);
+            LikeData<JourneyNoteSimple> likeData = new LikeData<>();
+            likeData.setData(dynamicDetailSimple);
+            likeData.setLikeUser(userInfo);
+            PushMessage<LikeData> pushMessage = new PushMessage<>();
+            pushMessage.setData(likeData);
+            pushMessage.setType(Constants.NOTICE_LIKE);
+            pushMessage.setCode(PushCodeEnum.DYNAMIC_LIKE.getMessage());
+            pushMessage.setTitle("您发表的养生日记有用户点赞");
+            pushMessage.setMessage("您发表的养生日记有用户点赞");
+            jPushUtils.pushData(pushMessage, journeyNoteEntity.getUserId());
+            //            }
+        }
+        journeyNoteRepository.save(journeyNoteEntity);
+    }
+
+    public JourneyNoteSimple getJourneyNoteSimple(JourneyNoteEntity journeyNoteEntity) {
+        if (journeyNoteEntity != null) {
+            JourneyNoteSimple journeyNoteSimple = new JourneyNoteSimple();
+            journeyNoteSimple.setJourneyId(journeyNoteEntity.getJourneyId());
+            journeyNoteSimple.setNoteId(journeyNoteEntity.getId());
+            journeyNoteSimple.setContent(journeyNoteEntity.getContent());
+            // 用户
+            UserEntity userEntity = journeyNoteEntity.getUser();
+            if (userEntity != null) {
+                journeyNoteSimple.setUser(userService.getUserInfo(userEntity));
+            }
+            // 评论个数
+            journeyNoteSimple.setMessageNum(journeyNoteEntity.getMessageNum());
+            // 点赞个数
+            journeyNoteSimple.setLikeNum(journeyNoteEntity.getLikeNum());
+            // 创建时间
+            journeyNoteSimple.setCreateTime(journeyNoteEntity.getCreateTime());
+            return journeyNoteSimple;
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteJourneyNoteMessage(Integer messageId) {
+        JourneyNoteMessageEntity journeyNoteMessageEntity = journeyNoteMessageRepository.findById(messageId);
+        if (journeyNoteMessageEntity != null) {
+            Integer noteId = journeyNoteMessageEntity.getJourneyNoteId();
+            journeyNoteMessageRepository.delete(journeyNoteMessageEntity);
+            // 更新message个数
+            JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.findById(noteId);
+            List<JourneyNoteMessageEntity> list = journeyNoteMessageRepository.findByJourneyNoteId(noteId);
+            int count = 0;
+            if (list != null) {
+                count = list.size();
+            }
+            journeyNoteEntity.setMessageNum(count);
+            journeyNoteRepository.save(journeyNoteEntity);
+        }
+    }
+
+    @Override
+    public void deleteJourneyNoteById(Integer noteId) {
+        String filePath = platformUtils.getFilePath();
+        JourneyNoteEntity journeyNoteEntity = journeyNoteRepository.findById(noteId);
+        // 删除封面图片
+        ImagesEntity imagesEntity = journeyNoteEntity.getCoverImage();
+        if (imagesEntity != null) {
+            String path = filePath + imagesEntity.getPath();
+            File file = new File(path);
+            if (file.exists()) {
+                boolean isDelete = file.delete();
+                if (isDelete) {
+                    LOG.info("JourneyNoteId:{},ImageId:{},封面图片已删除", journeyNoteEntity.getId(), imagesEntity.getId());
+                }
+            }
+        }
+        journeyNoteRepository.delete(journeyNoteEntity);
     }
 }
