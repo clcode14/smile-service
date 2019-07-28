@@ -297,7 +297,7 @@ public class JourneyHealthController {
 
     @PostMapping("/likeJourneyNote")
     @ApiOperation(value = "养生日记点赞或取消点赞", notes = "用户点赞或取消点赞养生日记")
-    @ApiImplicitParams(@ApiImplicitParam(value = "动态明细ID", name = "dynamicDetailId"))
+    @ApiImplicitParams(@ApiImplicitParam(value = "养生日记ID", name = "journeyNoteId"))
     public ResponseBean likeJourneyNote(Integer journeyNoteId) {
         try {
             journeyHealthService.likeJourneyNote(journeyNoteId);
