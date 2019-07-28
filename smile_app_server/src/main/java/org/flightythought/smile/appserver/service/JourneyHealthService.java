@@ -6,6 +6,7 @@ import org.flightythought.smile.appserver.database.entity.HealthNormTypeEntity;
 import org.flightythought.smile.appserver.database.entity.HealthResultEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyEntity;
 import org.flightythought.smile.appserver.database.entity.JourneyNoteEntity;
+import org.flightythought.smile.appserver.database.entity.JourneyNoteMessageEntity;
 import org.flightythought.smile.appserver.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,4 +39,14 @@ public interface JourneyHealthService {
     void deleteJourneyById(Integer journeyId);
 
     JourneyNote getJourneyNote(Integer noteId);
+
+    JourneyNoteMessageEntity addJourneyNoteMessage(JourneyNoteMessageDTO journeyNoteMessageDTO);
+
+    Page<JourneyNoteMessageSimple> getJourneyNoteMessageInfo(JourneyNoteMessageQueryDTO journeyNoteMessageQueryDTO);
+
+    void likeJourneyNote(Integer journeyNoteId);
+
+    void deleteJourneyNoteMessage(Integer messageId);
+
+    void deleteJourneyNoteById(Integer noteId);
 }

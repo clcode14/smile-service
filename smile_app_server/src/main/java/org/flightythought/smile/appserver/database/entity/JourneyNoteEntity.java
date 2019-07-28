@@ -79,5 +79,29 @@ public class JourneyNoteEntity extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "note_id", insertable = false, updatable = false)
     private List<JourneyNoteNormEntity> journeyNoteNorms;
+    
+    /**
+     * 评论个数
+     */
+    @Column(name = "message_num")
+    private Integer messageNum;
 
+    /**
+     * 点赞个数
+     */
+    @Column(name = "like_num")
+    private Integer likeNum;
+    
+    /**
+     * 用户ID
+     */
+    @Column(name = "user_id")
+    private Long userId;
+    
+    /**
+     * 用户
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
 }
