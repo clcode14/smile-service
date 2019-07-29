@@ -228,38 +228,38 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void deleteImage(Integer imageId) {
-        if (imageId != null) {
-            // 根据imageId获取图片对象
-            ImagesEntity imagesEntity = imagesRepository.findById(imageId);
-            if (imagesEntity != null) {
-                if (ossStatus) {
-                    // OSS 对象存储
-                    String endpoint = aLiOSSConfig.getEndpoint();
-                    String accessKeyId = aLiOSSConfig.getAccessKeyId();
-                    String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
-                    String bucketName = aLiOSSConfig.getBucketName();
-                    // 创建OSSClient实例
-                    OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
-                    // objectName
-                    String objectName = imagesEntity.getOssKey();
-                    if (StringUtils.isNotBlank(objectName)) {
-                        boolean found = ossClient.doesObjectExist(bucketName, objectName);
-                        if (found) {
-                            ossClient.deleteObject(bucketName, objectName);
-                        }
-                    }
-                    ossClient.shutdown();
-                } else {
-                    // 删除文件
-                    String path = sysParameterRepository.getFilePathParam().getParameterValue() + imagesEntity.getPath();
-                    File file = new File(path);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
-                imagesRepository.delete(imagesEntity);
-            }
-        }
+//        if (imageId != null) {
+//            // 根据imageId获取图片对象
+//            ImagesEntity imagesEntity = imagesRepository.findById(imageId);
+//            if (imagesEntity != null) {
+//                if (ossStatus) {
+//                    // OSS 对象存储
+//                    String endpoint = aLiOSSConfig.getEndpoint();
+//                    String accessKeyId = aLiOSSConfig.getAccessKeyId();
+//                    String accessKeySecret = aLiOSSConfig.getAccessKeySecret();
+//                    String bucketName = aLiOSSConfig.getBucketName();
+//                    // 创建OSSClient实例
+//                    OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+//                    // objectName
+//                    String objectName = imagesEntity.getOssKey();
+//                    if (StringUtils.isNotBlank(objectName)) {
+//                        boolean found = ossClient.doesObjectExist(bucketName, objectName);
+//                        if (found) {
+//                            ossClient.deleteObject(bucketName, objectName);
+//                        }
+//                    }
+//                    ossClient.shutdown();
+//                } else {
+//                    // 删除文件
+//                    String path = sysParameterRepository.getFilePathParam().getParameterValue() + imagesEntity.getPath();
+//                    File file = new File(path);
+//                    if (file.exists()) {
+//                        file.delete();
+//                    }
+//                }
+//                imagesRepository.delete(imagesEntity);
+//            }
+//        }
     }
 
     @Override

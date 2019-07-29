@@ -56,7 +56,7 @@ public class CourseRegistrationController {
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return ResponseBean.error("返回失败", e.getMessage());
+            return ResponseBean.error(e.getMessage(), "添加失败");
         }
         return ResponseBean.error(null);
     }

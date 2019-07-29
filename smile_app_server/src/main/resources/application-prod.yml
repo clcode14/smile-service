@@ -11,17 +11,17 @@ spring:
       max-file-size: 50MB
       max-request-size: 500MB
   mvc:
-    # 资源映射路径为/static/**，你想在url访问的请求路径
+    # 资源映射路径为/image/**，你想在url访问的请求路径
     static-path-pattern: /static/**
   # 资源映射地址，图片存放的真实路径
   resources:
-    static-locations: file:G://cache/smile/
+    static-locations: file:D://cache/smile/
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://rm-uf6bj20553igh785aco.mysql.rds.aliyuncs.com:3306/xm_demo?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-    username: xm_demo
-    password: xmJK1004
+    url: jdbc:mysql://rm-uf6bj20553igh785aco.mysql.rds.aliyuncs.com:3306/xm_prod?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    username: xm_prod
+    password: xmJK0414
     tomcat:
       max-active: 20
       max-idle: 8
@@ -29,16 +29,16 @@ spring:
       initial-size: 10
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   redis:
     #    Redis数据库索引（默认为0）
-    database: 10
+    database: 0
     #    Redis测试服务器
-    host: r-uf69bed609594094pd.redis.rds.aliyuncs.com
+    host: r-uf69bed609594094.redis.rds.aliyuncs.com
     #    Redis服务器连接端口
     port: 6379
     #    Redis服务器连接密码
@@ -61,11 +61,11 @@ ali-oss:
   #  查看你的bucketname的endpoint地址，如：http://oss-cn-shenzhen.aliyuncs.com
   endpoint: http://oss-cn-shanghai.aliyuncs.com
   #  你的bucketName
-  bucketName: flighty-thought-oss-demo
+  bucketName: xm-prod
   #  你的accessKeyId
-  accessKeyId: LTAICSkNdBY7Z0KK
+  accessKeyId: LTAINBhEkImrr67k
   #  你的accessKeySecret
-  accessKeySecret: eGil6NyacGbvTWsQoMD7rs1Ocrg3iy
+  accessKeySecret: Y6HmSO33Jm4COWBMBuN7e7SbV7dFRu
 
 jpush:
   masterSecret: aa9222fdde926e1e21a00b8f

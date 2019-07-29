@@ -101,7 +101,7 @@ public class CaseInputController {
             return ResponseBean.ok("添加成功, 请到案例审核功能进行审核");
         } catch (Exception e) {
             LOG.error("添加案例失败", e);
-            return ResponseBean.error("添加失败", e.getMessage());
+            return ResponseBean.error(e.getMessage(), "添加失败");
         }
     }
 }

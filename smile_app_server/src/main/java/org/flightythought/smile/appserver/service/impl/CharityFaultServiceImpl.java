@@ -199,8 +199,9 @@ public class CharityFaultServiceImpl implements CharityFaultService {
             }
         }
         List<UserCharityFaultRecord> userCharityFaultRecords = userCharityFaultRecordEntities.stream()
-                .sorted(Comparator.comparingLong(value -> value.getCreateTime().toInstant(ZoneOffset.UTC).toEpochMilli()))
-                .map(this::getUserCharityFaultRecord).collect(Collectors.toList());
+//                .sorted(Comparator.comparingLong(value -> value.getCreateTime().toInstant(ZoneOffset.UTC).toEpochMilli()))
+                .map(this::getUserCharityFaultRecord)
+                .collect(Collectors.toList());
         return new PageImpl<>(userCharityFaultRecords, pageRequest, userCharityFaultRecordEntities.getTotalElements());
     }
 

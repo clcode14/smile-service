@@ -222,11 +222,14 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                     // 标题
                     diseaseReasonInfo.setTitle(diseaseReason.getTitle());
                     // 类型
-                    SelectItemOption type = new SelectItemOption();
                     DiseaseReasonTypeEntity diseaseReasonTypeEntity = diseaseReason.getReasonType();
-                    type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
-                    type.setValue(diseaseReasonTypeEntity.getTypeName());
-                    diseaseReasonInfo.setType(type);
+                    if (diseaseReasonTypeEntity != null) {
+                        SelectItemOption type = new SelectItemOption();
+                        type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
+                        type.setValue(diseaseReasonTypeEntity.getTypeName());
+                        diseaseReasonInfo.setType(type);
+                    }
+
                     return diseaseReasonInfo;
                 }).collect(Collectors.toList());
         PageImpl<DiseaseReasonInfo> result = new PageImpl<>(diseaseReasonInfos, pageRequest, page.getTotalElements());
@@ -265,11 +268,13 @@ public class DiseaseReasonServiceImpl implements DiseaseReasonService {
                     // 标题
                     diseaseReasonInfo.setTitle(diseaseReasonEntity.getTitle());
                     // 类型
-                    SelectItemOption type = new SelectItemOption();
                     DiseaseReasonTypeEntity diseaseReasonTypeEntity = diseaseReasonEntity.getReasonType();
-                    type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
-                    type.setValue(diseaseReasonTypeEntity.getTypeName());
-                    diseaseReasonInfo.setType(type);
+                    if (diseaseReasonTypeEntity != null) {
+                        SelectItemOption type = new SelectItemOption();
+                        type.setKey(diseaseReasonTypeEntity.getTypeId() + "");
+                        type.setValue(diseaseReasonTypeEntity.getTypeName());
+                        diseaseReasonInfo.setType(type);
+                    }
                     return diseaseReasonInfo;
                 }).orElse(null);
     }

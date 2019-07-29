@@ -82,7 +82,7 @@ public class CaseAuditServiceImpl implements CaseAuditService {
         if (StringUtils.isNotBlank(recoverCase)) {
             journey.setRecoverCase(Boolean.valueOf(recoverCase));
         }
-        PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize));
+        PageRequest pageRequest = PageRequest.of(Integer.valueOf(pageNumber) - 1, Integer.valueOf(pageSize), new Sort(Sort.Direction.DESC, "createTime"));
         Page<JourneyEntity> page = journeyRepository.findAll(Example.of(journey), pageRequest);
         List<CaseAuditInfo> auditInfos = page
                 .getContent()
@@ -266,7 +266,7 @@ public class CaseAuditServiceImpl implements CaseAuditService {
             try {
                 solutionEntities = getSolutions(queryDTO).getContent();
             } catch (FlightyThoughtException e) {
-                LOG.error("找不多关联的解决方案", e);
+                LOG.error("找不到关联的解决方案", e);
                 // 查找旅程关联的解决方案
                List<JourneyToSolutionEntity> journeyToSolutionEntities = journeyToSolutionRepository.findByJourneyId(journeyId);
                List<Integer> solutionIds = journeyToSolutionEntities.stream().map(JourneyToSolutionEntity::getSolutionId).collect(Collectors.toList());
@@ -282,7 +282,33 @@ public class CaseAuditServiceImpl implements CaseAuditService {
                 // 标记为已审核
                 journeyEntity.setAudit(true);
                 // 不是案例
-                journeyEntity.setRecoverCase(false);
+//                journeyEntity.setRecoverCase(false);
+                journeyEntity.setRecoverCase(true);
+                // 用户ID
+                Long userId = userEntity.getId();
+                // 创建康复案例对象
+                RecoverCaseEntity recoverCaseEntity = new RecoverCaseEntity();
+                // 养生旅程ID
+                recoverCaseEntity.setJourneyId(journeyId);
+                // 解决方案ID
+                recoverCaseEntity.setSolutionId(null);
+                // 养生旅程对应的封面图
+                recoverCaseEntity.setCoverImageId(journeyEntity.getCoverImageId());
+                // 标题
+                recoverCaseEntity.setTitle(checkCaseAuditDTO.getTitle());
+                // 案例开始时间
+                recoverCaseEntity.setCaseStartTime(journeyEntity.getStartTime());
+                // 案例结束时间
+                recoverCaseEntity.setCaseEndTime(journeyEntity.getEndTime());
+                // 作者
+                recoverCaseEntity.setUserId(userId);
+                // 阅读数
+                recoverCaseEntity.setReadNum(0L);
+                // 创建者
+                recoverCaseEntity.setCreateUserName(sysUserEntity.getLoginName());
+                recoverCaseEntities.add(recoverCaseEntity);
+                // 保存康复案例
+                recoverCaseRepository.saveAll(recoverCaseEntities);
                 journeyRepository.save(journeyEntity);
                 return;
             }

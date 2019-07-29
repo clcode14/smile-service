@@ -19,9 +19,9 @@ spring:
   # MySQL 配置
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://47.102.126.36:3306/smile_test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
-    username: root
-    password: lt2015196
+    url: jdbc:mysql://rm-uf6bj20553igh785aco.mysql.rds.aliyuncs.com:3306/xm_demo?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    username: xm_demo
+    password: xmJK1004
     tomcat:
       max-active: 20
       max-idle: 8
@@ -29,26 +29,26 @@ spring:
       initial-size: 10
   jpa:
     database: mysql
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   redis:
-#    Redis数据库索引（默认为0）
+    #    Redis数据库索引（默认为0）
     database: 0
-#    Redis测试服务器
-    host: localhost
-#    Redis服务器连接端口
+    #    Redis测试服务器
+    host: r-uf69bed609594094.redis.rds.aliyuncs.com
+    #    Redis服务器连接端口
     port: 6379
-#    Redis服务器连接密码
-    password: lt5227
+    #    Redis服务器连接密码
+    password: xmJK1459
 
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
 
 #自定义参数
 app-config:

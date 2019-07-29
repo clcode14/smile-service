@@ -118,7 +118,7 @@ public class RecoverServiceImpl implements RecoverService {
                 .unwrap(NativeQueryImpl.class)
                 .addScalar("recoverId", IntegerType.INSTANCE)
                 .list();
-        List<RecoverCaseEntity> recoverCaseEntities = recoverCaseRepository.findByIdIn(recoverIds);
+        List<RecoverCaseEntity> recoverCaseEntities = recoverCaseRepository.findByIdInOrderByCreateTimeDesc(recoverIds);
         return new PageImpl<>(recoverCaseEntities, pageable, total);
     }
 
